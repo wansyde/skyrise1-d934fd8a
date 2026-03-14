@@ -23,7 +23,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-6">
         <Link to="/" className="text-lg font-semibold tracking-tight">
-          Vault<span className="text-primary">X</span>
+          Sky<span className="text-primary">rise</span>
         </Link>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
@@ -93,7 +93,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
           <span className="text-lg font-semibold tracking-tight">
-            Vault<span className="text-primary">X</span>
+            Sky<span className="text-primary">rise</span>
           </span>
         </header>
 

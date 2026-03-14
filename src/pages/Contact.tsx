@@ -45,7 +45,7 @@ const Contact = () => {
               <div className="glass-card p-6">
                 <Mail className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 <h3 className="mt-3 font-semibold text-sm">Email</h3>
-                <p className="mt-1 text-sm text-muted-foreground">support@vaultx.com</p>
+                <p className="mt-1 text-sm text-muted-foreground">support@skyrise.com</p>
               </div>
               <div className="glass-card p-6">
                 <MessageSquare className="h-5 w-5 text-primary" strokeWidth={1.5} />

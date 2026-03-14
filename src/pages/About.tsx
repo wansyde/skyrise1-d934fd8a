@@ -19,9 +19,9 @@ const About = () => (
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-2xl text-center"
         >
-          <h1 className="text-4xl font-semibold tracking-tight">About VaultX</h1>
+          <h1 className="text-4xl font-semibold tracking-tight">About Skyrise</h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            VaultX is an institutional-grade wealth management platform built for the modern investor. We combine cutting-edge technology with proven financial strategies to deliver consistent, transparent returns.
+            Skyrise is an institutional-grade wealth management platform built for the modern investor. We combine cutting-edge technology with proven financial strategies to deliver consistent, transparent returns.
           </p>
         </motion.div>
 
