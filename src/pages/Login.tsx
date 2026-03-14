@@ -30,7 +30,7 @@ const Login = () => {
       >
         <div className="mb-8 text-center">
           <Link to="/" className="text-xl font-semibold tracking-tight">
-            Vault<span className="text-primary">X</span>
+            Sky<span className="text-primary">rise</span>
           </Link>
           <h1 className="mt-6 text-2xl font-semibold tracking-tight">Welcome back</h1>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to access your portfolio.</p>

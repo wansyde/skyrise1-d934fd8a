@@ -93,7 +93,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
           <span className="text-lg font-semibold tracking-tight">
-            Vault<span className="text-primary">X</span>
+            Sky<span className="text-primary">rise</span>
           </span>
         </header>
 

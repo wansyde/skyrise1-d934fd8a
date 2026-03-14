@@ -98,7 +98,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
         <div className="container mx-auto px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} VaultX. All rights reserved.
+              © {new Date().getFullYear()} Skyrise. All rights reserved.
             </div>
             <div className="flex gap-6">
               {["Privacy", "Terms", "Security"].map((item) => (
