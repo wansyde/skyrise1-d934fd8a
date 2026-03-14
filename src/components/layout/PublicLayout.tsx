@@ -22,7 +22,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       <header className="fixed top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <Link to="/" className="text-lg font-semibold tracking-tight">
-            Vault<span className="text-primary">X</span>
+            Sky<span className="text-primary">rise</span>
           </Link>
 
           {/* Desktop nav */}
