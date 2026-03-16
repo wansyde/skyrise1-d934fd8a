@@ -5,6 +5,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Copy, Upload, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const methods = ["USDT (TRC-20)", "USDT (ERC-20)", "Bitcoin", "Bank Transfer"];
 const quickAmounts = [500, 1000, 5000, 10000];
@@ -14,6 +16,8 @@ const AppDeposit = () => {
   const [method, setMethod] = useState(methods[0]);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const { user } = useAuth();
 
   const walletAddress = "TXrE4kD9m2UPf8vBnhAEQ7cYz1wK5pN3jF";
 
@@ -22,14 +26,47 @@ const AppDeposit = () => {
     toast.success("Address copied.");
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Deposit request submitted.");
+
+    let proofUrl: string | null = null;
+    if (proofFile) {
+      const filePath = `${user.id}/${Date.now()}-${proofFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("deposit-proofs")
+        .upload(filePath, proofFile);
+      if (!uploadError) {
+        proofUrl = filePath;
+      }
+    }
+
+    const { error } = await supabase.from("deposits").insert({
+      user_id: user.id,
+      amount: Number(amount),
+      method,
+      wallet_address: walletAddress,
+      proof_url: proofUrl,
+    });
+
+    if (error) {
+      toast.error("Failed to submit deposit: " + error.message);
+    } else {
+      // Also create a pending transaction
+      await supabase.from("transactions").insert({
+        user_id: user.id,
+        type: "deposit",
+        amount: Number(amount),
+        status: "pending",
+        method,
+        description: `Deposit via ${method}`,
+      });
+      toast.success("Deposit request submitted! Awaiting admin approval.");
       setStep(1);
       setAmount("");
-    }, 1500);
+      setProofFile(null);
+    }
+    setLoading(false);
   };
 
   return (
@@ -45,7 +82,6 @@ const AppDeposit = () => {
           </div>
         </div>
 
-        {/* Steps */}
         <div className="flex items-center gap-2 mb-6">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2">
@@ -125,10 +161,18 @@ const AppDeposit = () => {
         {step === 3 && (
           <div className="glass-card p-5 flex flex-col gap-4">
             <h3 className="text-sm font-medium">Upload Proof</h3>
-            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-10 text-center">
+            <label className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-10 text-center cursor-pointer hover:border-primary/50 transition-colors">
               <Upload className="h-6 w-6 text-muted-foreground mb-2" strokeWidth={1.5} />
-              <p className="text-xs text-muted-foreground">Drop receipt or tap to upload</p>
-            </div>
+              <p className="text-xs text-muted-foreground">
+                {proofFile ? proofFile.name : "Drop receipt or tap to upload"}
+              </p>
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*,.pdf"
+                onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+              />
+            </label>
             <Button className="btn-press h-12" onClick={handleSubmit} disabled={loading}>
               {loading ? "Submitting..." : "Submit Deposit"}
             </Button>

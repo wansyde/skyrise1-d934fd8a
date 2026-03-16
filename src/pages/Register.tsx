@@ -1,29 +1,48 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
-    const confirm = (form.elements.namedItem("confirm") as HTMLInputElement).value;
     if (password !== confirm) {
       toast.error("Passwords do not match.");
       return;
     }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.info("Backend not connected yet. Enable Lovable Cloud to add authentication.");
-    }, 1000);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName, phone },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Account created! Please check your email to confirm.");
+      navigate("/login");
+    }
   };
 
   return (
@@ -46,26 +65,27 @@ const Register = () => {
         <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-4 p-8">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Full Name</label>
-            <Input placeholder="John Doe" required className="bg-background" />
+            <Input placeholder="John Doe" required className="bg-background" value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Email</label>
-            <Input type="email" placeholder="you@example.com" required className="bg-background" />
+            <Input type="email" placeholder="you@example.com" required className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Phone</label>
-            <Input type="tel" placeholder="+1 (555) 000-0000" required className="bg-background" />
+            <Input type="tel" placeholder="+1 (555) 000-0000" required className="bg-background" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Password</label>
             <div className="relative">
               <Input
-                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 required
                 minLength={8}
                 className="bg-background pr-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -79,12 +99,13 @@ const Register = () => {
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Confirm Password</label>
             <Input
-              name="confirm"
               type="password"
               placeholder="••••••••"
               required
               minLength={8}
               className="bg-background"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
             />
           </div>
           <Button type="submit" className="btn-press mt-2" disabled={loading}>

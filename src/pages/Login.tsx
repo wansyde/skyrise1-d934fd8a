@@ -1,22 +1,37 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const { session } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  if (session) {
+    navigate("/app", { replace: true });
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.info("Backend not connected yet. Enable Lovable Cloud to add authentication.");
-    }, 1000);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Welcome back!");
+      navigate("/app");
+    }
   };
 
   return (
@@ -39,7 +54,7 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-4 p-8">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Email</label>
-            <Input type="email" placeholder="you@example.com" required className="bg-background" />
+            <Input type="email" placeholder="you@example.com" required className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
@@ -52,6 +67,8 @@ const Login = () => {
                 placeholder="••••••••"
                 required
                 className="bg-background pr-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -61,10 +78,6 @@ const Login = () => {
                 {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={1.5} /> : <Eye className="h-4 w-4" strokeWidth={1.5} />}
               </button>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <input type="checkbox" id="remember" className="h-3.5 w-3.5 rounded border-border accent-primary" />
-            <label htmlFor="remember" className="text-xs text-muted-foreground">Remember me</label>
           </div>
           <Button type="submit" className="btn-press mt-2" disabled={loading}>
             {loading ? "Signing in..." : "Sign In"}

@@ -5,30 +5,53 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const methods = ["USDT (TRC-20)", "USDT (ERC-20)", "Bitcoin", "Bank Transfer"];
-const balance = 15200;
 
 const AppWithdraw = () => {
   const [method, setMethod] = useState(methods[0]);
   const [amount, setAmount] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+  const { user, profile } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const balance = profile?.balance ?? 0;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     const num = Number(amount);
     if (num <= 0 || num > balance) {
-      toast.error("Invalid amount.");
+      toast.error("Invalid amount. Cannot exceed your balance.");
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Withdrawal request submitted.");
+
+    const { error } = await supabase.from("withdrawals").insert({
+      user_id: user.id,
+      amount: num,
+      method,
+      wallet_address: address,
+    });
+
+    if (error) {
+      toast.error("Failed to submit withdrawal: " + error.message);
+    } else {
+      await supabase.from("transactions").insert({
+        user_id: user.id,
+        type: "withdrawal",
+        amount: -num,
+        status: "pending",
+        method,
+        description: `Withdrawal via ${method}`,
+      });
+      toast.success("Withdrawal request submitted!");
       setAmount("");
       setAddress("");
-    }, 1500);
+    }
+    setLoading(false);
   };
 
   return (
@@ -46,7 +69,9 @@ const AppWithdraw = () => {
 
         <div className="glass-card p-4 mb-5">
           <span className="text-xs text-muted-foreground">Available Balance</span>
-          <div className="text-2xl font-semibold tabular-nums mt-1">${balance.toLocaleString()}.00</div>
+          <div className="text-2xl font-semibold tabular-nums mt-1">
+            ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

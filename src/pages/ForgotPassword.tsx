@@ -4,17 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
       toast.success("If an account exists with that email, a reset link has been sent.");
-    }, 1000);
+    }
   };
 
   return (
@@ -37,7 +44,7 @@ const ForgotPassword = () => {
         <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-4 p-8">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Email</label>
-            <Input type="email" placeholder="you@example.com" required className="bg-background" />
+            <Input type="email" placeholder="you@example.com" required className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <Button type="submit" className="btn-press mt-2" disabled={loading}>
             {loading ? "Sending..." : "Send Reset Link"}

@@ -3,35 +3,126 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield } from "lucide-react";
-
-const adminStats = [
-  { label: "Total Users", value: "1,247", icon: Users },
-  { label: "Pending Deposits", value: "23", icon: ArrowDownToLine },
-  { label: "Pending Withdrawals", value: "8", icon: ArrowUpFromLine },
-  { label: "Total AUM", value: "$2.4M", icon: DollarSign },
-];
-
-const pendingDeposits = [
-  { id: "DEP-091", user: "alice@example.com", amount: "$5,000.00", method: "USDT", date: "Mar 14, 2026" },
-  { id: "DEP-090", user: "bob@example.com", amount: "$10,000.00", method: "BTC", date: "Mar 14, 2026" },
-  { id: "DEP-089", user: "carol@example.com", amount: "$2,500.00", method: "Bank", date: "Mar 13, 2026" },
-];
-
-const pendingWithdrawals = [
-  { id: "WTH-034", user: "dave@example.com", amount: "$1,000.00", method: "USDT", date: "Mar 14, 2026" },
-  { id: "WTH-033", user: "eve@example.com", amount: "$3,200.00", method: "Bank", date: "Mar 13, 2026" },
-];
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminPanel = () => {
-  const [holdingId, setHoldingId] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const handleApprove = (id: string, type: string) => {
-    setHoldingId(id);
-    setTimeout(() => {
-      setHoldingId(null);
-      toast.success(`${type} ${id} approved. Ledger updated.`);
-    }, 2000);
+  const { data: profiles } = useQuery({
+    queryKey: ["admin-profiles"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("*");
+      return data || [];
+    },
+  });
+
+  const { data: pendingDeposits } = useQuery({
+    queryKey: ["admin-pending-deposits"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("deposits")
+        .select("*, profiles!deposits_user_id_fkey(full_name, email)")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+  });
+
+  const { data: pendingWithdrawals } = useQuery({
+    queryKey: ["admin-pending-withdrawals"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("withdrawals")
+        .select("*, profiles!withdrawals_user_id_fkey(full_name, email)")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+  });
+
+  const handleApproveDeposit = async (deposit: any) => {
+    setProcessingId(deposit.id);
+    // Update deposit status
+    await supabase.from("deposits").update({ status: "approved" }).eq("id", deposit.id);
+    // Update user balance
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("balance")
+      .eq("user_id", deposit.user_id)
+      .single();
+    if (profile) {
+      await supabase
+        .from("profiles")
+        .update({ balance: Number(profile.balance) + Number(deposit.amount) })
+        .eq("user_id", deposit.user_id);
+    }
+    // Update transaction status
+    await supabase
+      .from("transactions")
+      .update({ status: "approved" })
+      .eq("user_id", deposit.user_id)
+      .eq("type", "deposit")
+      .eq("status", "pending")
+      .eq("amount", deposit.amount);
+
+    toast.success(`Deposit $${Number(deposit.amount).toLocaleString()} approved.`);
+    setProcessingId(null);
+    queryClient.invalidateQueries({ queryKey: ["admin-pending-deposits"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
   };
+
+  const handleApproveWithdrawal = async (withdrawal: any) => {
+    setProcessingId(withdrawal.id);
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("balance")
+      .eq("user_id", withdrawal.user_id)
+      .single();
+
+    if (profile && Number(profile.balance) >= Number(withdrawal.amount)) {
+      await supabase.from("withdrawals").update({ status: "approved" }).eq("id", withdrawal.id);
+      await supabase
+        .from("profiles")
+        .update({ balance: Number(profile.balance) - Number(withdrawal.amount) })
+        .eq("user_id", withdrawal.user_id);
+      await supabase
+        .from("transactions")
+        .update({ status: "approved" })
+        .eq("user_id", withdrawal.user_id)
+        .eq("type", "withdrawal")
+        .eq("status", "pending");
+      toast.success(`Withdrawal $${Number(withdrawal.amount).toLocaleString()} approved.`);
+    } else {
+      toast.error("Insufficient user balance.");
+    }
+    setProcessingId(null);
+    queryClient.invalidateQueries({ queryKey: ["admin-pending-withdrawals"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+  };
+
+  const handleRejectWithdrawal = async (withdrawal: any) => {
+    await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", withdrawal.id);
+    await supabase
+      .from("transactions")
+      .update({ status: "rejected" })
+      .eq("user_id", withdrawal.user_id)
+      .eq("type", "withdrawal")
+      .eq("status", "pending");
+    toast.success("Withdrawal rejected.");
+    queryClient.invalidateQueries({ queryKey: ["admin-pending-withdrawals"] });
+  };
+
+  const totalUsers = profiles?.length ?? 0;
+  const totalAUM = profiles?.reduce((s, p) => s + Number(p.balance), 0) ?? 0;
+
+  const stats = [
+    { label: "Total Users", value: totalUsers.toLocaleString(), icon: Users },
+    { label: "Pending Deposits", value: String(pendingDeposits?.length ?? 0), icon: ArrowDownToLine },
+    { label: "Pending Withdrawals", value: String(pendingWithdrawals?.length ?? 0), icon: ArrowUpFromLine },
+    { label: "Total AUM", value: `$${(totalAUM / 1000).toFixed(1)}K`, icon: DollarSign },
+  ];
 
   return (
     <DashboardLayout>
@@ -43,9 +134,8 @@ const AdminPanel = () => {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-        {adminStats.map((stat) => (
+        {stats.map((stat) => (
           <div key={stat.label} className="vault-card p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">{stat.label}</span>
@@ -65,7 +155,6 @@ const AdminPanel = () => {
           <table className="w-full">
             <thead>
               <tr className="border-t border-border text-left text-xs text-muted-foreground">
-                <th className="px-5 py-3 font-medium">ID</th>
                 <th className="px-5 py-3 font-medium">User</th>
                 <th className="px-5 py-3 font-medium">Amount</th>
                 <th className="px-5 py-3 font-medium">Method</th>
@@ -74,26 +163,28 @@ const AdminPanel = () => {
               </tr>
             </thead>
             <tbody>
-              {pendingDeposits.map((d) => (
+              {(pendingDeposits || []).map((d: any) => (
                 <tr key={d.id} className="border-t border-border">
-                  <td className="px-5 py-3 text-xs font-mono text-muted-foreground">{d.id}</td>
-                  <td className="px-5 py-3 text-sm">{d.user}</td>
-                  <td className="px-5 py-3 text-sm tabular-nums">{d.amount}</td>
+                  <td className="px-5 py-3 text-sm">{d.profiles?.email || "—"}</td>
+                  <td className="px-5 py-3 text-sm tabular-nums">${Number(d.amount).toLocaleString()}</td>
                   <td className="px-5 py-3 text-xs text-muted-foreground">{d.method}</td>
-                  <td className="px-5 py-3 text-xs text-muted-foreground">{d.date}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(d.created_at).toLocaleDateString()}</td>
                   <td className="px-5 py-3">
                     <Button
                       size="sm"
                       variant="outline"
                       className="btn-press text-xs h-7"
-                      disabled={holdingId === d.id}
-                      onMouseDown={() => handleApprove(d.id, "Deposit")}
+                      disabled={processingId === d.id}
+                      onClick={() => handleApproveDeposit(d)}
                     >
-                      {holdingId === d.id ? "Confirming..." : "Approve"}
+                      {processingId === d.id ? "..." : "Approve"}
                     </Button>
                   </td>
                 </tr>
               ))}
+              {(!pendingDeposits || pendingDeposits.length === 0) && (
+                <tr><td colSpan={5} className="px-5 py-6 text-center text-sm text-muted-foreground">No pending deposits.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -108,7 +199,6 @@ const AdminPanel = () => {
           <table className="w-full">
             <thead>
               <tr className="border-t border-border text-left text-xs text-muted-foreground">
-                <th className="px-5 py-3 font-medium">ID</th>
                 <th className="px-5 py-3 font-medium">User</th>
                 <th className="px-5 py-3 font-medium">Amount</th>
                 <th className="px-5 py-3 font-medium">Method</th>
@@ -117,29 +207,28 @@ const AdminPanel = () => {
               </tr>
             </thead>
             <tbody>
-              {pendingWithdrawals.map((w) => (
+              {(pendingWithdrawals || []).map((w: any) => (
                 <tr key={w.id} className="border-t border-border">
-                  <td className="px-5 py-3 text-xs font-mono text-muted-foreground">{w.id}</td>
-                  <td className="px-5 py-3 text-sm">{w.user}</td>
-                  <td className="px-5 py-3 text-sm tabular-nums">{w.amount}</td>
+                  <td className="px-5 py-3 text-sm">{w.profiles?.email || "—"}</td>
+                  <td className="px-5 py-3 text-sm tabular-nums">${Number(w.amount).toLocaleString()}</td>
                   <td className="px-5 py-3 text-xs text-muted-foreground">{w.method}</td>
-                  <td className="px-5 py-3 text-xs text-muted-foreground">{w.date}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(w.created_at).toLocaleDateString()}</td>
                   <td className="px-5 py-3">
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
                         className="btn-press text-xs h-7"
-                        disabled={holdingId === w.id}
-                        onMouseDown={() => handleApprove(w.id, "Withdrawal")}
+                        disabled={processingId === w.id}
+                        onClick={() => handleApproveWithdrawal(w)}
                       >
-                        {holdingId === w.id ? "Confirming..." : "Approve"}
+                        {processingId === w.id ? "..." : "Approve"}
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         className="btn-press text-xs h-7 text-destructive border-destructive/30 hover:bg-destructive/10"
-                        onClick={() => toast.success(`Withdrawal ${w.id} rejected.`)}
+                        onClick={() => handleRejectWithdrawal(w)}
                       >
                         Reject
                       </Button>
@@ -147,6 +236,9 @@ const AdminPanel = () => {
                   </td>
                 </tr>
               ))}
+              {(!pendingWithdrawals || pendingWithdrawals.length === 0) && (
+                <tr><td colSpan={5} className="px-5 py-6 text-center text-sm text-muted-foreground">No pending withdrawals.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
