@@ -120,49 +120,60 @@ const Login = () => {
     if (!agreed) errors.agreed = "You must agree to the Terms & Conditions";
 
     setRegErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-
-    setRegLoading(true);
-
-    // Validate referral code
-    const { data: referrer } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("referral_code", referralCode.toUpperCase().trim())
-      .maybeSingle();
-
-    if (!referrer) {
-      setRegErrors({ referralCode: "Invalid referral code" });
-      setRegLoading(false);
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fill all required fields");
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: regPassword,
-      options: {
-        data: {
-          full_name: username,
-          phone,
-          username,
-          gender,
-          withdraw_password: withdrawPw,
-          referred_by: referralCode.toUpperCase().trim(),
+    setRegLoading(true);
+
+    try {
+      // Validate referral code
+      const { data: referrer } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("referral_code", referralCode.toUpperCase().trim())
+        .maybeSingle();
+
+      if (!referrer) {
+        setRegErrors({ referralCode: "Invalid referral code" });
+        toast.error("Invalid referral code");
+        setRegLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: regPassword,
+        options: {
+          data: {
+            full_name: username.trim(),
+            phone: phone.trim(),
+            username: username.trim(),
+            gender,
+            withdraw_password: withdrawPw,
+            referred_by: referralCode.toUpperCase().trim(),
+          },
+          emailRedirectTo: window.location.origin,
         },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    setRegLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Account created successfully!");
-      navigate("/app");
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else if (data.user && !data.session) {
+        // Email confirmation required
+        toast.success("Account created! Please check your email to verify.");
+        setTab("login");
+      } else {
+        toast.success("Account created successfully!");
+        navigate("/app");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setRegLoading(false);
     }
   };
-
-  // Also update profile with extra fields after signup via trigger — but we pass metadata
-  // The handle_new_user trigger should be updated to handle these extra fields
 
   if (session) return null;
 
