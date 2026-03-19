@@ -18,14 +18,6 @@ const fadeUp = {
   }),
 };
 
-const dailyTasks = [
-  { id: 1, title: "Share BMW X7 Campaign", desc: "Post the BMW X7 promo on 2 social platforms", reward: 12.50, status: "pending" },
-  { id: 2, title: "Review Mercedes-Benz Ad", desc: "Watch and engage with the Mercedes-Benz video ad", reward: 8.00, status: "completed" },
-  { id: 3, title: "Maserati Survey Response", desc: "Complete the Maserati brand perception survey", reward: 15.00, status: "pending" },
-  { id: 4, title: "Rolls Royce Content Share", desc: "Share Rolls Royce content to your network", reward: 10.00, status: "completed" },
-  { id: 5, title: "Audi Campaign Engagement", desc: "Like and comment on Audi launch posts", reward: 6.50, status: "pending" },
-];
-
 const brandLogos = ["British Airways", "Chanel", "Porsche", "Bentley", "Aston Martin"];
 
 const Home = () => {
