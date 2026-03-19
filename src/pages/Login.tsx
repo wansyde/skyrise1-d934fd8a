@@ -80,17 +80,28 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!loginAccount.trim() || !loginPassword.trim()) {
+      toast.error("Please fill all required fields");
+      return;
+    }
     setLoginLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginAccount,
-      password: loginPassword,
-    });
-    setLoginLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Welcome back!");
-      navigate("/app");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginAccount.trim(),
+        password: loginPassword,
+      });
+      if (error) {
+        toast.error(error.message === "Invalid login credentials"
+          ? "Invalid login credentials. Please check your email and password."
+          : error.message);
+      } else {
+        toast.success("Welcome back!");
+        navigate("/app");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoginLoading(false);
     }
   };
 
