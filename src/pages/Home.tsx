@@ -2,7 +2,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import {
   Wallet, TrendingUp, CheckCircle2, ListChecks, Clock,
-  ArrowUpRight, Play, ChevronRight, BarChart3, Globe2, Users
+  BarChart3, Globe2, Users
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";

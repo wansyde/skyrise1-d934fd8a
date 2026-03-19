@@ -10,7 +10,7 @@ import {
 
 const bottomTabs = [
   { href: "/app", label: "Home", icon: Home },
-  { href: "/app/invest", label: "Invest", icon: TrendingUp },
+  { href: "/app/starting", label: "Starting", icon: Car },
   { href: "/app/team", label: "Team", icon: Users },
   { href: "/app/wallet", label: "Wallet", icon: Wallet },
   { href: "/app/profile", label: "Profile", icon: User },
