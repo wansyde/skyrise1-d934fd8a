@@ -4,7 +4,6 @@ import {
   Wallet, TrendingUp, CheckCircle2, ListChecks, Clock,
   BarChart3, Globe2, Users
 } from "lucide-react";
-import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
