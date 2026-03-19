@@ -1,28 +1,34 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
-import { TrendingUp, ArrowUpRight, Eye, EyeOff } from "lucide-react";
+import {
+  Wallet, TrendingUp, CheckCircle2, ListChecks, Clock,
+  ArrowUpRight, Play, ChevronRight, BarChart3, Globe2, Users
+} from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import heroDashboard from "@/assets/hero-dashboard.jpg";
 
-const chartData = [
-  { v: 400 }, { v: 520 }, { v: 480 }, { v: 610 }, { v: 730 },
-  { v: 850 }, { v: 920 }, { v: 1010 }, { v: 1140 }, { v: 1280 },
-  { v: 1350 }, { v: 1520 },
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] as const },
+  }),
+};
+
+const dailyTasks = [
+  { id: 1, title: "Share BMW X7 Campaign", desc: "Post the BMW X7 promo on 2 social platforms", reward: 12.50, status: "pending" },
+  { id: 2, title: "Review Mercedes-Benz Ad", desc: "Watch and engage with the Mercedes-Benz video ad", reward: 8.00, status: "completed" },
+  { id: 3, title: "Maserati Survey Response", desc: "Complete the Maserati brand perception survey", reward: 15.00, status: "pending" },
+  { id: 4, title: "Rolls Royce Content Share", desc: "Share Rolls Royce content to your network", reward: 10.00, status: "completed" },
+  { id: 5, title: "Audi Campaign Engagement", desc: "Like and comment on Audi launch posts", reward: 6.50, status: "pending" },
 ];
 
-const quickActions = [
-  { label: "Deposit", href: "/app/wallet/deposit", emoji: "💰" },
-  { label: "Withdraw", href: "/app/wallet/withdraw", emoji: "💸" },
-  { label: "Invest", href: "/app/invest", emoji: "📈" },
-  { label: "History", href: "/app/wallet", emoji: "📋" },
-];
+const brandLogos = ["British Airways", "Chanel", "Porsche", "Bentley", "Aston Martin"];
 
 const Home = () => {
-  const [balanceVisible, setBalanceVisible] = useState(true);
   const { profile } = useAuth();
 
   const { data: investments } = useQuery({
@@ -49,125 +55,359 @@ const Home = () => {
   });
 
   const balance = profile?.balance ?? 0;
-  const activeInvestment = investments?.[0];
-  const totalInvested = investments?.reduce((sum, inv) => sum + Number(inv.amount), 0) ?? 0;
+  const completedTasks = dailyTasks.filter(t => t.status === "completed").length;
+  const totalTasks = dailyTasks.length;
+  const todayEarnings = dailyTasks.filter(t => t.status === "completed").reduce((s, t) => s + t.reward, 0);
+
+  const summaryStats = [
+    { label: "Total Balance", value: `$${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, icon: Wallet, accent: "text-primary" },
+    { label: "Today's Earnings", value: `$${todayEarnings.toFixed(2)}`, icon: TrendingUp, accent: "text-success" },
+    { label: "Tasks Completed", value: `${completedTasks}/${totalTasks}`, icon: CheckCircle2, accent: "text-success" },
+    { label: "Active Tasks", value: `${totalTasks - completedTasks}`, icon: ListChecks, accent: "text-warning" },
+  ];
+
+  const caseStudyCards = [
+    {
+      title: "Campaign Overview",
+      content: "A luxury automotive manufacturer partnered with Skyrise to amplify their new model launch across global markets.",
+      highlight: "2.5M",
+      highlightLabel: "Users Reached",
+    },
+    {
+      title: "Target Audience",
+      content: "High-net-worth individuals aged 30–55 with affinity for luxury lifestyle, premium travel, and automotive culture.",
+      highlight: "3.3M",
+      highlightLabel: "Impressions",
+    },
+    {
+      title: "Results",
+      content: "The campaign achieved unprecedented engagement rates, surpassing industry benchmarks by a significant margin.",
+      highlight: "40.7%",
+      highlightLabel: "Engagement Rate",
+    },
+    {
+      title: "Performance Metrics",
+      content: "Conversion rates tripled compared to traditional advertising methods, validating the promoter-driven model.",
+      highlight: "3X",
+      highlightLabel: "Conversion Uplift",
+    },
+  ];
+
+  const demographics = [
+    { label: "25–34", pct: 38 },
+    { label: "35–44", pct: 29 },
+    { label: "45–54", pct: 18 },
+    { label: "55+", pct: 15 },
+  ];
+
+  const mediaAffinity = [
+    { label: "Social Media", pct: 72 },
+    { label: "Video Platforms", pct: 61 },
+    { label: "Lifestyle Blogs", pct: 48 },
+    { label: "News & Finance", pct: 35 },
+  ];
 
   return (
     <AppLayout>
-      <div className="px-4 py-5">
-        <div className="mb-5">
-          <p className="text-sm text-muted-foreground">Welcome back,</p>
-          <h1 className="text-xl font-semibold tracking-tight">{profile?.full_name || "User"}</h1>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="balance-card p-5 mb-5"
+      <div className="px-0">
+        {/* SECTION 1 — HERO BANNER */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="relative w-full h-[280px] sm:h-[340px] overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-white/70">Total Balance</span>
-            <button onClick={() => setBalanceVisible(!balanceVisible)} className="text-white/60 hover:text-white transition-colors">
-              {balanceVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-            </button>
-          </div>
-          <div className="text-3xl font-semibold tabular-nums mb-3">
-            {balanceVisible ? `$${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "••••••"}
-          </div>
-          <div className="h-12 mt-3 -mx-1">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="balGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
-                    <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="v" stroke="rgba(255,255,255,0.6)" strokeWidth={1.5} fill="url(#balGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="glass-card p-4">
-            <span className="text-xs text-muted-foreground">Active Investment</span>
-            <div className="text-lg font-semibold tabular-nums mt-1">${totalInvested.toLocaleString("en-US", { minimumFractionDigits: 2 })}</div>
-          </div>
-          <div className="glass-card p-4">
-            <span className="text-xs text-muted-foreground">Accrued Returns</span>
-            <div className="text-lg font-semibold tabular-nums mt-1 text-success">
-              ${(investments?.reduce((s, i) => s + Number(i.accrued_return), 0) ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2 mb-6">
-          {quickActions.map((action) => (
-            <Link
-              key={action.label}
-              to={action.href}
-              className="glass-card flex flex-col items-center gap-1.5 py-3 px-2 text-center hover:bg-card/80 transition-colors btn-press"
+          <img
+            src={heroDashboard}
+            alt="Luxury automotive campaign"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
+          <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-8">
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="text-xs font-medium tracking-[0.2em] uppercase text-primary mb-2"
             >
-              <span className="text-xl">{action.emoji}</span>
-              <span className="text-[11px] font-medium text-muted-foreground">{action.label}</span>
-            </Link>
-          ))}
+              Luxury Car Manufacturer Brand
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.6 }}
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]"
+            >
+              3X CONVERSION
+              <br />
+              <span className="text-primary">UPLIFT</span>
+            </motion.h1>
+          </div>
+        </motion.section>
+
+        {/* SUMMARY BAR */}
+        <div className="px-4 -mt-4 relative z-10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {summaryStats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                custom={i}
+                initial="hidden"
+                animate="visible"
+                variants={fadeUp}
+                className="glass-card p-4"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] text-muted-foreground">{stat.label}</span>
+                  <stat.icon className={`h-4 w-4 ${stat.accent}`} strokeWidth={1.5} />
+                </div>
+                <span className="text-xl font-semibold tabular-nums">{stat.value}</span>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        {activeInvestment && (
-          <div className="glass-card p-4 mb-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium">Active Plan</h3>
-              <span className="text-xs text-success flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                Active
-              </span>
-            </div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground">{(activeInvestment as any).investment_plans?.name}</span>
-              <span className="text-xs text-muted-foreground">{(activeInvestment as any).investment_plans?.rate}%/mo</span>
-            </div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-lg font-semibold tabular-nums">${Number(activeInvestment.amount).toLocaleString()}</span>
-              <span className="text-sm font-medium text-success tabular-nums">+${Number(activeInvestment.accrued_return).toLocaleString()}</span>
-            </div>
-            {(() => {
-              const start = new Date(activeInvestment.started_at).getTime();
-              const end = new Date(activeInvestment.ends_at).getTime();
-              const now = Date.now();
-              const progress = Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
-              const daysElapsed = Math.floor((now - start) / 86400000);
-              const totalDays = Math.floor((end - start) / 86400000);
-              return (
-                <>
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: `${progress}%` }} />
-                  </div>
-                  <div className="flex justify-between mt-1.5">
-                    <span className="text-[10px] text-muted-foreground">{daysElapsed} of {totalDays} days</span>
-                    <span className="text-[10px] text-muted-foreground">{Math.round(progress)}%</span>
-                  </div>
-                </>
-              );
-            })()}
+        {/* SECTION 2 — CASE STUDY */}
+        <div className="px-4 mt-8">
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-lg font-semibold mb-4"
+          >
+            Campaign Case Study
+          </motion.h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {caseStudyCards.map((card, i) => (
+              <motion.div
+                key={card.title}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="glass-card p-5"
+              >
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">{card.title}</span>
+                <div className="mt-3 mb-2">
+                  <span className="text-3xl font-bold text-primary tabular-nums">{card.highlight}</span>
+                  <span className="text-xs text-muted-foreground ml-2">{card.highlightLabel}</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{card.content}</p>
+              </motion.div>
+            ))}
           </div>
-        )}
+        </div>
 
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium">Recent Activity</h3>
-            <Link to="/app/wallet" className="text-xs text-primary">View All</Link>
+        {/* SECTION 3 — ANALYTICS */}
+        <div className="px-4 mt-8">
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-lg font-semibold mb-4"
+          >
+            Analytics & Data
+          </motion.h2>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="glass-card p-5 sm:p-6"
+          >
+            {/* Audience Size */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Globe2 className="h-5 w-5 text-primary" strokeWidth={1.5} />
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground">Global Audience Size</span>
+                <div className="text-2xl font-bold tabular-nums">2,540,000</div>
+              </div>
+            </div>
+
+            {/* Map placeholder */}
+            <div className="relative h-40 sm:h-52 rounded-xl overflow-hidden mb-6 bg-secondary/50">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative">
+                  {[
+                    { top: "20%", left: "25%", size: "h-3 w-3" },
+                    { top: "35%", left: "48%", size: "h-4 w-4" },
+                    { top: "30%", left: "52%", size: "h-2.5 w-2.5" },
+                    { top: "45%", left: "75%", size: "h-3.5 w-3.5" },
+                    { top: "55%", left: "30%", size: "h-2 w-2" },
+                    { top: "40%", left: "15%", size: "h-3 w-3" },
+                  ].map((dot, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + i * 0.1, duration: 0.4 }}
+                      className={`absolute ${dot.size} rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.5)]`}
+                      style={{ top: dot.top, left: dot.left }}
+                    />
+                  ))}
+                  <div className="text-xs text-muted-foreground text-center mt-28">Global Reach Map</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Demographics */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                  <span className="text-sm font-medium">Demographics</span>
+                </div>
+                <div className="space-y-3">
+                  {demographics.map((d) => (
+                    <div key={d.label}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-muted-foreground">{d.label}</span>
+                        <span className="tabular-nums">{d.pct}%</span>
+                      </div>
+                      <div className="progress-track">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${d.pct}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                          className="progress-fill"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                  <span className="text-sm font-medium">Media Affinity</span>
+                </div>
+                <div className="space-y-3">
+                  {mediaAffinity.map((m) => (
+                    <div key={m.label}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-muted-foreground">{m.label}</span>
+                        <span className="tabular-nums">{m.pct}%</span>
+                      </div>
+                      <div className="progress-track">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${m.pct}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                          className="progress-fill"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Brand Logos */}
+            <div className="mt-6 pt-5 border-t border-border">
+              <span className="text-xs text-muted-foreground mb-3 block">Featured Brands</span>
+              <div className="flex items-center gap-6 overflow-x-auto pb-1">
+                {brandLogos.map((name) => (
+                  <span
+                    key={name}
+                    className="text-xs font-medium text-muted-foreground/60 whitespace-nowrap uppercase tracking-widest hover:text-muted-foreground transition-all duration-300 cursor-default"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* DAILY PROGRESS */}
+        <div className="px-4 mt-8">
+          <div className="glass-card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium">Daily Progress</h3>
+              <span className="text-xs text-muted-foreground tabular-nums">{completedTasks} / {totalTasks} tasks</span>
+            </div>
+            <div className="progress-track h-3">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${(completedTasks / totalTasks) * 100}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="progress-fill h-3"
+              />
+            </div>
+            <div className="flex justify-between mt-2">
+              <span className="text-[11px] text-muted-foreground">{Math.round((completedTasks / totalTasks) * 100)}% complete</span>
+              <span className="text-[11px] text-success tabular-nums">+${todayEarnings.toFixed(2)} earned</span>
+            </div>
+          </div>
+        </div>
+
+        {/* YOUR DAILY TASKS */}
+        <div className="px-4 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Your Daily Tasks</h2>
+            <span className="text-xs text-primary">{totalTasks - completedTasks} remaining</span>
+          </div>
+          <div className="flex flex-col gap-3">
+            {dailyTasks.map((task, i) => (
+              <motion.div
+                key={task.id}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="glass-card p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="text-sm font-medium truncate">{task.title}</h4>
+                      {task.status === "completed" ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 text-success flex-shrink-0">Done</span>
+                      ) : (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-warning/10 text-warning flex-shrink-0">Pending</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{task.desc}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <span className="text-sm font-semibold text-success tabular-nums">+${task.reward.toFixed(2)}</span>
+                    {task.status === "pending" && (
+                      <button className="flex items-center gap-1 text-[11px] font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-lg btn-press transition-all duration-200 hover:brightness-110">
+                        <Play className="h-3 w-3" />
+                        Start
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* RECENT ACTIVITY */}
+        <div className="px-4 mt-8 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Recent Activity</h2>
+            <Clock className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col gap-2">
             {(recentTxns || []).map((tx, i) => (
               <motion.div
                 key={tx.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05, duration: 0.3 }}
-                className="glass-card flex items-center justify-between p-3.5"
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="glass-card flex items-center justify-between p-4"
               >
                 <div>
                   <span className="text-sm font-medium capitalize">{tx.type}</span>
@@ -175,14 +415,19 @@ const Home = () => {
                     {new Date(tx.created_at).toLocaleDateString()}
                   </span>
                 </div>
-                <span className={`text-sm font-medium tabular-nums ${Number(tx.amount) >= 0 ? "text-success" : "text-foreground"}`}>
-                  {Number(tx.amount) >= 0 ? "+" : ""}${Math.abs(Number(tx.amount)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </span>
+                <div className="text-right">
+                  <span className={`text-sm font-medium tabular-nums ${Number(tx.amount) >= 0 ? "text-success" : "text-foreground"}`}>
+                    {Number(tx.amount) >= 0 ? "+" : ""}${Math.abs(Number(tx.amount)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  </span>
+                  <span className={`text-[10px] block mt-0.5 capitalize ${tx.status === "pending" ? "text-warning" : tx.status === "approved" ? "text-success" : "text-muted-foreground"}`}>
+                    {tx.status}
+                  </span>
+                </div>
               </motion.div>
             ))}
             {(!recentTxns || recentTxns.length === 0) && (
-              <div className="glass-card p-6 text-center text-sm text-muted-foreground">
-                No transactions yet. Make your first deposit to get started.
+              <div className="glass-card p-8 text-center text-sm text-muted-foreground">
+                No activity yet. Complete your first task to start earning.
               </div>
             )}
           </div>
