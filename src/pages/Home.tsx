@@ -1,13 +1,11 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import {
-  Wallet, TrendingUp, CheckCircle2, ListChecks, Clock,
-  BarChart3, Globe2, Users
+  Globe2, Users, BarChart3
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import heroDashboard from "@/assets/hero-dashboard.jpg";
+import analysisCar from "@/assets/analysis-car.jpg";
+import carOwners from "@/assets/car-owners.jpg";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -19,84 +17,48 @@ const fadeUp = {
 
 const brandLogos = ["British Airways", "Chanel", "Porsche", "Bentley", "Aston Martin"];
 
+const caseStudyCards = [
+  {
+    title: "Campaign Overview",
+    content: "A luxury automotive manufacturer partnered with Skyrise to amplify their new model launch across global markets.",
+    highlight: "2.5M",
+    highlightLabel: "Users Reached",
+  },
+  {
+    title: "Target Audience",
+    content: "High-net-worth individuals aged 30–55 with affinity for luxury lifestyle, premium travel, and automotive culture.",
+    highlight: "3.3M",
+    highlightLabel: "Impressions",
+  },
+  {
+    title: "Results",
+    content: "The campaign achieved unprecedented engagement rates, surpassing industry benchmarks by a significant margin.",
+    highlight: "40.7%",
+    highlightLabel: "Engagement Rate",
+  },
+  {
+    title: "Performance Metrics",
+    content: "Conversion rates tripled compared to traditional advertising methods, validating the promoter-driven model.",
+    highlight: "3X",
+    highlightLabel: "Conversion Uplift",
+  },
+];
+
+const demographics = [
+  { label: "25–34", pct: 38 },
+  { label: "35–44", pct: 29 },
+  { label: "45–54", pct: 18 },
+  { label: "55+", pct: 15 },
+];
+
+const mediaAffinity = [
+  { label: "Social Media", pct: 72 },
+  { label: "Video Platforms", pct: 61 },
+  { label: "Lifestyle Blogs", pct: 48 },
+  { label: "News & Finance", pct: 35 },
+];
+
 const Home = () => {
-  const { profile } = useAuth();
-
-  const { data: investments } = useQuery({
-    queryKey: ["user-investments"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("user_investments")
-        .select("*, investment_plans(*)")
-        .eq("status", "active");
-      return data || [];
-    },
-  });
-
-  const { data: recentTxns } = useQuery({
-    queryKey: ["recent-transactions"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(5);
-      return data || [];
-    },
-  });
-
-  const balance = profile?.balance ?? 0;
-  const totalInvested = investments?.reduce((sum, inv) => sum + Number(inv.amount), 0) ?? 0;
-  const accruedReturns = investments?.reduce((s, i) => s + Number(i.accrued_return), 0) ?? 0;
-
-  const summaryStats = [
-    { label: "Total Balance", value: `$${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, icon: Wallet, accent: "text-primary" },
-    { label: "Accrued Returns", value: `$${accruedReturns.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, icon: TrendingUp, accent: "text-success" },
-    { label: "Invested", value: `$${totalInvested.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, icon: CheckCircle2, accent: "text-primary" },
-    { label: "Transactions", value: `${recentTxns?.length ?? 0}`, icon: ListChecks, accent: "text-muted-foreground" },
-  ];
-
-  const caseStudyCards = [
-    {
-      title: "Campaign Overview",
-      content: "A luxury automotive manufacturer partnered with Skyrise to amplify their new model launch across global markets.",
-      highlight: "2.5M",
-      highlightLabel: "Users Reached",
-    },
-    {
-      title: "Target Audience",
-      content: "High-net-worth individuals aged 30–55 with affinity for luxury lifestyle, premium travel, and automotive culture.",
-      highlight: "3.3M",
-      highlightLabel: "Impressions",
-    },
-    {
-      title: "Results",
-      content: "The campaign achieved unprecedented engagement rates, surpassing industry benchmarks by a significant margin.",
-      highlight: "40.7%",
-      highlightLabel: "Engagement Rate",
-    },
-    {
-      title: "Performance Metrics",
-      content: "Conversion rates tripled compared to traditional advertising methods, validating the promoter-driven model.",
-      highlight: "3X",
-      highlightLabel: "Conversion Uplift",
-    },
-  ];
-
-  const demographics = [
-    { label: "25–34", pct: 38 },
-    { label: "35–44", pct: 29 },
-    { label: "45–54", pct: 18 },
-    { label: "55+", pct: 15 },
-  ];
-
-  const mediaAffinity = [
-    { label: "Social Media", pct: 72 },
-    { label: "Video Platforms", pct: 61 },
-    { label: "Lifestyle Blogs", pct: 48 },
-    { label: "News & Finance", pct: 35 },
-  ];
-
   return (
     <AppLayout>
       <div className="px-0">
@@ -134,28 +96,6 @@ const Home = () => {
             </motion.h1>
           </div>
         </motion.section>
-
-        {/* SUMMARY BAR */}
-        <div className="px-4 -mt-4 relative z-10">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {summaryStats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                custom={i}
-                initial="hidden"
-                animate="visible"
-                variants={fadeUp}
-                className="glass-card p-4"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] text-muted-foreground">{stat.label}</span>
-                  <stat.icon className={`h-4 w-4 ${stat.accent}`} strokeWidth={1.5} />
-                </div>
-                <span className="text-xl font-semibold tabular-nums">{stat.value}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
 
         {/* SECTION 2 — CASE STUDY */}
         <div className="px-4 mt-8">
@@ -316,46 +256,101 @@ const Home = () => {
           </motion.div>
         </div>
 
-
-        {/* RECENT ACTIVITY */}
-        <div className="px-4 mt-8 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Recent Activity</h2>
-            <Clock className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-          </div>
-          <div className="flex flex-col gap-2">
-            {(recentTxns || []).map((tx, i) => (
+        {/* SECTION 4 — IN-DEPTH ANALYSIS & CONNECTING CAR OWNERS */}
+        <div className="px-4 mt-10 mb-8 space-y-12">
+          {/* In-depth Analysis */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="overflow-hidden rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <motion.div
-                key={tx.id}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
+                whileInView={{ scale: 1.03 }}
                 viewport={{ once: true }}
-                variants={fadeUp}
-                className="glass-card flex items-center justify-between p-4"
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="h-[220px] sm:h-[280px] overflow-hidden"
               >
-                <div>
-                  <span className="text-sm font-medium capitalize">{tx.type}</span>
-                  <span className="text-xs text-muted-foreground block mt-0.5">
-                    {new Date(tx.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className={`text-sm font-medium tabular-nums ${Number(tx.amount) >= 0 ? "text-success" : "text-foreground"}`}>
-                    {Number(tx.amount) >= 0 ? "+" : ""}${Math.abs(Number(tx.amount)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                  </span>
-                  <span className={`text-[10px] block mt-0.5 capitalize ${tx.status === "pending" ? "text-warning" : tx.status === "approved" ? "text-success" : "text-muted-foreground"}`}>
-                    {tx.status}
-                  </span>
-                </div>
+                <img
+                  src={analysisCar}
+                  alt="Luxury car interior analysis"
+                  className="w-full h-full object-cover"
+                />
               </motion.div>
-            ))}
-            {(!recentTxns || recentTxns.length === 0) && (
-              <div className="glass-card p-8 text-center text-sm text-muted-foreground">
-                No activity yet. Complete your first task to start earning.
-              </div>
-            )}
-          </div>
+            </div>
+            <div className="mt-6">
+              <motion.h2
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.15, duration: 0.5 }}
+                className="text-2xl sm:text-3xl font-bold tracking-tight"
+              >
+                In-depth analysis
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="text-sm sm:text-base text-muted-foreground leading-relaxed mt-3 max-w-xl"
+              >
+                Our platform leverages advanced data analytics to provide
+                deep insights into consumer behavior across the luxury
+                automotive sector. Every campaign is meticulously tracked
+                and optimized in real time, ensuring maximum return on
+                investment for our brand partners.
+              </motion.p>
+            </div>
+          </motion.div>
+
+          {/* Connecting Real Car Owners */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="overflow-hidden rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              <motion.div
+                whileInView={{ scale: 1.03 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="h-[220px] sm:h-[280px] overflow-hidden"
+              >
+                <img
+                  src={carOwners}
+                  alt="Connecting real car owners"
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
+            </div>
+            <div className="mt-6">
+              <motion.h2
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.15, duration: 0.5 }}
+                className="text-2xl sm:text-3xl font-bold tracking-tight"
+              >
+                Connecting real car owners
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="text-sm sm:text-base text-muted-foreground leading-relaxed mt-3 max-w-xl"
+              >
+                Skyrise bridges the gap between premium automotive brands
+                and genuine car enthusiasts. Through our verified promoter
+                network, campaigns reach audiences who are truly passionate
+                about luxury vehicles — driving authentic engagement and
+                meaningful brand connections.
+              </motion.p>
+            </div>
+          </motion.div>
         </div>
       </div>
     </AppLayout>
