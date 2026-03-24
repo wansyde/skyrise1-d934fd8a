@@ -1,149 +1,331 @@
 import AppLayout from "@/components/layout/AppLayout";
-import { motion } from "framer-motion";
-import { Play, CheckCircle2, ListChecks, Clock, DollarSign } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Wallet, DollarSign, Play, ChevronRight, Clock, Headphones } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRef, useState, useEffect, useCallback } from "react";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] as const },
-  }),
-};
+import bmwImg from "@/assets/cars/bmw.jpg";
+import mercedesImg from "@/assets/cars/mercedes.jpg";
+import rollsRoyceImg from "@/assets/cars/rolls-royce.jpg";
+import porscheImg from "@/assets/cars/porsche.jpg";
+import audiImg from "@/assets/cars/audi.jpg";
+import ferrariImg from "@/assets/cars/ferrari.jpg";
+import lamborghiniImg from "@/assets/cars/lamborghini.jpg";
+import bentleyImg from "@/assets/cars/bentley.jpg";
+import maseratiImg from "@/assets/cars/maserati.jpg";
+import rangeRoverImg from "@/assets/cars/range-rover.jpg";
+import teslaImg from "@/assets/cars/tesla.jpg";
+import jaguarImg from "@/assets/cars/jaguar.jpg";
+import lexusImg from "@/assets/cars/lexus.jpg";
+import volvoImg from "@/assets/cars/volvo.jpg";
+import mclarenImg from "@/assets/cars/mclaren.jpg";
+import genesisImg from "@/assets/cars/genesis.jpg";
+import astonMartinImg from "@/assets/cars/aston-martin.jpg";
+import bugattiImg from "@/assets/cars/bugatti.jpg";
+import landRoverImg from "@/assets/cars/land-rover.jpg";
+import alfaRomeoImg from "@/assets/cars/alfa-romeo.jpg";
 
-const tasks = Array.from({ length: 40 }, (_, i) => ({
-  id: i + 1,
-  title: [
-    "Share BMW X7 Campaign", "Review Mercedes-Benz Ad", "Maserati Survey Response",
-    "Rolls Royce Content Share", "Audi Campaign Engagement", "Porsche Launch Promo",
-    "Bentley Brand Review", "Ferrari Social Post", "Lamborghini Video Ad",
-    "Land Rover Survey", "Jaguar Content Share", "Volvo Safety Campaign",
-    "Tesla Innovation Post", "Lexus Lifestyle Share", "Genesis Brand Survey",
-    "Bugatti Exclusive Promo", "McLaren Speed Campaign", "Aston Martin Heritage",
-    "Alfa Romeo Style Post", "Range Rover Adventure", "BMW i Series Review",
-    "Mercedes EQ Campaign", "Maserati GranTurismo", "Rolls Royce Ghost Post",
-    "Audi e-tron Share", "Porsche Taycan Review", "Bentley Flying Spur",
-    "Ferrari Roma Campaign", "Lamborghini Huracán", "Land Rover Defender",
-    "Jaguar F-Type Promo", "Volvo XC90 Review", "Tesla Model S Post",
-    "Lexus LC Share", "Genesis GV80 Survey", "Bugatti Chiron Feature",
-    "McLaren 720S Campaign", "Aston Martin DB12", "Alfa Romeo Tonale",
-    "Range Rover Sport Post",
-  ][i],
-  desc: [
-    "Post the campaign on 2 social platforms", "Watch and engage with the video ad",
-    "Complete the brand perception survey", "Share content to your network",
-    "Like and comment on launch posts", "Promote the new model launch",
-    "Submit a detailed brand review", "Share the social media post",
-    "Watch and share the video advertisement", "Complete the customer survey",
-  ][i % 10],
-  reward: [12.50, 8.00, 15.00, 10.00, 6.50, 11.00, 9.50, 14.00, 7.50, 13.00][i % 10],
-  status: i < 8 ? "completed" : "pending" as "completed" | "pending",
-}));
+const carCampaigns = [
+  { brand: "BMW", model: "X7 Campaign", reward: 0.50, image: bmwImg },
+  { brand: "Mercedes", model: "S-Class Promo", reward: 0.65, image: mercedesImg },
+  { brand: "Rolls Royce", model: "Ghost Campaign", reward: 1.20, image: rollsRoyceImg },
+  { brand: "Porsche", model: "911 Launch", reward: 0.80, image: porscheImg },
+  { brand: "Audi", model: "A8 Campaign", reward: 0.55, image: audiImg },
+  { brand: "Ferrari", model: "Roma Promo", reward: 1.50, image: ferrariImg },
+  { brand: "Lamborghini", model: "Huracán Ad", reward: 1.30, image: lamborghiniImg },
+  { brand: "Bentley", model: "Continental GT", reward: 0.90, image: bentleyImg },
+  { brand: "Maserati", model: "GranTurismo", reward: 0.70, image: maseratiImg },
+  { brand: "Range Rover", model: "Sport Campaign", reward: 0.60, image: rangeRoverImg },
+  { brand: "Tesla", model: "Model S Promo", reward: 0.45, image: teslaImg },
+  { brand: "Jaguar", model: "F-Type Ad", reward: 0.75, image: jaguarImg },
+  { brand: "Lexus", model: "LC Campaign", reward: 0.55, image: lexusImg },
+  { brand: "Volvo", model: "XC90 Promo", reward: 0.40, image: volvoImg },
+  { brand: "McLaren", model: "720S Launch", reward: 1.40, image: mclarenImg },
+  { brand: "Genesis", model: "GV80 Campaign", reward: 0.50, image: genesisImg },
+  { brand: "Aston Martin", model: "DB12 Promo", reward: 1.10, image: astonMartinImg },
+  { brand: "Bugatti", model: "Chiron Feature", reward: 2.00, image: bugattiImg },
+  { brand: "Land Rover", model: "Defender Ad", reward: 0.60, image: landRoverImg },
+  { brand: "Alfa Romeo", model: "Giulia Campaign", reward: 0.65, image: alfaRomeoImg },
+];
 
 const Starting = () => {
-  const completedTasks = tasks.filter(t => t.status === "completed").length;
-  const totalTasks = tasks.length;
-  const totalEarned = tasks.filter(t => t.status === "completed").reduce((s, t) => s + t.reward, 0);
+  const { profile } = useAuth();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const completedTasks = 0;
+  const totalTasks = 40;
+  const todaySalary = 0;
+
+  const userName = profile?.full_name || "User";
+
+  // Auto-scroll carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % carCampaigns.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Scroll to active card
+  useEffect(() => {
+    if (scrollRef.current) {
+      const card = scrollRef.current.children[activeIndex] as HTMLElement;
+      if (card) {
+        const scrollLeft = card.offsetLeft - scrollRef.current.offsetWidth / 2 + card.offsetWidth / 2;
+        scrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      }
+    }
+  }, [activeIndex]);
+
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const center = container.scrollLeft + container.offsetWidth / 2;
+    let closest = 0;
+    let minDist = Infinity;
+    Array.from(container.children).forEach((child, i) => {
+      const el = child as HTMLElement;
+      const elCenter = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(center - elCenter);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    setActiveIndex(closest);
+  }, []);
+
+  const featuredCar = carCampaigns[activeIndex];
 
   return (
     <AppLayout>
-      <div className="px-4 py-5">
+      <div className="px-4 py-5 pb-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-5"
+          transition={{ duration: 0.5 }}
+          className="glass-card p-4 mb-5"
         >
-          <h1 className="text-xl font-semibold tracking-tight">Starting</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Complete tasks to earn rewards</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">
+                Hi, {userName} 👋
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">Junior Promoter</p>
+            </div>
+            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-sm font-semibold text-primary">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
-          <motion.div custom={0} initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-3 text-center">
-            <ListChecks className="h-4 w-4 mx-auto mb-1 text-primary" strokeWidth={1.5} />
-            <div className="text-lg font-semibold tabular-nums">{totalTasks}</div>
-            <span className="text-[10px] text-muted-foreground">Total Tasks</span>
+        {/* Balance Cards */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            className="glass-card p-4"
+          >
+            <Wallet className="h-4 w-4 text-primary mb-2" strokeWidth={1.5} />
+            <div className="text-xl font-bold tabular-nums tracking-tight">0 AC</div>
+            <span className="text-[10px] text-muted-foreground">Wallet Balance</span>
           </motion.div>
-          <motion.div custom={1} initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-3 text-center">
-            <CheckCircle2 className="h-4 w-4 mx-auto mb-1 text-success" strokeWidth={1.5} />
-            <div className="text-lg font-semibold tabular-nums">{completedTasks}</div>
-            <span className="text-[10px] text-muted-foreground">Completed</span>
-          </motion.div>
-          <motion.div custom={2} initial="hidden" animate="visible" variants={fadeUp} className="glass-card p-3 text-center">
-            <DollarSign className="h-4 w-4 mx-auto mb-1 text-success" strokeWidth={1.5} />
-            <div className="text-lg font-semibold tabular-nums">${totalEarned.toFixed(0)}</div>
-            <span className="text-[10px] text-muted-foreground">Earned</span>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
+            className="glass-card p-4"
+          >
+            <DollarSign className="h-4 w-4 text-success mb-2" strokeWidth={1.5} />
+            <div className="text-xl font-bold tabular-nums tracking-tight">0 AC</div>
+            <span className="text-[10px] text-muted-foreground">Advertising Salary</span>
           </motion.div>
         </div>
 
-        {/* Daily Progress */}
+        {/* Car Slideshow */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="mb-6"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+              Campaigns
+            </h2>
+            <span className="text-[10px] text-muted-foreground">{carCampaigns.length} available</span>
+          </div>
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {carCampaigns.map((car, i) => (
+              <motion.div
+                key={car.brand}
+                className={`flex-shrink-0 snap-center rounded-2xl overflow-hidden relative transition-all duration-500 ${
+                  i === activeIndex ? "w-36 h-48" : "w-28 h-44 opacity-60"
+                }`}
+                style={{
+                  boxShadow: i === activeIndex
+                    ? "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)"
+                    : "0 2px 8px rgba(0,0,0,0.3)",
+                }}
+              >
+                <img
+                  src={car.image}
+                  alt={car.brand}
+                  loading="lazy"
+                  width={640}
+                  height={800}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                  <p className="text-[11px] font-semibold truncate">{car.brand} Campaign</p>
+                  <p className="text-[10px] text-success font-medium tabular-nums">+${car.reward.toFixed(2)}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          {/* Dot indicators */}
+          <div className="flex justify-center gap-1 mt-3">
+            {carCampaigns.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveIndex(i)}
+                className={`rounded-full transition-all duration-300 ${
+                  i === activeIndex
+                    ? "w-5 h-1.5 bg-primary"
+                    : "w-1.5 h-1.5 bg-muted-foreground/30"
+                }`}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Featured Car Display */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="mb-6 rounded-2xl overflow-hidden relative"
+          style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)" }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={featuredCar.brand}
+              src={featuredCar.image}
+              alt={featuredCar.brand}
+              width={640}
+              height={800}
+              className="w-full h-56 object-cover"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            />
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Featured</p>
+                <h3 className="text-lg font-bold">{featuredCar.brand}</h3>
+                <p className="text-xs text-muted-foreground">{featuredCar.model}</p>
+              </div>
+              <span className="text-base font-bold text-success tabular-nums">+${featuredCar.reward.toFixed(2)}</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Progress Bar */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="glass-card p-5 mb-6"
+          transition={{ delay: 0.35, duration: 0.5 }}
+          className="glass-card p-4 mb-4"
         >
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium">Daily Progress</h3>
-            <span className="text-xs text-muted-foreground tabular-nums">{completedTasks} / {totalTasks} tasks</span>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-muted-foreground">Task Progress</span>
+            <span className="text-xs tabular-nums font-semibold">{completedTasks} / {totalTasks}</span>
           </div>
-          <div className="progress-track h-3">
+          <div className="progress-track h-2.5">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${(completedTasks / totalTasks) * 100}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="progress-fill h-3"
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              className="progress-fill h-2.5"
             />
           </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-[11px] text-muted-foreground">{Math.round((completedTasks / totalTasks) * 100)}% complete</span>
-            <span className="text-[11px] text-success tabular-nums">+${totalEarned.toFixed(2)} earned</span>
+          <p className="text-[10px] text-muted-foreground mt-1.5">
+            {Math.round((completedTasks / totalTasks) * 100)}% completed today
+          </p>
+        </motion.div>
+
+        {/* Start Task Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="mb-6"
+        >
+          <button className="w-full py-4 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 btn-press transition-all duration-300 bg-card text-foreground border border-border hover:border-primary/30"
+            style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
+          >
+            <Play className="h-4 w-4 text-primary" fill="hsl(var(--primary))" />
+            Match Ad
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </motion.div>
+
+        {/* Daily Earnings */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          className="glass-card p-4 mb-5"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
+              <span className="text-xs text-muted-foreground">Today Advertising Salary</span>
+            </div>
+            <span className="text-base font-bold tabular-nums">{todaySalary}</span>
           </div>
         </motion.div>
 
-        {/* Task List */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">All Tasks</h2>
-          <span className="text-xs text-primary">{totalTasks - completedTasks} remaining</span>
-        </div>
-        <div className="flex flex-col gap-3 mb-6">
-          {tasks.map((task, i) => (
-            <motion.div
-              key={task.id}
-              custom={i}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-40px" }}
-              variants={fadeUp}
-              className="glass-card p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] text-muted-foreground tabular-nums">#{task.id}</span>
-                    <h4 className="text-sm font-medium truncate">{task.title}</h4>
-                    {task.status === "completed" ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 text-success flex-shrink-0">Done</span>
-                    ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-warning/10 text-warning flex-shrink-0">Pending</span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{task.desc}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <span className="text-sm font-semibold text-success tabular-nums">+${task.reward.toFixed(2)}</span>
-                  {task.status === "pending" && (
-                    <button className="flex items-center gap-1 text-[11px] font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-lg btn-press transition-all duration-200 hover:brightness-110">
-                      <Play className="h-3 w-3" />
-                      Start
-                    </button>
-                  )}
-                </div>
+        {/* Important Notes */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="glass-card p-5 border border-border/50"
+        >
+          <h3 className="text-sm font-semibold mb-3">Important Notes</h3>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+              <div>
+                <p className="text-xs font-medium">Support Hours</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Mon – Fri, 9:00 AM – 6:00 PM (UTC)
+                </p>
               </div>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Headphones className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+              <div>
+                <p className="text-xs font-medium">Contact Support</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  support@skyrise.com
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </AppLayout>
   );
