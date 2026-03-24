@@ -310,7 +310,7 @@ const Starting = () => {
               transition={{ duration: 0.5 }}
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-5">
             <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Featured</p>
             <h3 className="text-lg font-bold">{featuredCar.brand}</h3>
