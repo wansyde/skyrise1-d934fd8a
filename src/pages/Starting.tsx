@@ -25,27 +25,49 @@ import bugattiImg from "@/assets/cars/bugatti.jpg";
 import landRoverImg from "@/assets/cars/land-rover.jpg";
 import alfaRomeoImg from "@/assets/cars/alfa-romeo.jpg";
 
+// Featured images (different angles)
+import bmwFeatured from "@/assets/cars/featured/bmw.jpg";
+import mercedesFeatured from "@/assets/cars/featured/mercedes.jpg";
+import rollsRoyceFeatured from "@/assets/cars/featured/rolls-royce.jpg";
+import porscheFeatured from "@/assets/cars/featured/porsche.jpg";
+import audiFeatured from "@/assets/cars/featured/audi.jpg";
+import ferrariFeatured from "@/assets/cars/featured/ferrari.jpg";
+import lamborghiniFeatured from "@/assets/cars/featured/lamborghini.jpg";
+import bentleyFeatured from "@/assets/cars/featured/bentley.jpg";
+import maseratiFeatured from "@/assets/cars/featured/maserati.jpg";
+import rangeRoverFeatured from "@/assets/cars/featured/range-rover.jpg";
+import teslaFeatured from "@/assets/cars/featured/tesla.jpg";
+import jaguarFeatured from "@/assets/cars/featured/jaguar.jpg";
+import lexusFeatured from "@/assets/cars/featured/lexus.jpg";
+import volvoFeatured from "@/assets/cars/featured/volvo.jpg";
+import mclarenFeatured from "@/assets/cars/featured/mclaren.jpg";
+import genesisFeatured from "@/assets/cars/featured/genesis.jpg";
+import astonMartinFeatured from "@/assets/cars/featured/aston-martin.jpg";
+import bugattiFeatured from "@/assets/cars/featured/bugatti.jpg";
+import landRoverFeatured from "@/assets/cars/featured/land-rover.jpg";
+import alfaRomeoFeatured from "@/assets/cars/featured/alfa-romeo.jpg";
+
 const carCampaigns = [
-  { brand: "BMW", image: bmwImg },
-  { brand: "Mercedes", image: mercedesImg },
-  { brand: "Rolls Royce", image: rollsRoyceImg },
-  { brand: "Porsche", image: porscheImg },
-  { brand: "Audi", image: audiImg },
-  { brand: "Ferrari", image: ferrariImg },
-  { brand: "Lamborghini", image: lamborghiniImg },
-  { brand: "Bentley", image: bentleyImg },
-  { brand: "Maserati", image: maseratiImg },
-  { brand: "Range Rover", image: rangeRoverImg },
-  { brand: "Tesla", image: teslaImg },
-  { brand: "Jaguar", image: jaguarImg },
-  { brand: "Lexus", image: lexusImg },
-  { brand: "Volvo", image: volvoImg },
-  { brand: "McLaren", image: mclarenImg },
-  { brand: "Genesis", image: genesisImg },
-  { brand: "Aston Martin", image: astonMartinImg },
-  { brand: "Bugatti", image: bugattiImg },
-  { brand: "Land Rover", image: landRoverImg },
-  { brand: "Alfa Romeo", image: alfaRomeoImg },
+  { brand: "BMW", image: bmwImg, featured: bmwFeatured },
+  { brand: "Mercedes", image: mercedesImg, featured: mercedesFeatured },
+  { brand: "Rolls Royce", image: rollsRoyceImg, featured: rollsRoyceFeatured },
+  { brand: "Porsche", image: porscheImg, featured: porscheFeatured },
+  { brand: "Audi", image: audiImg, featured: audiFeatured },
+  { brand: "Ferrari", image: ferrariImg, featured: ferrariFeatured },
+  { brand: "Lamborghini", image: lamborghiniImg, featured: lamborghiniFeatured },
+  { brand: "Bentley", image: bentleyImg, featured: bentleyFeatured },
+  { brand: "Maserati", image: maseratiImg, featured: maseratiFeatured },
+  { brand: "Range Rover", image: rangeRoverImg, featured: rangeRoverFeatured },
+  { brand: "Tesla", image: teslaImg, featured: teslaFeatured },
+  { brand: "Jaguar", image: jaguarImg, featured: jaguarFeatured },
+  { brand: "Lexus", image: lexusImg, featured: lexusFeatured },
+  { brand: "Volvo", image: volvoImg, featured: volvoFeatured },
+  { brand: "McLaren", image: mclarenImg, featured: mclarenFeatured },
+  { brand: "Genesis", image: genesisImg, featured: genesisFeatured },
+  { brand: "Aston Martin", image: astonMartinImg, featured: astonMartinFeatured },
+  { brand: "Bugatti", image: bugattiImg, featured: bugattiFeatured },
+  { brand: "Land Rover", image: landRoverImg, featured: landRoverFeatured },
+  { brand: "Alfa Romeo", image: alfaRomeoImg, featured: alfaRomeoFeatured },
 ];
 
 const VISIBLE_COUNT = 5;
@@ -307,7 +329,7 @@ const Starting = () => {
           <AnimatePresence mode="wait">
             <motion.img
               key={featuredCar.brand}
-              src={featuredCar.image}
+              src={featuredCar.featured}
               alt={featuredCar.brand}
               className="w-full h-96 object-contain drop-shadow-2xl"
               initial={{ opacity: 0, scale: 1.08, rotateY: 5 }}
