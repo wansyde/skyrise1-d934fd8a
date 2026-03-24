@@ -187,7 +187,7 @@ const Starting = () => {
 
           {/* 3D Carousel Container */}
           <div
-            className="relative h-56 flex items-center justify-center overflow-hidden"
+            className="relative h-64 flex items-center justify-center overflow-hidden"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             style={{
