@@ -293,18 +293,13 @@ const Starting = () => {
               key={featuredCar.brand}
               src={featuredCar.image}
               alt={featuredCar.brand}
-              className="w-full h-56 object-cover"
+              className="w-full h-80 object-contain"
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.5 }}
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-5">
-            <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Featured</p>
-            <h3 className="text-lg font-bold">{featuredCar.brand}</h3>
-          </div>
         </motion.div>
 
         {/* Start Task Button */}
