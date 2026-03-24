@@ -82,17 +82,21 @@ const Starting = () => {
   // Get offset from center for 3D transform
   const getCardStyle = (offset: number) => {
     const absOffset = Math.abs(offset);
-    const scale = offset === 0 ? 1 : Math.max(0.65, 1 - absOffset * 0.15);
-    const rotateY = offset * -25;
-    const translateX = offset * 90;
-    const translateZ = offset === 0 ? 40 : -absOffset * 80;
-    const opacity = offset === 0 ? 1 : Math.max(0.3, 1 - absOffset * 0.3);
+    const scale = offset === 0 ? 1.08 : Math.max(0.68, 1 - absOffset * 0.14);
+    const rotateY = offset * -22;
+    const translateX = offset * 95;
+    const translateZ = offset === 0 ? 60 : -absOffset * 70;
+    const opacity = offset === 0 ? 1 : Math.max(0.45, 1 - absOffset * 0.25);
     const zIndex = 10 - absOffset;
+    const brightness = offset === 0 ? 1.12 : Math.max(0.7, 1 - absOffset * 0.15);
+    const contrast = offset === 0 ? 1.1 : 1;
+    const saturate = offset === 0 ? 1.15 : Math.max(0.85, 1 - absOffset * 0.1);
 
     return {
       transform: `perspective(1200px) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
       opacity,
       zIndex,
+      filter: `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`,
     };
   };
 
