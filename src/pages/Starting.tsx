@@ -329,7 +329,7 @@ const Starting = () => {
           <AnimatePresence mode="wait">
             <motion.img
               key={featuredCar.brand}
-              src={featuredCar.image}
+              src={featuredCar.featured}
               alt={featuredCar.brand}
               className="w-full h-96 object-contain drop-shadow-2xl"
               initial={{ opacity: 0, scale: 1.08, rotateY: 5 }}
