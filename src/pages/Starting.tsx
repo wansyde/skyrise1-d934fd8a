@@ -51,9 +51,7 @@ const carCampaigns = [
 const Starting = () => {
   const { profile } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const completedTasks = 0;
-  const totalTasks = 40;
+  const [isPaused, setIsPaused] = useState(false);
   const todaySalary = 0;
 
   const userName = profile?.full_name || "User";
