@@ -331,7 +331,7 @@ const Starting = () => {
               key={featuredCar.brand}
               src={featuredCar.featured}
               alt={featuredCar.brand}
-              className="w-full h-96 object-contain drop-shadow-2xl"
+              className="w-full aspect-[4/3] object-cover rounded-2xl"
               initial={{ opacity: 0, scale: 1.08, rotateY: 5 }}
               animate={{ opacity: 1, scale: 1, rotateY: 0 }}
               exit={{ opacity: 0, scale: 0.92, rotateY: -5 }}
@@ -341,9 +341,9 @@ const Starting = () => {
           </AnimatePresence>
           {/* Showroom floor reflection */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-16 opacity-20"
+            className="absolute bottom-0 left-0 right-0 h-20 opacity-25"
             style={{
-              background: "linear-gradient(to top, hsl(var(--primary) / 0.08), transparent)",
+              background: "linear-gradient(to top, hsl(var(--primary) / 0.1), transparent)",
             }}
           />
         </motion.div>
