@@ -232,16 +232,6 @@ const Starting = () => {
                       {/* Subtle side edge highlights */}
                       <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-white/10 via-transparent to-transparent" />
                       <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-white/10 via-transparent to-transparent" />
-                      {/* Brand label only on active */}
-                      {isCenter && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="absolute bottom-0 left-0 right-0 p-2.5 bg-gradient-to-t from-background/70 to-transparent"
-                        >
-                          <p className="text-[11px] font-semibold text-center truncate">{car.brand}</p>
-                        </motion.div>
-                      )}
                     </div>
                     {/* Showroom floor reflection */}
                     <div
