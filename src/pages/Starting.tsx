@@ -80,7 +80,7 @@ const Starting = () => {
   const userName = profile?.full_name || "User";
   const total = carCampaigns.length;
 
-  // Auto-slide for top carousel
+  // Single synchronized auto-slide for both carousels
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
@@ -88,15 +88,6 @@ const Starting = () => {
     }, 4000);
     return () => clearInterval(interval);
   }, [isPaused, total]);
-
-  // Auto-slide for featured carousel
-  useEffect(() => {
-    if (featuredPaused) return;
-    const interval = setInterval(() => {
-      setFeaturedIndex((prev) => (prev + 1) % total);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [featuredPaused, total]);
 
   // Pause on interaction
   const handleInteraction = useCallback(() => {
