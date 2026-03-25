@@ -7,6 +7,7 @@ import {
   ArrowUpFromLine, ArrowDownToLine, Scale,
   Calendar, HelpCircle, Info, Shield
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const bottomTabs = [
   { href: "/app", label: "Home", icon: Home },
