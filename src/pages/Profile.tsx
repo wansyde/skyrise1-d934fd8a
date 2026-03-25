@@ -66,9 +66,13 @@ const Profile = () => {
           {/* Avatar + user info overlapping */}
           <div className="relative -mt-10 px-4 pb-4">
             <div className="flex items-end gap-3">
-              <div className="h-16 w-16 rounded-full border-[3px] border-card bg-muted flex items-center justify-center shrink-0">
-                <User className="h-7 w-7 text-muted-foreground" strokeWidth={1.5} />
-              </div>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Avatar" className="h-16 w-16 rounded-full border-[3px] border-card object-cover shrink-0" />
+              ) : (
+                <div className="h-16 w-16 rounded-full border-[3px] border-card bg-muted flex items-center justify-center shrink-0">
+                  <User className="h-7 w-7 text-muted-foreground" strokeWidth={1.5} />
+                </div>
+              )}
               <div className="pb-1">
                 <h1 className="text-base font-semibold leading-tight">{profile?.username || profile?.full_name || "User"}</h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
