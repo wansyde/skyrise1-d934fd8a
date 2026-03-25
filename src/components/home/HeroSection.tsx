@@ -29,7 +29,7 @@ const HeroSection = () => (
     />
 
     {/* Content */}
-    <div className="absolute inset-0 flex flex-col justify-end px-6 sm:px-10 pb-24 sm:pb-28">
+    <div className="absolute inset-0 flex flex-col justify-end px-6 sm:px-10 pb-32 sm:pb-36">
       <motion.span
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
