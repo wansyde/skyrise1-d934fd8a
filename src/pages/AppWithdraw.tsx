@@ -163,10 +163,10 @@ const AppWithdraw = () => {
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Transaction Password"
+                      placeholder="Enter password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-transparent border-0 border-b border-border rounded-none h-12 text-base pr-12 focus-visible:border-muted-foreground/40"
+                      className="bg-transparent border-0 border-b border-border rounded-none h-12 text-sm pr-12 focus-visible:border-muted-foreground/40"
                     />
                     <button
                       type="button"
