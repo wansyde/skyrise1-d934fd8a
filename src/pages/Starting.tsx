@@ -147,9 +147,9 @@ const Starting = () => {
     visibleCards.push({ idx, offset, car: carCampaigns[idx] });
   }
 
-  const featuredCar = carCampaigns[activeIndex];
+  const featuredCar = carCampaigns[featuredIndex];
 
-  // Swipe handling
+  // Swipe handling for top carousel
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -160,6 +160,30 @@ const Starting = () => {
     }
     setTouchStart(null);
   };
+
+  // Swipe handling for featured carousel
+  const [featuredTouchStart, setFeaturedTouchStart] = useState<number | null>(null);
+  const handleFeaturedTouchStart = (e: React.TouchEvent) => setFeaturedTouchStart(e.touches[0].clientX);
+  const handleFeaturedTouchEnd = (e: React.TouchEvent) => {
+    if (featuredTouchStart === null) return;
+    const diff = featuredTouchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      const next = diff > 0 ? (featuredIndex + 1) % total : (featuredIndex - 1 + total) % total;
+      setFeaturedIndex(next);
+      handleFeaturedInteraction();
+    }
+    setFeaturedTouchStart(null);
+  };
+
+  const goFeaturedPrev = useCallback(() => {
+    setFeaturedIndex((prev) => (prev - 1 + total) % total);
+    handleFeaturedInteraction();
+  }, [total, handleFeaturedInteraction]);
+
+  const goFeaturedNext = useCallback(() => {
+    setFeaturedIndex((prev) => (prev + 1) % total);
+    handleFeaturedInteraction();
+  }, [total, handleFeaturedInteraction]);
 
   return (
     <AppLayout>
