@@ -254,17 +254,46 @@ const PersonalInfo = () => {
             >
               <Header title="Account Settings" onBack={() => navigate("/app/profile")} />
 
-              {/* User summary card */}
+              {/* User summary card with avatar upload */}
               <div
                 className="rounded-2xl border border-border p-5 mb-4 flex items-center gap-4"
                 style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
               >
-                <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="relative h-14 w-14 rounded-full shrink-0 group"
+                >
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Avatar"
+                      className="h-14 w-14 rounded-full object-cover border-2 border-border group-hover:border-primary/40 transition-colors"
+                    />
+                  ) : (
+                    <div className="h-14 w-14 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
+                      <User className="h-6 w-6 text-primary" strokeWidth={1.5} />
+                    </div>
+                  )}
+                  <div className="absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-full bg-primary flex items-center justify-center border-2 border-card">
+                    {uploadingAvatar ? (
+                      <Loader2 className="h-3 w-3 text-primary-foreground animate-spin" />
+                    ) : (
+                      <Camera className="h-3 w-3 text-primary-foreground" strokeWidth={2} />
+                    )}
+                  </div>
+                </button>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate">{profile?.username || profile?.full_name || "User"}</p>
                   <p className="text-xs text-muted-foreground truncate mt-0.5">{profile?.email || "—"}</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">Tap photo to change</p>
                 </div>
               </div>
 
