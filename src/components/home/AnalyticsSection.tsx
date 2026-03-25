@@ -57,7 +57,7 @@ const AnalyticsSection = () => (
     {/* Purple banner with headline */}
     <div
       className="px-5 sm:px-8 pt-14 pb-56 sm:pb-64"
-      style={{ background: "linear-gradient(180deg, hsl(250 45% 62%) 0%, hsl(250 50% 58%) 100%)" }}
+      style={{ background: "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%)" }}
     >
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
@@ -65,7 +65,7 @@ const AnalyticsSection = () => (
         viewport={{ once: true }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] as const }}
         className="text-[2rem] sm:text-[2.8rem] lg:text-[3.5rem] font-black leading-[0.95] tracking-tight uppercase"
-        style={{ color: "hsl(240 40% 20%)" }}
+        style={{ color: "hsl(var(--muted-foreground))" }}
       >
         Skyrise is
         <br />
