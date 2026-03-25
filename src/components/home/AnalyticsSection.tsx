@@ -302,7 +302,7 @@ const AnalyticsSection = () => (
         transition={{ duration: 0.6 }}
       >
         <div className="relative">
-          <div className="flex animate-[ticker_20s_linear_infinite] w-max">
+          <div className="flex ticker-scroll w-max">
             {[...brandLogos, ...brandLogos, ...brandLogos].map((brand, i) => (
               <span
                 key={`${brand.name}-${i}`}
