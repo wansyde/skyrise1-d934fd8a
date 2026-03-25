@@ -2,43 +2,47 @@ import { motion } from "framer-motion";
 import heroHome from "@/assets/hero-home.jpg";
 
 const HeroSection = () => (
-  <motion.section
+  <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     transition={{ duration: 1 }}
-    className="relative w-full h-[480px] sm:h-[540px] lg:h-[600px] overflow-hidden"
   >
-    <motion.img
-      initial={{ scale: 1.06 }}
-      animate={{ scale: 1 }}
-      transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-      src={heroHome}
-      alt="Luxury automotive campaign"
-      className="absolute inset-0 w-full h-full object-cover"
-      width={1920}
-      height={1080}
-    />
+    {/* Image section */}
+    <div className="relative w-full h-[420px] sm:h-[480px] lg:h-[520px] overflow-hidden">
+      <motion.img
+        initial={{ scale: 1.06 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+        src={heroHome}
+        alt="Luxury automotive campaign"
+        className="absolute inset-0 w-full h-full object-cover"
+        width={1920}
+        height={1080}
+      />
 
-    {/* Multi-layer gradient for depth */}
-    <div
-      className="absolute inset-0"
-      style={{
-        background:
-          "linear-gradient(180deg, transparent 0%, hsl(var(--background) / 0.2) 40%, hsl(var(--background) / 0.75) 75%, hsl(var(--background)) 100%)",
-      }}
-    />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent 0%, hsl(var(--background) / 0.15) 50%, hsl(var(--background)) 100%)",
+        }}
+      />
 
-    {/* Content */}
-    <div className="absolute inset-0 flex flex-col justify-end px-6 sm:px-10 pb-32 sm:pb-36">
-      <motion.span
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-muted-foreground mb-4"
-      >
-        Luxury Car Manufacturer Brand
-      </motion.span>
+      {/* Label on image */}
+      <div className="absolute inset-0 flex flex-col justify-end px-6 sm:px-10 pb-6">
+        <motion.span
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-muted-foreground"
+        >
+          Luxury Car Manufacturer Brand
+        </motion.span>
+      </div>
+    </div>
 
+    {/* Text below image */}
+    <div className="px-6 sm:px-10 pt-6 pb-2">
       <motion.h1
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -59,7 +63,7 @@ const HeroSection = () => (
         Data-driven audience intelligence for premium automotive brands.
       </motion.p>
     </div>
-  </motion.section>
+  </motion.div>
 );
 
 export default HeroSection;
