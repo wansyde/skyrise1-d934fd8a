@@ -293,25 +293,28 @@ const AnalyticsSection = () => (
       </motion.div>
     </div>
 
-    {/* Brand Logos */}
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.3, duration: 0.6 }}
-      className="mt-12 px-5 sm:px-8 pb-2"
-    >
-      <div className="flex items-center justify-between gap-6 overflow-x-auto pb-2">
-        {brandLogos.map((brand) => (
-          <span
-            key={brand.name}
-            className={`whitespace-nowrap text-foreground/20 hover:text-foreground/40 transition-colors duration-300 cursor-default select-none ${brand.style}`}
-          >
-            {brand.name}
-          </span>
-        ))}
-      </div>
-    </motion.div>
+    {/* Brand Logos Ticker */}
+    <div className="mt-12 overflow-hidden pb-2">
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="relative">
+          <div className="flex animate-[ticker_20s_linear_infinite] w-max">
+            {[...brandLogos, ...brandLogos, ...brandLogos].map((brand, i) => (
+              <span
+                key={`${brand.name}-${i}`}
+                className={`whitespace-nowrap text-foreground/20 cursor-default select-none mx-8 sm:mx-12 ${brand.style}`}
+              >
+                {brand.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </div>
   </section>
 );
 

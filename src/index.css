@@ -210,7 +210,12 @@
   .progress-fill {
     @apply h-full rounded-full transition-all duration-500;
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-  }
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
 }
 
 /* Scrollbar */
