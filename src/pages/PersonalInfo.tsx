@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft, ChevronRight, UserCircle, Phone,
-  KeyRound, ShieldCheck, Pencil, User, Lock
+  KeyRound, ShieldCheck, Pencil, User, Lock, Camera, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -96,6 +96,8 @@ const PersonalInfo = () => {
   const { profile, user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState<View>("main");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Edit profile state
   const [fullName, setFullName] = useState(profile?.full_name || "");
@@ -114,6 +116,44 @@ const PersonalInfo = () => {
   const [newTxPassword, setNewTxPassword] = useState("");
   const [confirmTxPassword, setConfirmTxPassword] = useState("");
   const [updatingTxPassword, setUpdatingTxPassword] = useState(false);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB.");
+      return;
+    }
+    setUploadingAvatar(true);
+    const ext = file.name.split(".").pop();
+    const filePath = `${user.id}/avatar.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+    if (uploadError) {
+      setUploadingAvatar(false);
+      toast.error("Failed to upload avatar.");
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ avatar_url: avatarUrl })
+      .eq("user_id", user.id);
+    setUploadingAvatar(false);
+    if (updateError) {
+      toast.error("Failed to save avatar.");
+    } else {
+      toast.success("Avatar updated!");
+      await refreshProfile();
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -214,17 +254,46 @@ const PersonalInfo = () => {
             >
               <Header title="Account Settings" onBack={() => navigate("/app/profile")} />
 
-              {/* User summary card */}
+              {/* User summary card with avatar upload */}
               <div
                 className="rounded-2xl border border-border p-5 mb-4 flex items-center gap-4"
                 style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
               >
-                <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="relative h-14 w-14 rounded-full shrink-0 group"
+                >
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Avatar"
+                      className="h-14 w-14 rounded-full object-cover border-2 border-border group-hover:border-primary/40 transition-colors"
+                    />
+                  ) : (
+                    <div className="h-14 w-14 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
+                      <User className="h-6 w-6 text-primary" strokeWidth={1.5} />
+                    </div>
+                  )}
+                  <div className="absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-full bg-primary flex items-center justify-center border-2 border-card">
+                    {uploadingAvatar ? (
+                      <Loader2 className="h-3 w-3 text-primary-foreground animate-spin" />
+                    ) : (
+                      <Camera className="h-3 w-3 text-primary-foreground" strokeWidth={2} />
+                    )}
+                  </div>
+                </button>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate">{profile?.username || profile?.full_name || "User"}</p>
                   <p className="text-xs text-muted-foreground truncate mt-0.5">{profile?.email || "—"}</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">Tap photo to change</p>
                 </div>
               </div>
 
