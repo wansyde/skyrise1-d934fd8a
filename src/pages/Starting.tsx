@@ -289,7 +289,7 @@ const Starting = () => {
                   {/* Card with showroom floor reflection */}
                   <div className="flex flex-col items-center">
                     <div
-                      className="w-32 h-44 rounded-2xl overflow-hidden relative"
+                      className="w-40 h-56 sm:w-48 sm:h-64 rounded-2xl overflow-hidden relative"
                       style={{
                         boxShadow: isCenter
                           ? "0 20px 60px rgba(0,0,0,0.5), 0 0 30px hsl(var(--primary) / 0.12), 0 0 80px hsl(var(--primary) / 0.06)"
