@@ -262,7 +262,7 @@ const Starting = () => {
 
           {/* 3D Carousel Container */}
           <div
-            className="relative h-64 flex items-center justify-center overflow-hidden"
+            className="relative h-[340px] sm:h-[400px] flex items-center justify-center overflow-hidden"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             style={{
@@ -289,7 +289,7 @@ const Starting = () => {
                   {/* Card with showroom floor reflection */}
                   <div className="flex flex-col items-center">
                     <div
-                      className="w-32 h-44 rounded-2xl overflow-hidden relative"
+                      className="w-40 h-56 sm:w-48 sm:h-64 rounded-2xl overflow-hidden relative"
                       style={{
                         boxShadow: isCenter
                           ? "0 20px 60px rgba(0,0,0,0.5), 0 0 30px hsl(var(--primary) / 0.12), 0 0 80px hsl(var(--primary) / 0.06)"
@@ -310,7 +310,7 @@ const Starting = () => {
                     </div>
                     {/* Showroom floor reflection */}
                     <div
-                      className="w-28 h-10 mt-0.5 rounded-b-2xl overflow-hidden opacity-30"
+                      className="w-36 sm:w-44 h-12 mt-0.5 rounded-b-2xl overflow-hidden opacity-30"
                       style={{
                         transform: "scaleY(-1) scaleX(0.92)",
                         maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)",
@@ -320,7 +320,7 @@ const Starting = () => {
                       <img
                         src={car.image}
                         alt=""
-                        className="w-full h-44 object-cover object-bottom"
+                        className="w-full h-56 sm:h-64 object-cover object-bottom"
                         style={{ filter: "blur(2px)" }}
                       />
                     </div>
@@ -392,7 +392,7 @@ const Starting = () => {
                   <img
                     src={featuredCar.featured}
                     alt={featuredCar.brand}
-                    className="w-full aspect-[16/10] object-cover rounded-2xl"
+                    className="w-full aspect-[16/9] object-cover rounded-2xl"
                     style={{
                       filter: "brightness(1.08) contrast(1.06) saturate(1.12)",
                     }}
