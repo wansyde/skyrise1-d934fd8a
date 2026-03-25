@@ -33,11 +33,13 @@ const steps = [
   "Promoter earns Advertising Salary",
 ];
 
+const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
+
 const fade = (delay = 0) => ({
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] as number[] },
+  initial: { opacity: 0, y: 20 } as const,
+  whileInView: { opacity: 1, y: 0 } as const,
+  viewport: { once: true } as const,
+  transition: { delay, duration: 0.5, ease },
 });
 
 const About = () => (
