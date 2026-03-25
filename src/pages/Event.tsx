@@ -1,52 +1,159 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
-import { Calendar } from "lucide-react";
+import { Diamond, ChevronRight, Crown, Award, Star, Gem, CalendarCheck } from "lucide-react";
 
-const events = [
+const tiers = [
   {
-    title: "Q1 Portfolio Review",
-    date: "Mar 31, 2026",
-    description: "Quarterly review of all active investment portfolios and performance metrics.",
-    status: "Upcoming",
+    name: "Junior",
+    icon: Star,
+    salary: "0.4%",
+    tasks: "40 / 3 sets",
+    deposit: "USD 100–499",
+    color: "from-[hsl(220,10%,20%)] to-[hsl(220,10%,14%)]",
+    accent: "hsl(220, 10%, 50%)",
   },
   {
-    title: "New Plan Launch",
-    date: "Apr 15, 2026",
-    description: "Introduction of new Platinum tier investment plan with enhanced returns.",
-    status: "Upcoming",
+    name: "Professional",
+    icon: Gem,
+    salary: "0.6%",
+    tasks: "45 / 3 sets",
+    deposit: "USD 500–1,499",
+    color: "from-[hsl(225,60%,45%)] to-[hsl(225,70%,35%)]",
+    accent: "hsl(225, 85%, 55%)",
   },
+  {
+    name: "Expert",
+    icon: Award,
+    salary: "0.8%",
+    tasks: "50 / 3 sets",
+    deposit: "USD 1,500–4,999",
+    color: "from-[hsl(38,60%,40%)] to-[hsl(38,50%,30%)]",
+    accent: "hsl(38, 92%, 50%)",
+  },
+  {
+    name: "Elite",
+    icon: Crown,
+    salary: "1.0%",
+    tasks: "55 / 3 sets",
+    deposit: "USD 5,000+",
+    color: "from-[hsl(260,50%,40%)] to-[hsl(260,40%,28%)]",
+    accent: "hsl(260, 70%, 58%)",
+  },
+];
+
+const salaryTiers = [
+  { days: 5, reward: 900 },
+  { days: 10, reward: 1800 },
+  { days: 15, reward: 2700 },
+  { days: 20, reward: 3600 },
+  { days: 25, reward: 4500 },
+  { days: 30, reward: 5400 },
 ];
 
 const Event = () => (
   <AppLayout>
-    <div className="px-4 py-5">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight">Events</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Upcoming platform events and announcements.</p>
-      </div>
+    <div className="px-4 py-5 pb-24">
+      {/* Membership Levels */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <div className="mb-5 flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <Diamond className="h-4 w-4 text-primary" strokeWidth={1.5} />
+          </div>
+          <div>
+            <h1 className="text-base font-semibold tracking-tight">Membership Levels</h1>
+            <p className="text-xs text-muted-foreground">Unlock tiers by increasing your deposit</p>
+          </div>
+        </div>
 
-      <div className="flex flex-col gap-3">
-        {events.map((event, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-            className="glass-card p-4"
-          >
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-4 w-4 text-primary" strokeWidth={1.5} />
+        {/* Header row */}
+        <div className="mb-2 grid grid-cols-4 gap-2 px-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          <span>VIP Level</span>
+          <span className="text-center">Ads Salary</span>
+          <span className="text-center">Tasks</span>
+          <span className="text-right">Condition</span>
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          {tiers.map((tier, i) => {
+            const Icon = tier.icon;
+            return (
+              <motion.div
+                key={tier.name}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className={`grid grid-cols-4 items-center gap-2 rounded-xl bg-gradient-to-r ${tier.color} p-3.5 ring-1 ring-white/[0.04]`}
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 shrink-0" style={{ color: tier.accent }} strokeWidth={1.5} />
+                  <span className="text-xs font-semibold text-foreground">{tier.name}</span>
+                </div>
+                <span className="text-center text-sm font-bold tabular-nums text-foreground">{tier.salary}</span>
+                <span className="text-center text-xs text-muted-foreground">{tier.tasks}</span>
+                <div className="text-right">
+                  <span className="text-[10px] text-muted-foreground block leading-tight">Reset Deposit</span>
+                  <span className="text-xs font-semibold text-foreground">{tier.deposit}</span>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Base Salary Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="mb-5 flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10">
+            <CalendarCheck className="h-4 w-4 text-success" strokeWidth={1.5} />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold tracking-tight">Base Salary</h2>
+            <p className="text-xs text-muted-foreground">Earn rewards for consecutive daily check-ins</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {salaryTiers.map((tier, i) => (
+            <motion.div
+              key={tier.days}
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.35 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3.5 ring-1 ring-white/[0.04]"
+            >
+              <div className="flex-1">
+                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  Consecutive Check-ins
+                </span>
+                <p className="text-lg font-bold tabular-nums text-foreground">{tier.days} Days</p>
               </div>
-              <div>
-                <h3 className="text-sm font-semibold">{event.title}</h3>
-                <span className="text-xs text-primary">{event.date}</span>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{event.description}</p>
+
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" strokeWidth={1.5} />
+
+              <div className="flex-1 text-right">
+                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  Receive
+                </span>
+                <p className="text-lg font-bold tabular-nums text-foreground">
+                  {tier.reward.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">USD</span>
+                </p>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <p className="mt-4 text-center text-[10px] text-muted-foreground/60">
+          The final interpretation right belongs to Skyrise
+        </p>
+      </motion.div>
     </div>
   </AppLayout>
 );
