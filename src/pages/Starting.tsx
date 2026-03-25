@@ -1,6 +1,6 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, DollarSign, Play, ChevronRight, Clock, Headphones } from "lucide-react";
+import { Wallet, DollarSign, Play, ChevronRight, Clock, Headphones, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback } from "react";
 
@@ -76,11 +76,13 @@ const Starting = () => {
   const { profile } = useAuth();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [featuredPaused, setFeaturedPaused] = useState(false);
   const todaySalary = 0;
   const userName = profile?.full_name || "User";
   const total = carCampaigns.length;
 
-  // Auto-slide
+  // Auto-slide for top carousel
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
@@ -89,10 +91,25 @@ const Starting = () => {
     return () => clearInterval(interval);
   }, [isPaused, total]);
 
+  // Auto-slide for featured carousel
+  useEffect(() => {
+    if (featuredPaused) return;
+    const interval = setInterval(() => {
+      setFeaturedIndex((prev) => (prev + 1) % total);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [featuredPaused, total]);
+
   // Pause on interaction
   const handleInteraction = useCallback(() => {
     setIsPaused(true);
     const timeout = setTimeout(() => setIsPaused(false), 8000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handleFeaturedInteraction = useCallback(() => {
+    setFeaturedPaused(true);
+    const timeout = setTimeout(() => setFeaturedPaused(false), 8000);
     return () => clearTimeout(timeout);
   }, []);
 
@@ -130,9 +147,9 @@ const Starting = () => {
     visibleCards.push({ idx, offset, car: carCampaigns[idx] });
   }
 
-  const featuredCar = carCampaigns[activeIndex];
+  const featuredCar = carCampaigns[featuredIndex];
 
-  // Swipe handling
+  // Swipe handling for top carousel
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -143,6 +160,30 @@ const Starting = () => {
     }
     setTouchStart(null);
   };
+
+  // Swipe handling for featured carousel
+  const [featuredTouchStart, setFeaturedTouchStart] = useState<number | null>(null);
+  const handleFeaturedTouchStart = (e: React.TouchEvent) => setFeaturedTouchStart(e.touches[0].clientX);
+  const handleFeaturedTouchEnd = (e: React.TouchEvent) => {
+    if (featuredTouchStart === null) return;
+    const diff = featuredTouchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      const next = diff > 0 ? (featuredIndex + 1) % total : (featuredIndex - 1 + total) % total;
+      setFeaturedIndex(next);
+      handleFeaturedInteraction();
+    }
+    setFeaturedTouchStart(null);
+  };
+
+  const goFeaturedPrev = useCallback(() => {
+    setFeaturedIndex((prev) => (prev - 1 + total) % total);
+    handleFeaturedInteraction();
+  }, [total, handleFeaturedInteraction]);
+
+  const goFeaturedNext = useCallback(() => {
+    setFeaturedIndex((prev) => (prev + 1) % total);
+    handleFeaturedInteraction();
+  }, [total, handleFeaturedInteraction]);
 
   return (
     <AppLayout>
@@ -314,38 +355,114 @@ const Starting = () => {
           </div>
         </motion.div>
 
-        {/* Featured Car Display - 3D */}
+        {/* Featured Car Carousel - Premium Showcase */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="mb-6 rounded-2xl overflow-hidden relative"
-          style={{
-            boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
-            background: "radial-gradient(ellipse at center, hsl(var(--card) / 0.6) 0%, hsl(var(--background)) 70%)",
-            perspective: "1000px",
-          }}
+          className="mb-6 relative"
         >
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={featuredCar.brand}
-              src={featuredCar.featured}
-              alt={featuredCar.brand}
-              className="w-full aspect-[4/3] object-cover rounded-2xl"
-              initial={{ opacity: 0, scale: 1.08, rotateY: 5 }}
-              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-              exit={{ opacity: 0, scale: 0.92, rotateY: -5 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ filter: "brightness(1.05) contrast(1.05) saturate(1.1)" }}
-            />
-          </AnimatePresence>
-          {/* Showroom floor reflection */}
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+              Showcase
+            </h2>
+            <span className="text-[10px] text-muted-foreground">{featuredCar.brand}</span>
+          </div>
+
+          {/* Carousel Container */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-20 opacity-25"
+            className="relative rounded-2xl overflow-hidden"
+            onTouchStart={handleFeaturedTouchStart}
+            onTouchEnd={handleFeaturedTouchEnd}
             style={{
-              background: "linear-gradient(to top, hsl(var(--primary) / 0.1), transparent)",
+              background: "radial-gradient(ellipse at 50% 40%, hsl(var(--primary) / 0.06) 0%, hsl(var(--card) / 0.4) 50%, hsl(var(--background)) 100%)",
             }}
-          />
+          >
+            {/* Main image with cinematic transitions */}
+            <div className="relative" style={{ perspective: "1200px" }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={featuredCar.brand}
+                  className="relative"
+                  initial={{ opacity: 0, scale: 1.06, x: 40 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, x: -40 }}
+                  transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+                >
+                  <img
+                    src={featuredCar.featured}
+                    alt={featuredCar.brand}
+                    className="w-full aspect-[16/10] object-cover rounded-2xl"
+                    style={{
+                      filter: "brightness(1.08) contrast(1.06) saturate(1.12)",
+                    }}
+                  />
+                  {/* Floating shadow underneath */}
+                  <div
+                    className="absolute -bottom-3 left-[10%] right-[10%] h-8 rounded-full"
+                    style={{
+                      background: "radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, transparent 70%)",
+                      filter: "blur(8px)",
+                    }}
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Showroom floor reflection */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-24 rounded-b-2xl overflow-hidden opacity-20 pointer-events-none"
+                style={{
+                  background: "linear-gradient(to top, hsl(var(--primary) / 0.08), transparent)",
+                }}
+              />
+
+              {/* Subtle top highlight edge */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-t-2xl" />
+            </div>
+
+            {/* Arrow Controls */}
+            <button
+              onClick={goFeaturedPrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-all duration-200 hover:bg-background/80 hover:scale-105"
+            >
+              <ChevronLeft className="h-4 w-4 text-foreground/70" />
+            </button>
+            <button
+              onClick={goFeaturedNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-all duration-200 hover:bg-background/80 hover:scale-105"
+            >
+              <ChevronRight className="h-4 w-4 text-foreground/70" />
+            </button>
+          </div>
+
+          {/* Brand label */}
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={featuredCar.brand}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.4 }}
+              className="text-center text-xs font-medium text-muted-foreground mt-3 tracking-widest uppercase"
+            >
+              {featuredCar.brand}
+            </motion.p>
+          </AnimatePresence>
+
+          {/* Dot indicators */}
+          <div className="flex justify-center gap-1 mt-2">
+            {carCampaigns.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { setFeaturedIndex(i); handleFeaturedInteraction(); }}
+                className={`rounded-full transition-all duration-300 ${
+                  i === featuredIndex
+                    ? "w-4 h-1 bg-primary/70"
+                    : "w-1 h-1 bg-muted-foreground/20"
+                }`}
+              />
+            ))}
+          </div>
         </motion.div>
 
         {/* Start Task Button */}
