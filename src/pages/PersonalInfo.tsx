@@ -96,6 +96,8 @@ const PersonalInfo = () => {
   const { profile, user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState<View>("main");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Edit profile state
   const [fullName, setFullName] = useState(profile?.full_name || "");
