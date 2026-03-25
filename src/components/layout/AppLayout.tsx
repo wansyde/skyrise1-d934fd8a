@@ -89,15 +89,29 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               {/* Menu items */}
               <nav className="flex-1 overflow-y-auto px-5 pt-4">
                 {slideMenuItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="slide-menu-item"
-                  >
-                    <span>{item.label}</span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-                  </Link>
+                  item.external ? (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMenuOpen(false)}
+                      className="slide-menu-item"
+                    >
+                      <span>{item.label}</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="slide-menu-item"
+                    >
+                      <span>{item.label}</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                    </Link>
+                  )
                 ))}
               </nav>
             </motion.aside>
