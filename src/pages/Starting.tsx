@@ -310,7 +310,7 @@ const Starting = () => {
                     </div>
                     {/* Showroom floor reflection */}
                     <div
-                      className="w-28 h-10 mt-0.5 rounded-b-2xl overflow-hidden opacity-30"
+                      className="w-36 sm:w-44 h-12 mt-0.5 rounded-b-2xl overflow-hidden opacity-30"
                       style={{
                         transform: "scaleY(-1) scaleX(0.92)",
                         maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)",
