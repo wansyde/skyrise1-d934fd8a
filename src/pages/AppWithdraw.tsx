@@ -3,37 +3,64 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowUpFromLine, Clock, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-const methods = ["USDT (TRC-20)", "USDT (ERC-20)", "Bitcoin", "Bank Transfer"];
+import { useQuery } from "@tanstack/react-query";
 
 const AppWithdraw = () => {
-  const [method, setMethod] = useState(methods[0]);
+  const [tab, setTab] = useState<"withdraw" | "history">("withdraw");
   const [amount, setAmount] = useState("");
-  const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user, profile } = useAuth();
-
   const balance = profile?.balance ?? 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const { data: history } = useQuery({
+    queryKey: ["withdrawal-history", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("withdrawals")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      return data || [];
+    },
+  });
+
+  const handleFillAll = () => {
+    setAmount(balance.toFixed(2));
+  };
+
+  const handleSubmit = async () => {
     if (!user) return;
     const num = Number(amount);
     if (num <= 0 || num > balance) {
       toast.error("Invalid amount. Cannot exceed your balance.");
       return;
     }
-    setLoading(true);
+    if (!password) {
+      toast.error("Please enter your transaction password.");
+      return;
+    }
 
+    // Verify withdraw password
+    if (profile?.withdraw_password && password !== profile.withdraw_password) {
+      toast.error("Incorrect transaction password.");
+      return;
+    }
+
+    setLoading(true);
     const { error } = await supabase.from("withdrawals").insert({
       user_id: user.id,
       amount: num,
-      method,
-      wallet_address: address,
+      method: "USDT (TRC-20)",
+      wallet_address: null,
     });
 
     if (error) {
@@ -44,84 +71,170 @@ const AppWithdraw = () => {
         type: "withdrawal",
         amount: -num,
         status: "pending",
-        method,
-        description: `Withdrawal via ${method}`,
+        method: "USDT (TRC-20)",
+        description: "Withdrawal request",
       });
       toast.success("Withdrawal request submitted!");
       setAmount("");
-      setAddress("");
+      setPassword("");
     }
     setLoading(false);
   };
 
   return (
     <AppLayout>
-      <div className="px-4 py-5">
-        <div className="flex items-center gap-3 mb-5">
-          <Link to="/app/wallet" className="text-muted-foreground hover:text-foreground transition-colors">
+      <div className="flex flex-col min-h-[calc(100vh-5rem)]">
+        {/* Header */}
+        <div className="flex items-center h-14 px-4 border-b border-border">
+          <Link to="/app/wallet" className="mr-3 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
           </Link>
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight">Withdraw</h1>
-            <p className="text-sm text-muted-foreground">Request a withdrawal</p>
-          </div>
+          <h1 className="flex-1 text-center text-base font-semibold tracking-tight pr-8">Withdraw</h1>
         </div>
 
-        <div className="glass-card p-4 mb-5">
-          <span className="text-xs text-muted-foreground">Available Balance</span>
-          <div className="text-2xl font-semibold tabular-nums mt-1">
-            ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </div>
+        {/* Tabs */}
+        <div className="flex border-b border-border">
+          {(["withdraw", "history"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 py-3 text-sm font-medium capitalize transition-colors relative ${tab === t ? "text-primary" : "text-muted-foreground"}`}
+            >
+              {t}
+              {tab === t && (
+                <motion.div
+                  layoutId="withdraw-tab-indicator"
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-12 rounded-full bg-primary"
+                />
+              )}
+            </button>
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="glass-card p-4">
-            <label className="text-xs font-medium mb-2 block text-muted-foreground">Withdrawal Method</label>
-            <div className="grid grid-cols-2 gap-2">
-              {methods.map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setMethod(m)}
-                  className={`rounded-lg border px-3 py-2.5 text-xs transition-colors btn-press ${method === m ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
+        <div className="flex-1 px-4 py-5">
+          <AnimatePresence mode="wait">
+            {tab === "withdraw" ? (
+              <motion.div
+                key="withdraw"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col gap-5"
+              >
+                {/* Balance card */}
+                <div className="balance-card p-5 rounded-2xl">
+                  <span className="text-sm text-white/60">Account Amount</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-3xl font-semibold tabular-nums">
+                      {balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </span>
+                    <span className="text-sm text-white/50 font-medium">AC</span>
+                  </div>
+                  <p className="text-xs text-white/40 mt-2">You will receive your withdrawal within an hour</p>
+                </div>
+
+                {/* Withdraw Amount */}
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-2">Withdraw Amount</label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      className="bg-transparent border-0 border-b border-border rounded-none h-12 text-base tabular-nums pr-16 focus-visible:border-muted-foreground/40"
+                      min={0}
+                      max={balance}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleFillAll}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-medium px-4 py-1.5 rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                      ALL
+                    </button>
+                  </div>
+                </div>
+
+                {/* Transaction Password */}
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-2">Transaction Password</label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Transaction Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="bg-transparent border-0 border-b border-border rounded-none h-12 text-base pr-12 focus-visible:border-muted-foreground/40"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={1.5} /> : <Eye className="h-4 w-4" strokeWidth={1.5} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <Button
+                  className="btn-press h-12 w-full text-sm mt-2"
+                  disabled={loading || !amount || !password}
+                  onClick={handleSubmit}
                 >
-                  {m}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="glass-card p-4">
-            <label className="text-xs font-medium mb-2 block text-muted-foreground">Amount (USD)</label>
-            <Input
-              type="number"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="bg-background tabular-nums text-lg h-12"
-              min={10}
-              max={balance}
-              required
-            />
-          </div>
-
-          <div className="glass-card p-4">
-            <label className="text-xs font-medium mb-2 block text-muted-foreground">
-              {method.includes("Bank") ? "Bank Details" : "Wallet Address"}
-            </label>
-            <Input
-              placeholder={method.includes("Bank") ? "Account number" : "Wallet address"}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="bg-background font-mono text-xs"
-              required
-            />
-          </div>
-
-          <Button type="submit" className="btn-press h-12" disabled={loading}>
-            {loading ? "Processing..." : "Submit Withdrawal"}
-          </Button>
-        </form>
+                  {loading ? "Processing..." : "Withdraw"}
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="history"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col gap-2"
+              >
+                {(history || []).map((w, i) => (
+                  <motion.div
+                    key={w.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04, duration: 0.25 }}
+                    className="glass-card flex items-center justify-between p-3.5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                        <ArrowUpFromLine className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium">Withdrawal</span>
+                        <span className="text-xs text-muted-foreground block mt-0.5">
+                          {new Date(w.created_at).toLocaleDateString()} · {w.method}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-medium tabular-nums">
+                        -${Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      </span>
+                      <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "approved" ? "text-success" : "text-destructive"}`}>
+                        {w.status}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+                {(!history || history.length === 0) && (
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                    <Clock className="h-8 w-8 mb-3 opacity-40" strokeWidth={1.5} />
+                    <p className="text-sm">No withdrawal history yet.</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </AppLayout>
   );
