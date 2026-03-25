@@ -17,7 +17,7 @@ const bottomTabs = [
 ];
 
 const slideMenuItems = [
-  { href: "/app/wfp", label: "WFP", icon: FileText },
+  { href: "https://www.wfp.org", label: "WFP", icon: FileText, external: true },
   { href: "/app/certificate", label: "Certificate", icon: Award },
   { href: "/app/wallet/withdraw", label: "Withdrawal", icon: ArrowUpFromLine },
   { href: "/app/wallet/deposit", label: "Deposit", icon: ArrowDownToLine },
