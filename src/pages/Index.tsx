@@ -327,12 +327,12 @@ const Index = () => {
               Join thousands of promoters earning daily by helping premium automotive brands grow their audience.
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Button asChild size="lg" className="btn-press gap-2 px-10 h-12 text-base">
+              <Button asChild size="lg" className="btn-press gap-2 px-12 h-14 text-base">
                 <Link to="/register">
                   Register <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="btn-press px-10 h-12 text-base">
+              <Button asChild variant="outline" size="lg" className="btn-press px-12 h-14 text-base hover:bg-secondary hover:text-foreground">
                 <Link to="/login">Login</Link>
               </Button>
             </div>
