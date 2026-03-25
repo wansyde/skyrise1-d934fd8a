@@ -52,7 +52,15 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         <Link to="/" className="text-lg font-semibold tracking-tight">
           Sky<span className="text-primary">rise</span>
         </Link>
-        <div className="w-9" />
+        <Link to="/app/profile" className="flex items-center justify-center h-9 w-9 rounded-full overflow-hidden">
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="Avatar" className="h-9 w-9 rounded-full object-cover" />
+          ) : (
+            <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center">
+              <User className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+            </div>
+          )}
+        </Link>
       </header>
 
       {/* Slide-out menu */}
