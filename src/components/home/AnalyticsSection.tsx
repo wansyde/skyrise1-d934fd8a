@@ -65,7 +65,7 @@ const AnalyticsSection = () => (
         viewport={{ once: true }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] as const }}
         className="text-[2rem] sm:text-[2.8rem] lg:text-[3.5rem] font-black leading-[0.95] tracking-tight uppercase"
-        style={{ color: "hsl(240 40% 20%)" }}
+        style={{ color: "hsl(var(--muted-foreground))" }}
       >
         Skyrise is
         <br />
