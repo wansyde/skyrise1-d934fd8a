@@ -143,7 +143,7 @@ const AppWithdraw = () => {
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="bg-transparent border-0 border-b border-border rounded-none h-12 text-base tabular-nums pr-16 focus-visible:border-muted-foreground/40"
+                      className="bg-transparent border-0 border-b border-border rounded-none h-12 text-sm tabular-nums pr-16 focus-visible:border-muted-foreground/40"
                       min={0}
                       max={balance}
                     />
