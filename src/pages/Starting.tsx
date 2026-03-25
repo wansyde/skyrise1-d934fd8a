@@ -1,6 +1,6 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, DollarSign, Play, ChevronRight, Clock, Headphones } from "lucide-react";
+import { Wallet, DollarSign, Play, ChevronRight, Clock, Headphones, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback } from "react";
 
