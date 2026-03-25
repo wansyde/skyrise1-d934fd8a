@@ -13,6 +13,10 @@ interface Profile {
   status: string;
   avatar_url: string | null;
   withdraw_password: string | null;
+  username: string | null;
+  referral_code: string | null;
+  referred_by: string | null;
+  gender: string | null;
 }
 
 interface AuthContextType {
