@@ -12,6 +12,7 @@ interface Profile {
   balance: number;
   status: string;
   avatar_url: string | null;
+  withdraw_password: string | null;
 }
 
 interface AuthContextType {
