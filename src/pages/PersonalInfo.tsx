@@ -117,6 +117,44 @@ const PersonalInfo = () => {
   const [confirmTxPassword, setConfirmTxPassword] = useState("");
   const [updatingTxPassword, setUpdatingTxPassword] = useState(false);
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB.");
+      return;
+    }
+    setUploadingAvatar(true);
+    const ext = file.name.split(".").pop();
+    const filePath = `${user.id}/avatar.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+    if (uploadError) {
+      setUploadingAvatar(false);
+      toast.error("Failed to upload avatar.");
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ avatar_url: avatarUrl })
+      .eq("user_id", user.id);
+    setUploadingAvatar(false);
+    if (updateError) {
+      toast.error("Failed to save avatar.");
+    } else {
+      toast.success("Avatar updated!");
+      await refreshProfile();
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSaveProfile = async () => {
     if (!user) return;
     setSaving(true);
