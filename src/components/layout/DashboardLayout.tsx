@@ -23,8 +23,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={skyriseLogo} alt="Skyrise" className="h-7 w-auto" />
+        <Link to="/" className="flex items-center">
+          <SkyriseLogo className="h-7 w-auto" />
         </Link>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
