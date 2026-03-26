@@ -206,7 +206,7 @@ const Login = () => {
         <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-12 z-10">
           <Link to="/" className="mb-6">
-            <img src={skyriseLogo} alt="Skyrise" className="h-10 w-auto" />
+            <SkyriseLogo className="h-10 w-auto" />
           </Link>
           <p className="text-center text-lg text-foreground/80 max-w-md leading-relaxed">
             Access your account and continue earning with Skyrise
