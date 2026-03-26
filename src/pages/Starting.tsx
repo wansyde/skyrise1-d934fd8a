@@ -15,17 +15,28 @@ import bmwPurpleImg from "@/assets/cars/bmw-purple.jpg";
 import ferrariYellowImg from "@/assets/cars/ferrari-yellow.jpg";
 import bentleyWhiteImg from "@/assets/cars/bentley-white.jpg";
 
+import audiA1Featured from "@/assets/cars/featured/audi-a1.png";
+import audiA2Featured from "@/assets/cars/featured/audi-a2.png";
+import astonMartinGreenFeatured from "@/assets/cars/featured/aston-martin-green.png";
+import astonMartinYellowFeatured from "@/assets/cars/featured/aston-martin-yellow.png";
+import maybachFeatured from "@/assets/cars/featured/maybach.png";
+import mercedesRedFeatured from "@/assets/cars/featured/mercedes-red.png";
+import bmwBlueFeatured from "@/assets/cars/featured/bmw-blue.png";
+import bmwPurpleFeatured from "@/assets/cars/featured/bmw-purple.png";
+import ferrariYellowFeatured from "@/assets/cars/featured/ferrari-yellow.png";
+import bentleyWhiteFeatured from "@/assets/cars/featured/bentley-white.png";
+
 const carCampaigns = [
-  { brand: "Audi", image: audiA1Img, featured: audiA1Img },
-  { brand: "Audi RS", image: audiA2Img, featured: audiA2Img },
-  { brand: "Aston Martin", image: astonMartinGreenImg, featured: astonMartinGreenImg },
-  { brand: "Aston Martin", image: astonMartinYellowImg, featured: astonMartinYellowImg },
-  { brand: "Maybach", image: maybachImg, featured: maybachImg },
-  { brand: "Mercedes", image: mercedesRedImg, featured: mercedesRedImg },
-  { brand: "BMW", image: bmwBlueImg, featured: bmwBlueImg },
-  { brand: "BMW", image: bmwPurpleImg, featured: bmwPurpleImg },
-  { brand: "Ferrari", image: ferrariYellowImg, featured: ferrariYellowImg },
-  { brand: "Bentley", image: bentleyWhiteImg, featured: bentleyWhiteImg },
+  { brand: "Audi", image: audiA1Img, featured: audiA1Featured },
+  { brand: "Audi RS", image: audiA2Img, featured: audiA2Featured },
+  { brand: "Aston Martin", image: astonMartinGreenImg, featured: astonMartinGreenFeatured },
+  { brand: "Aston Martin", image: astonMartinYellowImg, featured: astonMartinYellowFeatured },
+  { brand: "Maybach", image: maybachImg, featured: maybachFeatured },
+  { brand: "Mercedes", image: mercedesRedImg, featured: mercedesRedFeatured },
+  { brand: "BMW", image: bmwBlueImg, featured: bmwBlueFeatured },
+  { brand: "BMW", image: bmwPurpleImg, featured: bmwPurpleFeatured },
+  { brand: "Ferrari", image: ferrariYellowImg, featured: ferrariYellowFeatured },
+  { brand: "Bentley", image: bentleyWhiteImg, featured: bentleyWhiteFeatured },
 ];
 
 const VISIBLE_COUNT = 5;
