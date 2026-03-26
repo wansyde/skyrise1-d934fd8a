@@ -86,8 +86,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             >
               {/* Menu header */}
               <div className="flex h-14 items-center justify-between px-5">
-                <Link to="/" className="text-lg font-semibold tracking-tight" onClick={() => setMenuOpen(false)}>
-                  Sky<span className="text-primary">rise</span>
+                <Link to="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
+                  <img src={skyriseLogo} alt="Skyrise" className="h-7 w-auto" />
                 </Link>
                 <button
                   onClick={() => setMenuOpen(false)}
