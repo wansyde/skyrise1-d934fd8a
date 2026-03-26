@@ -9,8 +9,10 @@ const tiers = [
     salary: "0.4%",
     tasks: "40 / 3 sets",
     deposit: "USD 100–499",
-    color: "from-[hsl(220,10%,20%)] to-[hsl(220,10%,14%)]",
-    accent: "hsl(220, 10%, 50%)",
+    color: "from-[hsl(240,8%,95%)] to-[hsl(240,8%,90%)]",
+    accent: "hsl(240, 10%, 45%)",
+    textColor: "text-gray-800",
+    subColor: "text-gray-500",
   },
   {
     name: "Professional",
@@ -18,8 +20,10 @@ const tiers = [
     salary: "0.6%",
     tasks: "45 / 3 sets",
     deposit: "USD 500–1,499",
-    color: "from-[hsl(225,60%,45%)] to-[hsl(225,70%,35%)]",
-    accent: "hsl(225, 85%, 55%)",
+    color: "from-[hsl(255,50%,95%)] to-[hsl(255,45%,88%)]",
+    accent: "hsl(255, 60%, 58%)",
+    textColor: "text-gray-800",
+    subColor: "text-gray-500",
   },
   {
     name: "Expert",
@@ -27,8 +31,10 @@ const tiers = [
     salary: "0.8%",
     tasks: "50 / 3 sets",
     deposit: "USD 1,500–4,999",
-    color: "from-[hsl(38,60%,40%)] to-[hsl(38,50%,30%)]",
-    accent: "hsl(38, 92%, 50%)",
+    color: "from-[hsl(38,70%,94%)] to-[hsl(38,60%,85%)]",
+    accent: "hsl(38, 80%, 42%)",
+    textColor: "text-gray-800",
+    subColor: "text-gray-500",
   },
   {
     name: "Elite",
@@ -36,8 +42,10 @@ const tiers = [
     salary: "1.0%",
     tasks: "55 / 3 sets",
     deposit: "USD 5,000+",
-    color: "from-[hsl(260,50%,40%)] to-[hsl(260,40%,28%)]",
-    accent: "hsl(260, 70%, 58%)",
+    color: "from-[hsl(270,40%,94%)] to-[hsl(270,35%,87%)]",
+    accent: "hsl(270, 55%, 50%)",
+    textColor: "text-gray-800",
+    subColor: "text-gray-500",
   },
 ];
 
@@ -90,13 +98,13 @@ const Event = () => (
               >
                 <div className="flex items-center gap-2">
                   <Icon className="h-4 w-4 shrink-0" style={{ color: tier.accent }} strokeWidth={1.5} />
-                  <span className="text-xs font-semibold text-foreground">{tier.name}</span>
+                  <span className={`text-xs font-semibold ${tier.textColor}`}>{tier.name}</span>
                 </div>
-                <span className="text-center text-sm font-bold tabular-nums text-foreground">{tier.salary}</span>
-                <span className="text-center text-xs text-muted-foreground">{tier.tasks}</span>
+                <span className={`text-center text-sm font-bold tabular-nums ${tier.textColor}`}>{tier.salary}</span>
+                <span className={`text-center text-xs ${tier.subColor}`}>{tier.tasks}</span>
                 <div className="text-right">
-                  <span className="text-[10px] text-muted-foreground block leading-tight">Reset Deposit</span>
-                  <span className="text-xs font-semibold text-foreground">{tier.deposit}</span>
+                  <span className={`text-[10px] ${tier.subColor} block leading-tight`}>Reset Deposit</span>
+                  <span className={`text-xs font-semibold ${tier.textColor}`}>{tier.deposit}</span>
                 </div>
               </motion.div>
             );
