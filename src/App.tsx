@@ -34,6 +34,7 @@ import TermsConditions from "./pages/TermsConditions";
 import Event from "./pages/Event";
 import AML from "./pages/AML";
 import PersonalInfo from "./pages/PersonalInfo";
+import KYC from "./pages/KYC";
 
 // Admin
 import AdminPanel from "./pages/AdminPanel";
