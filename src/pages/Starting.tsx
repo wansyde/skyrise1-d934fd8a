@@ -4,70 +4,28 @@ import { Wallet, DollarSign, Play, ChevronRight, Clock, Headphones, ChevronLeft 
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback } from "react";
 
-import bmwImg from "@/assets/cars/bmw.jpg";
-import mercedesImg from "@/assets/cars/mercedes.jpg";
-import rollsRoyceImg from "@/assets/cars/rolls-royce.jpg";
-import porscheImg from "@/assets/cars/porsche.jpg";
-import audiImg from "@/assets/cars/audi.jpg";
-import ferrariImg from "@/assets/cars/ferrari.jpg";
-import lamborghiniImg from "@/assets/cars/lamborghini.jpg";
-import bentleyImg from "@/assets/cars/bentley.jpg";
-import maseratiImg from "@/assets/cars/maserati.jpg";
-import rangeRoverImg from "@/assets/cars/range-rover.jpg";
-import teslaImg from "@/assets/cars/tesla.jpg";
-import jaguarImg from "@/assets/cars/jaguar.jpg";
-import lexusImg from "@/assets/cars/lexus.jpg";
-import volvoImg from "@/assets/cars/volvo.jpg";
-import mclarenImg from "@/assets/cars/mclaren.jpg";
-import genesisImg from "@/assets/cars/genesis.jpg";
-import astonMartinImg from "@/assets/cars/aston-martin.jpg";
-import bugattiImg from "@/assets/cars/bugatti.jpg";
-import landRoverImg from "@/assets/cars/land-rover.jpg";
-import alfaRomeoImg from "@/assets/cars/alfa-romeo.jpg";
-
-// Featured images (different angles)
-import bmwFeatured from "@/assets/cars/featured/bmw.jpg";
-import mercedesFeatured from "@/assets/cars/featured/mercedes.jpg";
-import rollsRoyceFeatured from "@/assets/cars/featured/rolls-royce.jpg";
-import porscheFeatured from "@/assets/cars/featured/porsche.jpg";
-import audiFeatured from "@/assets/cars/featured/audi.jpg";
-import ferrariFeatured from "@/assets/cars/featured/ferrari.jpg";
-import lamborghiniFeatured from "@/assets/cars/featured/lamborghini.jpg";
-import bentleyFeatured from "@/assets/cars/featured/bentley.jpg";
-import maseratiFeatured from "@/assets/cars/featured/maserati.jpg";
-import rangeRoverFeatured from "@/assets/cars/featured/range-rover.jpg";
-import teslaFeatured from "@/assets/cars/featured/tesla.jpg";
-import jaguarFeatured from "@/assets/cars/featured/jaguar.jpg";
-import lexusFeatured from "@/assets/cars/featured/lexus.jpg";
-import volvoFeatured from "@/assets/cars/featured/volvo.jpg";
-import mclarenFeatured from "@/assets/cars/featured/mclaren.jpg";
-import genesisFeatured from "@/assets/cars/featured/genesis.jpg";
-import astonMartinFeatured from "@/assets/cars/featured/aston-martin.jpg";
-import bugattiFeatured from "@/assets/cars/featured/bugatti.jpg";
-import landRoverFeatured from "@/assets/cars/featured/land-rover.jpg";
-import alfaRomeoFeatured from "@/assets/cars/featured/alfa-romeo.jpg";
+import audiA1Img from "@/assets/cars/audi-a1.jpg";
+import audiA2Img from "@/assets/cars/audi-a2.jpg";
+import astonMartinGreenImg from "@/assets/cars/aston-martin-green.jpg";
+import astonMartinYellowImg from "@/assets/cars/aston-martin-yellow.jpg";
+import maybachImg from "@/assets/cars/maybach.jpg";
+import mercedesRedImg from "@/assets/cars/mercedes-red.jpg";
+import bmwBlueImg from "@/assets/cars/bmw-blue.jpg";
+import bmwPurpleImg from "@/assets/cars/bmw-purple.jpg";
+import ferrariYellowImg from "@/assets/cars/ferrari-yellow.jpg";
+import bentleyWhiteImg from "@/assets/cars/bentley-white.jpg";
 
 const carCampaigns = [
-  { brand: "BMW", image: bmwImg, featured: bmwFeatured },
-  { brand: "Mercedes", image: mercedesImg, featured: mercedesFeatured },
-  { brand: "Rolls Royce", image: rollsRoyceImg, featured: rollsRoyceFeatured },
-  { brand: "Porsche", image: porscheImg, featured: porscheFeatured },
-  { brand: "Audi", image: audiImg, featured: audiFeatured },
-  { brand: "Ferrari", image: ferrariImg, featured: ferrariFeatured },
-  { brand: "Lamborghini", image: lamborghiniImg, featured: lamborghiniFeatured },
-  { brand: "Bentley", image: bentleyImg, featured: bentleyFeatured },
-  { brand: "Maserati", image: maseratiImg, featured: maseratiFeatured },
-  { brand: "Range Rover", image: rangeRoverImg, featured: rangeRoverFeatured },
-  { brand: "Tesla", image: teslaImg, featured: teslaFeatured },
-  { brand: "Jaguar", image: jaguarImg, featured: jaguarFeatured },
-  { brand: "Lexus", image: lexusImg, featured: lexusFeatured },
-  { brand: "Volvo", image: volvoImg, featured: volvoFeatured },
-  { brand: "McLaren", image: mclarenImg, featured: mclarenFeatured },
-  { brand: "Genesis", image: genesisImg, featured: genesisFeatured },
-  { brand: "Aston Martin", image: astonMartinImg, featured: astonMartinFeatured },
-  { brand: "Bugatti", image: bugattiImg, featured: bugattiFeatured },
-  { brand: "Land Rover", image: landRoverImg, featured: landRoverFeatured },
-  { brand: "Alfa Romeo", image: alfaRomeoImg, featured: alfaRomeoFeatured },
+  { brand: "Audi", image: audiA1Img, featured: audiA1Img },
+  { brand: "Audi RS", image: audiA2Img, featured: audiA2Img },
+  { brand: "Aston Martin", image: astonMartinGreenImg, featured: astonMartinGreenImg },
+  { brand: "Aston Martin", image: astonMartinYellowImg, featured: astonMartinYellowImg },
+  { brand: "Maybach", image: maybachImg, featured: maybachImg },
+  { brand: "Mercedes", image: mercedesRedImg, featured: mercedesRedImg },
+  { brand: "BMW", image: bmwBlueImg, featured: bmwBlueImg },
+  { brand: "BMW", image: bmwPurpleImg, featured: bmwPurpleImg },
+  { brand: "Ferrari", image: ferrariYellowImg, featured: ferrariYellowImg },
+  { brand: "Bentley", image: bentleyWhiteImg, featured: bentleyWhiteImg },
 ];
 
 const VISIBLE_COUNT = 5;
