@@ -82,7 +82,17 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    letter-spacing: -0.04em;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+
+  .font-heading {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .font-display {
+    font-family: 'Montserrat', sans-serif;
     font-weight: 600;
   }
 
