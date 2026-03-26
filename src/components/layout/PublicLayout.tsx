@@ -3,7 +3,7 @@ import { ReactNode, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import skyriseLogo from "@/assets/skyrise-logo.png";
+import SkyriseLogo from "@/components/SkyriseLogo";
 
 const navLinks = [
   { href: "/", label: "Home" },
