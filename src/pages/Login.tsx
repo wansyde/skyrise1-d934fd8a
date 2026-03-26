@@ -8,7 +8,7 @@ import { Eye, EyeOff, Loader2, Check, X, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
-import skyriseLogo from "@/assets/skyrise-logo.png";
+import SkyriseLogo from "@/components/SkyriseLogo";
 
 import heroCar1 from "@/assets/hero-car-1.jpg";
 import heroCar2 from "@/assets/hero-car-2.jpg";
@@ -206,7 +206,7 @@ const Login = () => {
         <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-12 z-10">
           <Link to="/" className="mb-6">
-            <img src={skyriseLogo} alt="Skyrise" className="h-10 w-auto" />
+            <SkyriseLogo className="h-10 w-auto" />
           </Link>
           <p className="text-center text-lg text-foreground/80 max-w-md leading-relaxed">
             Access your account and continue earning with Skyrise
@@ -236,8 +236,8 @@ const Login = () => {
         >
           {/* Logo on mobile */}
           <div className="mb-8 text-center lg:hidden">
-            <Link to="/">
-              <img src={skyriseLogo} alt="Skyrise" className="h-9 w-auto mx-auto" />
+            <Link to="/" className="inline-block">
+              <SkyriseLogo className="h-9 w-auto" />
             </Link>
           </div>
 

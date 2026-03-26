@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Wallet, ArrowDownToLine, ArrowUpFromLine, TrendingUp,
   Clock, Settings, LogOut, Menu, X, ChevronRight
 } from "lucide-react";
-import skyriseLogo from "@/assets/skyrise-logo.png";
+import SkyriseLogo from "@/components/SkyriseLogo";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -23,8 +23,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={skyriseLogo} alt="Skyrise" className="h-7 w-auto" />
+        <Link to="/" className="flex items-center">
+          <SkyriseLogo className="h-7 w-auto" />
         </Link>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
@@ -93,8 +93,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground">
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
-          <span className="flex items-center gap-2">
-            <img src={skyriseLogo} alt="Skyrise" className="h-7 w-auto" />
+          <span className="flex items-center">
+            <SkyriseLogo className="h-7 w-auto" />
           </span>
         </header>
 

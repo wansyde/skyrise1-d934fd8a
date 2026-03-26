@@ -110,8 +110,8 @@ const Index = () => {
             />
           </motion.div>
         ))}
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
+        {/* Overlay with stronger blur for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/20 backdrop-blur-[2px]" />
 
         {/* Slide indicators */}
         <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">
@@ -135,13 +135,6 @@ const Index = () => {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col items-center text-center max-w-3xl mx-auto"
             >
-              <h2 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Skyrise
-              </h2>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-background/40 backdrop-blur-sm px-4 py-1.5 text-sm text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                Platform Operational
-              </div>
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl xl:text-6xl leading-tight">
                 Empowering Global Automotive Brands Through{" "}
                 <span className="text-primary">Intelligent Promotion</span>
