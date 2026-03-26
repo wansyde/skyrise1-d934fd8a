@@ -60,31 +60,31 @@ const Profile = () => {
     <AppLayout>
       <div className="px-4 py-5">
         {/* Hero banner area */}
-        <div className="relative mb-5 rounded-2xl overflow-hidden">
-          <div className="relative h-40 w-full overflow-hidden">
+        <div className="relative mb-5 rounded-2xl overflow-hidden bg-card border border-border">
+          <div className="relative h-36 w-full overflow-hidden">
             <img src={heroCarBanner} alt="Profile banner" className="absolute inset-0 h-full w-full object-cover object-center" width={1920} height={768} />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/30" />
           </div>
 
-          {/* Avatar + user info overlapping */}
-          <div className="relative -mt-10 px-4 pb-4">
-            <div className="flex items-end gap-3">
+          {/* Avatar + user info below banner */}
+          <div className="relative px-4 pb-4">
+            <div className="flex items-end gap-3 -mt-9">
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="Avatar" className="h-18 w-18 rounded-full border-[3px] border-card object-cover shrink-0 shadow-lg" style={{ width: 72, height: 72 }} />
+                <img src={profile.avatar_url} alt="Avatar" className="rounded-full border-[3px] border-card object-cover shrink-0 shadow-lg" style={{ width: 68, height: 68 }} />
               ) : (
-                <div className="rounded-full border-[3px] border-card bg-muted flex items-center justify-center shrink-0 shadow-lg" style={{ width: 72, height: 72 }}>
-                  <User className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
+                <div className="rounded-full border-[3px] border-card bg-muted flex items-center justify-center shrink-0 shadow-lg" style={{ width: 68, height: 68 }}>
+                  <User className="h-7 w-7 text-muted-foreground" strokeWidth={1.5} />
                 </div>
               )}
-              <div className="pb-1">
-                <div className="flex items-center gap-1.5">
-                  <h1 className="text-base font-semibold leading-tight text-foreground">{profile?.username || profile?.full_name || "User"}</h1>
-                  <BadgeCheck className="h-4 w-4 text-primary fill-primary/15" strokeWidth={2} />
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Invitation Code: {profile?.referral_code || "—"}
-                </p>
+            </div>
+            <div className="mt-2.5 px-0.5">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-base font-semibold leading-tight text-foreground">{profile?.username || profile?.full_name || "User"}</h1>
+                <BadgeCheck className="h-4 w-4 text-primary fill-primary/15" strokeWidth={2} />
               </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Invitation Code: {profile?.referral_code || "—"}
+              </p>
             </div>
 
             {/* Credit Score */}
