@@ -93,8 +93,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground">
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
-          <span className="text-lg font-semibold tracking-tight">
-            Sky<span className="text-primary">rise</span>
+          <span className="flex items-center gap-2">
+            <img src={skyriseLogo} alt="Skyrise" className="h-7 w-auto" />
           </span>
         </header>
 
