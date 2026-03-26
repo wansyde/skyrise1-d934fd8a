@@ -35,8 +35,8 @@ const ForgotPassword = () => {
         className="relative z-10 w-full max-w-sm"
       >
         <div className="mb-8 text-center">
-          <Link to="/">
-            <img src={skyriseLogo} alt="Skyrise" className="h-9 w-auto mx-auto" />
+          <Link to="/" className="inline-block">
+            <SkyriseLogo className="h-9 w-auto" />
           </Link>
           <h1 className="mt-6 text-2xl font-semibold tracking-tight">Reset password</h1>
           <p className="mt-2 text-sm text-muted-foreground">Enter your email to receive a reset link.</p>
