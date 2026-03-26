@@ -191,19 +191,7 @@ const Login = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left — Image slider (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {slides.map((slide, i) => (
-          <motion.div
-            key={i}
-            initial={false}
-            animate={{ opacity: currentSlide === i ? 1 : 0 }}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
-            <img src={slide} alt={`Luxury car ${i + 1}`} className="h-full w-full object-cover" />
-          </motion.div>
-        ))}
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white">
         <div className="absolute inset-0 flex flex-col items-center justify-center px-12 z-10">
           <Link to="/" className="mb-6">
             <SkyriseLogo className="h-10 w-auto" />
@@ -211,18 +199,6 @@ const Login = () => {
           <p className="text-center text-lg text-foreground/80 max-w-md leading-relaxed">
             Access your account and continue earning with Skyrise
           </p>
-          {/* Slide indicators */}
-          <div className="flex gap-2 mt-8">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentSlide(i)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  currentSlide === i ? "w-8 bg-primary" : "w-4 bg-muted-foreground/40"
-                }`}
-              />
-            ))}
-          </div>
         </div>
       </div>
 
