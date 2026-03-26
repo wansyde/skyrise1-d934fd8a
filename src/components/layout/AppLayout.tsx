@@ -8,7 +8,7 @@ import {
   Calendar, HelpCircle, Info, Shield
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import skyriseLogo from "@/assets/skyrise-logo.png";
+import SkyriseLogo from "@/components/SkyriseLogo";
 
 const bottomTabs = [
   { href: "/app", label: "Home", icon: Home },

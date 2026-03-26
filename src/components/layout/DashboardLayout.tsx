@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Wallet, ArrowDownToLine, ArrowUpFromLine, TrendingUp,
   Clock, Settings, LogOut, Menu, X, ChevronRight
 } from "lucide-react";
-import skyriseLogo from "@/assets/skyrise-logo.png";
+import SkyriseLogo from "@/components/SkyriseLogo";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
