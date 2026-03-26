@@ -34,6 +34,7 @@ import TermsConditions from "./pages/TermsConditions";
 import Event from "./pages/Event";
 import AML from "./pages/AML";
 import PersonalInfo from "./pages/PersonalInfo";
+import KYC from "./pages/KYC";
 
 // Admin
 import AdminPanel from "./pages/AdminPanel";
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/app/event" element={<ProtectedRoute><Event /></ProtectedRoute>} />
             <Route path="/app/aml" element={<ProtectedRoute><AML /></ProtectedRoute>} />
             <Route path="/app/settings" element={<ProtectedRoute><PersonalInfo /></ProtectedRoute>} />
+            <Route path="/app/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPanel /></ProtectedRoute>} />

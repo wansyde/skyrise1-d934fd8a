@@ -101,6 +101,14 @@ export type Database = {
           full_name: string
           gender: string | null
           id: string
+          kyc_back_url: string | null
+          kyc_front_url: string | null
+          kyc_id_number: string | null
+          kyc_id_type: string | null
+          kyc_name: string | null
+          kyc_selfie_url: string | null
+          kyc_status: string
+          kyc_submitted_at: string | null
           phone: string | null
           referral_code: string | null
           referred_by: string | null
@@ -118,6 +126,14 @@ export type Database = {
           full_name?: string
           gender?: string | null
           id?: string
+          kyc_back_url?: string | null
+          kyc_front_url?: string | null
+          kyc_id_number?: string | null
+          kyc_id_type?: string | null
+          kyc_name?: string | null
+          kyc_selfie_url?: string | null
+          kyc_status?: string
+          kyc_submitted_at?: string | null
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
@@ -135,6 +151,14 @@ export type Database = {
           full_name?: string
           gender?: string | null
           id?: string
+          kyc_back_url?: string | null
+          kyc_front_url?: string | null
+          kyc_id_number?: string | null
+          kyc_id_type?: string | null
+          kyc_name?: string | null
+          kyc_selfie_url?: string | null
+          kyc_status?: string
+          kyc_submitted_at?: string | null
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
