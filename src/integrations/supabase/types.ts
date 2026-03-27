@@ -173,6 +173,45 @@ export type Database = {
         }
         Relationships: []
       }
+      task_records: {
+        Row: {
+          advertising_salary: number
+          assignment_code: string
+          car_brand: string
+          car_image_url: string | null
+          car_name: string
+          created_at: string
+          id: string
+          status: string
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          advertising_salary?: number
+          assignment_code: string
+          car_brand: string
+          car_image_url?: string | null
+          car_name: string
+          created_at?: string
+          id?: string
+          status?: string
+          total_amount?: number
+          user_id: string
+        }
+        Update: {
+          advertising_salary?: number
+          assignment_code?: string
+          car_brand?: string
+          car_image_url?: string | null
+          car_name?: string
+          created_at?: string
+          id?: string
+          status?: string
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
