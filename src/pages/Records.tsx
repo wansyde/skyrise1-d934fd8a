@@ -1,143 +1,145 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
-import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useState } from "react";
 
-const statusIcon = (status: string) => {
-  const s = status.toLowerCase();
-  if (s === "approved" || s === "completed") return <CheckCircle className="h-3.5 w-3.5 text-success" />;
-  if (s === "pending") return <Clock className="h-3.5 w-3.5 text-warning animate-pulse" />;
-  return <XCircle className="h-3.5 w-3.5 text-destructive" />;
-};
-
-const statusClass = (status: string) => {
-  const s = status.toLowerCase();
-  if (s === "approved" || s === "completed") return "text-success";
-  if (s === "pending") return "text-warning";
-  return "text-destructive";
-};
+type TabKey = "all" | "pending" | "completed";
 
 const Records = () => {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabKey>("all");
 
-  const { data: transactions = [] } = useQuery({
-    queryKey: ["records-transactions", user?.id],
+  const { data: records = [] } = useQuery({
+    queryKey: ["task-records", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase
-        .from("transactions")
+        .from("task_records")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(100);
       return data ?? [];
     },
   });
 
-  const { data: deposits = [] } = useQuery({
-    queryKey: ["records-deposits", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("deposits")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      return data ?? [];
-    },
+  const filtered = records.filter((r) => {
+    if (activeTab === "all") return true;
+    if (activeTab === "pending") return r.status === "pending";
+    return r.status === "completed";
   });
 
-  const { data: withdrawals = [] } = useQuery({
-    queryKey: ["records-withdrawals", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("withdrawals")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      return data ?? [];
-    },
-  });
-
-  const fmt = (d: string) => format(new Date(d), "MMM d, yyyy");
+  const tabs: { key: TabKey; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "pending", label: "Pending" },
+    { key: "completed", label: "Completed" },
+  ];
 
   return (
     <AppLayout>
-      <div className="px-4 py-5">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold tracking-tight">Records</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your complete activity history.</p>
+      <div className="px-4 py-5 min-h-screen">
+        {/* Tabs */}
+        <div className="flex border-b border-border/50 mb-6">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 pb-3 text-sm font-medium transition-colors relative ${
+                activeTab === tab.key
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+              {activeTab === tab.key && (
+                <motion.div
+                  layoutId="records-tab-indicator"
+                  className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full"
+                />
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* Task History (from transactions with type) */}
-        <Section title="Task History">
-          {transactions.filter(t => t.type === "task" || t.type === "roi").length === 0 && <Empty />}
-          {transactions
-            .filter(t => t.type === "task" || t.type === "roi")
-            .map((t, i) => (
-              <Row key={t.id} i={i} type={t.type} amount={t.amount} status={t.status} date={fmt(t.created_at)} method={t.method} />
-            ))}
-        </Section>
+        {/* Records List */}
+        {filtered.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-sm text-muted-foreground">No records yet.</p>
+          </div>
+        )}
 
-        {/* Deposit History */}
-        <Section title="Deposit History">
-          {deposits.length === 0 && <Empty />}
-          {deposits.map((d, i) => (
-            <Row key={d.id} i={i} type="Deposit" amount={d.amount} status={d.status} date={fmt(d.created_at)} method={d.method} />
-          ))}
-        </Section>
+        <div className="space-y-6">
+          {filtered.map((record, i) => (
+            <motion.div
+              key={record.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03, duration: 0.3 }}
+            >
+              {/* Date & Status header */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">
+                  {format(new Date(record.created_at), "yyyy-MM-dd HH:mm:ss")}
+                </span>
+                <span
+                  className={`text-[11px] font-semibold px-3 py-1 rounded-md ${
+                    record.status === "completed"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {record.status === "completed" ? "Completed" : "Pending"}
+                </span>
+              </div>
 
-        {/* Withdrawal History */}
-        <Section title="Withdrawal History">
-          {withdrawals.length === 0 && <Empty />}
-          {withdrawals.map((w, i) => (
-            <Row key={w.id} i={i} type="Withdrawal" amount={w.amount} status={w.status} date={fmt(w.created_at)} method={w.method} />
+              {/* Card */}
+              <div className="bg-card rounded-2xl border border-border/50 p-4 shadow-sm">
+                <div className="flex gap-4">
+                  {/* Car Image */}
+                  <div className="w-20 h-20 flex-shrink-0 rounded-xl bg-muted/30 flex items-center justify-center overflow-hidden">
+                    {record.car_image_url ? (
+                      <img
+                        src={record.car_image_url}
+                        alt={record.car_name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-muted rounded-lg" />
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold leading-snug line-clamp-2 mb-3">
+                      {record.car_name}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Total Amount</p>
+                        <p className="text-sm font-bold text-primary">
+                          {Number(record.total_amount)} <span className="text-[10px] font-normal text-muted-foreground">AC</span>
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Advertising salary</p>
+                        <p className="text-sm font-bold text-primary">
+                          {Number(record.advertising_salary)} <span className="text-[10px] font-normal text-muted-foreground">AC</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           ))}
-        </Section>
+        </div>
       </div>
     </AppLayout>
   );
 };
-
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className="mb-6">
-    <h3 className="text-sm font-medium mb-3">{title}</h3>
-    <div className="flex flex-col gap-2">{children}</div>
-  </div>
-);
-
-const Empty = () => (
-  <div className="glass-card p-4 text-center text-xs text-muted-foreground">No records yet.</div>
-);
-
-const Row = ({ i, type, amount, status, date, method }: { i: number; type: string; amount: number; status: string; date: string; method?: string | null }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 8 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: i * 0.03, duration: 0.25 }}
-    className="glass-card flex items-center justify-between p-3.5"
-  >
-    <div className="flex items-center gap-2.5">
-      {statusIcon(status)}
-      <div>
-        <span className="text-sm font-medium capitalize">{type}</span>
-        {method && <span className="text-[10px] text-muted-foreground block mt-0.5">{method}</span>}
-      </div>
-    </div>
-    <div className="text-right">
-      <span className="text-sm font-medium tabular-nums">${amount.toLocaleString()}</span>
-      <div className="flex items-center gap-1.5 justify-end mt-0.5">
-        <span className={`text-[10px] capitalize ${statusClass(status)}`}>{status}</span>
-        <span className="text-[10px] text-muted-foreground">· {date}</span>
-      </div>
-    </div>
-  </motion.div>
-);
 
 export default Records;
