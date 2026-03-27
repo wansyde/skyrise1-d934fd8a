@@ -10,6 +10,7 @@ interface Profile {
   email: string;
   phone: string;
   balance: number;
+  advertising_salary: number;
   status: string;
   avatar_url: string | null;
   withdraw_password: string | null;

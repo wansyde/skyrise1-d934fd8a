@@ -191,7 +191,7 @@ const Starting = () => {
             className="glass-card p-4"
           >
             <DollarSign className="h-4 w-4 text-success mb-2" strokeWidth={1.5} />
-            <div className="text-xl font-bold tabular-nums tracking-tight">0 AC</div>
+            <div className="text-xl font-bold tabular-nums tracking-tight">{profile?.advertising_salary ?? 0} AC</div>
             <span className="text-[10px] text-muted-foreground">Advertising Salary</span>
             <p className="text-[9px] text-muted-foreground/60 mt-1.5 leading-snug">Fixed balance where there is a mixed product pending in process.</p>
           </motion.div>
