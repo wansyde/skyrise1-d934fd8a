@@ -59,7 +59,7 @@ const generateAssignmentCode = () => {
 type MatchState = "idle" | "matching" | "matched";
 
 const Starting = () => {
-  const { profile, user } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [matchState, setMatchState] = useState<MatchState>("idle");
@@ -70,10 +70,12 @@ const Starting = () => {
   const [completedCount, setCompletedCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
+  const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
+  const DAILY_LIMIT = vipTier.taskLimit;
+
   const todaySalary = 0;
   const userName = profile?.full_name || "User";
   const total = carCampaigns.length;
-  const DAILY_LIMIT = 40;
 
   // Fetch today's completed count
   useEffect(() => {
