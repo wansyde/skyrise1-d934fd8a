@@ -117,7 +117,7 @@ const Login = () => {
             .maybeSingle();
           if (adminRole) {
             toast.success("Welcome back, Admin!");
-            navigate("/admin");
+            navigate("/admin-sky-987");
             return;
           }
         }

@@ -111,7 +111,7 @@ const Index = () => {
           </motion.div>
         ))}
         {/* Overlay with stronger blur for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/50 backdrop-blur-[3px]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-background/70 backdrop-blur-[4px]" />
 
         {/* Slide indicators */}
         <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">

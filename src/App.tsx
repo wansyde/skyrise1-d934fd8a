@@ -78,7 +78,7 @@ const App = () => (
             <Route path="/app/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
 
             {/* Admin */}
-            <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPanel /></ProtectedRoute>} />
+            <Route path="/admin-sky-987" element={<ProtectedRoute adminOnly><AdminPanel /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
