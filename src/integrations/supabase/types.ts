@@ -410,6 +410,10 @@ export type Database = {
         }
         Returns: Json
       }
+      submit_withdrawal: {
+        Args: { _amount: number; _wallet_address: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
