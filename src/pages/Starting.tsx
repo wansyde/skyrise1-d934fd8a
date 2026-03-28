@@ -536,7 +536,7 @@ const Starting = () => {
 
       {/* Assignment Submission Modal */}
       <AnimatePresence>
-        {(matchState === "matching" || matchState === "matched") && matchedCar && (
+        {(matchState === "matching" || matchState === "matched" || matchState === "submitted") && matchedCar && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -552,6 +552,37 @@ const Starting = () => {
               className="w-full max-w-md bg-card rounded-t-3xl p-6 pb-8 relative shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Submitted overlay */}
+              <AnimatePresence>
+                {matchState === "submitted" && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="absolute inset-0 z-10 flex items-center justify-center rounded-t-3xl bg-card/95 backdrop-blur-sm"
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
+                        className="h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center"
+                      >
+                        <Check className="h-8 w-8 text-primary" strokeWidth={2.5} />
+                      </motion.div>
+                      <motion.p
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25 }}
+                        className="text-lg font-semibold tracking-tight"
+                      >
+                        Submitted
+                      </motion.p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Close button */}
               <button
                 onClick={() => { setMatchState("idle"); setMatchedCar(null); }}
@@ -564,14 +595,9 @@ const Starting = () => {
 
               {/* Car Image */}
               <div className="flex justify-center mb-4">
-                <img
-                  src={matchedCar.featured}
-                  alt={matchedCar.name}
-                  className="h-28 object-contain"
-                />
+                <img src={matchedCar.featured} alt={matchedCar.name} className="h-28 object-contain" />
               </div>
 
-              {/* Car Name */}
               <p className="text-center text-sm font-semibold mb-4 px-4">{matchedCar.name}</p>
 
               {/* Progress / Slider */}
@@ -589,7 +615,6 @@ const Starting = () => {
                 </div>
               </div>
 
-              {/* Amount details */}
               <div className="grid grid-cols-2 gap-4 mb-5 border-t border-border/30 pt-4">
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
@@ -601,7 +626,6 @@ const Starting = () => {
                 </div>
               </div>
 
-              {/* Details */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Created At</span>
@@ -615,7 +639,6 @@ const Starting = () => {
                 </div>
               </div>
 
-              {/* Promote Button */}
               <button
                 onClick={handlePromote}
                 disabled={matchState !== "matched" || submitting}
