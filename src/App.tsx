@@ -18,7 +18,7 @@ import Register from "./pages/Register";
 
 // App pages (mobile-first dashboard)
 import Home from "./pages/Home";
-import Invest from "./pages/Invest";
+
 import Starting from "./pages/Starting";
 import Team from "./pages/Team";
 import Records from "./pages/Records";
