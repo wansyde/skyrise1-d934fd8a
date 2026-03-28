@@ -118,7 +118,7 @@ const Starting = () => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % total);
-    }, 2000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [isPaused, total]);
 
