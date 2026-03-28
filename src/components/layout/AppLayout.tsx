@@ -50,7 +50,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
           <Menu className="h-5 w-5" strokeWidth={1.5} />
         </button>
         <Link to="/" className="flex items-center">
-          <SkyriseLogo className="h-7 w-auto" />
+          <SkyriseLogo className="h-9 w-auto" />
         </Link>
         <div className="w-9" />
       </header>
