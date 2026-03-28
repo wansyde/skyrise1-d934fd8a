@@ -363,15 +363,6 @@ const Starting = () => {
               onTouchEnd={handleTouchEnd}
               style={{ background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
             >
-              <motion.div
-                className="absolute top-1/2 flex items-center"
-                style={{ gap: `${CARD_GAP}px` }}
-                animate={{ x: -(half * CARD_STEP) + (typeof window !== 'undefined' ? window.innerWidth / 2 : 300) - CARD_WIDTH / 2 - (activeIndex * CARD_STEP) + (activeIndex * CARD_STEP) }}
-                // We position so the strip flows: translate based on activeIndex
-                key="strip"
-              >
-                {/* We render using offset-based positioning instead */}
-              </motion.div>
 
               {visibleCards.map(({ idx, offset, car }) => (
                 <motion.div
