@@ -94,7 +94,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
           <span className="flex items-center">
-            <SkyriseLogo className="h-7 w-auto" />
+            <SkyriseLogo className="h-9 w-auto" />
           </span>
         </header>
 

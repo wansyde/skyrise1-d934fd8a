@@ -78,7 +78,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               {/* Menu header */}
               <div className="flex h-14 items-center justify-between px-5">
                 <Link to="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
-                  <SkyriseLogo className="h-7 w-auto" />
+                  <SkyriseLogo className="h-9 w-auto" />
                 </Link>
                 <button
                   onClick={() => setMenuOpen(false)}

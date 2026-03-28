@@ -92,7 +92,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
             >
               <div className="flex h-14 items-center justify-between px-5">
                 <Link to="/" className="flex items-center" onClick={() => setSlideMenuOpen(false)}>
-                  <SkyriseLogo className="h-7 w-auto" />
+                  <SkyriseLogo className="h-9 w-auto" />
                 </Link>
                 <button
                   onClick={() => setSlideMenuOpen(false)}
