@@ -369,6 +369,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_deposit: {
+        Args: { _amount: number; _note?: string; _user_id: string }
+        Returns: Json
+      }
+      admin_withdraw: {
+        Args: { _amount: number; _note?: string; _user_id: string }
+        Returns: Json
+      }
       complete_task: {
         Args: {
           _assignment_code: string
