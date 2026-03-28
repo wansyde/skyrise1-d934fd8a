@@ -38,6 +38,16 @@ import bmwBlueFeatured from "@/assets/cars/featured/bmw-blue.png";
 import bmwPurpleFeatured from "@/assets/cars/featured/bmw-purple.png";
 import ferrariYellowFeatured from "@/assets/cars/featured/ferrari-yellow.png";
 import bentleyWhiteFeatured from "@/assets/cars/featured/bentley-white.png";
+import bentleyBlueFeatured from "@/assets/cars/featured/bentley-blue.png";
+import fordMustangFeatured from "@/assets/cars/featured/ford-mustang.png";
+import ferrariRomaFeatured from "@/assets/cars/featured/ferrari-roma.png";
+import cadillacCt5Featured from "@/assets/cars/featured/cadillac-ct5.png";
+import rangeRoverFeatured from "@/assets/cars/featured/range-rover.png";
+import lexusLcFeatured from "@/assets/cars/featured/lexus-lc.png";
+import mclarenArturaFeatured from "@/assets/cars/featured/mclaren-artura.png";
+import mclarenGtFeatured from "@/assets/cars/featured/mclaren-gt.png";
+import lexusEsFeatured from "@/assets/cars/featured/lexus-es.png";
+import teslaModelSFeatured from "@/assets/cars/featured/tesla-model-s.png";
 
 const carCampaigns = [
   { brand: "Audi", name: "Audi A1 2025 Sportback Premium Edition", image: audiA1Img, featured: audiA1Featured, totalAmount: 41, adSalary: 0.16 },
