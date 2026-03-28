@@ -30,9 +30,21 @@ const otherItems = [
 ];
 
 const Profile = () => {
-  const { profile, signOut, isAdmin } = useAuth();
+  const { profile, signOut, isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const balance = profile?.balance ?? 0;
+
+  const { data: pendingCount } = useQuery({
+    queryKey: ["notif-badge", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const [{ count: dc }, { count: wc }] = await Promise.all([
+        supabase.from("deposits").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "pending"),
+        supabase.from("withdrawals").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "pending"),
+      ]);
+      return (dc || 0) + (wc || 0);
+    },
+  });
 
   const handleSignOut = async () => {
     await signOut();
