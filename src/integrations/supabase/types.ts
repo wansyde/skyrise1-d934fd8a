@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action_type: string
+          admin_user_id: string
+          admin_username: string
+          created_at: string
+          description: string
+          id: string
+          target_user_id: string | null
+          target_username: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_user_id: string
+          admin_username?: string
+          created_at?: string
+          description?: string
+          id?: string
+          target_user_id?: string | null
+          target_username?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_user_id?: string
+          admin_username?: string
+          created_at?: string
+          description?: string
+          id?: string
+          target_user_id?: string | null
+          target_username?: string | null
+        }
+        Relationships: []
+      }
       deposits: {
         Row: {
           admin_note: string | null
@@ -416,6 +449,14 @@ export type Database = {
       invest_in_plan: {
         Args: { _amount: number; _plan_id: string }
         Returns: Json
+      }
+      log_admin_action: {
+        Args: {
+          _action_type: string
+          _description?: string
+          _target_user_id?: string
+        }
+        Returns: undefined
       }
       submit_kyc: {
         Args: {
