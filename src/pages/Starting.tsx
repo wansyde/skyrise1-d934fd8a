@@ -201,7 +201,7 @@ const Starting = () => {
   }, [activeIndex, total, goTo]);
 
   const MIN_BALANCE = 100;
-  const isRestricted = profile?.status === "restricted";
+  const isRestricted = profile?.status === "suspended";
 
   // Match Ad handler
   const handleMatchAd = () => {
