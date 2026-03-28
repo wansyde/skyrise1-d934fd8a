@@ -3,20 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowUpFromLine, Clock, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, ArrowUpFromLine, Clock, Eye, EyeOff, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const AppWithdraw = () => {
   const [tab, setTab] = useState<"withdraw" | "history">("withdraw");
   const [amount, setAmount] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
   const balance = profile?.balance ?? 0;
 
   const { data: history } = useQuery({
@@ -44,41 +46,42 @@ const AppWithdraw = () => {
       toast.error("Invalid amount. Cannot exceed your balance.");
       return;
     }
+    if (!walletAddress.trim()) {
+      toast.error("Please enter your crypto wallet address.");
+      return;
+    }
     if (!password) {
       toast.error("Please enter your transaction password.");
       return;
     }
 
-    // Verify withdraw password
     if (profile?.withdraw_password && password !== profile.withdraw_password) {
       toast.error("Incorrect transaction password.");
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.from("withdrawals").insert({
-      user_id: user.id,
-      amount: num,
-      method: "USDT (TRC-20)",
-      wallet_address: null,
-    });
-
-    if (error) {
-      toast.error("Failed to submit withdrawal: " + error.message);
-    } else {
-      await supabase.from("transactions").insert({
-        user_id: user.id,
-        type: "withdrawal",
-        amount: -num,
-        status: "pending",
-        method: "USDT (TRC-20)",
-        description: "Withdrawal request",
-      });
-      toast.success("Withdrawal request submitted!");
+    try {
+      const { data, error } = await supabase.rpc("submit_withdrawal", {
+        _amount: num,
+        _wallet_address: walletAddress.trim(),
+      } as any);
+      if (error) throw error;
+      const result = data as any;
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Withdrawal request submitted. Status: Pending.");
       setAmount("");
+      setWalletAddress("");
       setPassword("");
+      queryClient.invalidateQueries({ queryKey: ["withdrawal-history"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to submit withdrawal.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -157,6 +160,18 @@ const AppWithdraw = () => {
                   </div>
                 </div>
 
+                {/* Wallet Address */}
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-2">Crypto Wallet Address</label>
+                  <Input
+                    type="text"
+                    placeholder="Enter your USDT (TRC-20) wallet address"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                    className="bg-transparent border-0 border-b border-border rounded-none h-12 text-sm font-mono focus-visible:border-muted-foreground/40"
+                  />
+                </div>
+
                 {/* Transaction Password */}
                 <div>
                   <label className="text-sm text-muted-foreground block mb-2">Transaction Password</label>
@@ -181,7 +196,7 @@ const AppWithdraw = () => {
                 {/* Submit */}
                 <Button
                   className="btn-press h-12 w-full text-sm mt-2"
-                  disabled={loading || !amount || !password}
+                  disabled={loading || !amount || !walletAddress.trim() || !password}
                   onClick={handleSubmit}
                 >
                   {loading ? "Processing..." : "Withdraw"}
@@ -202,27 +217,35 @@ const AppWithdraw = () => {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04, duration: 0.25 }}
-                    className="glass-card flex items-center justify-between p-3.5"
+                    className="glass-card p-3.5"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
-                        <ArrowUpFromLine className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                          <ArrowUpFromLine className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">Withdrawal</span>
+                          <span className="text-xs text-muted-foreground block mt-0.5">
+                            {new Date(w.created_at).toLocaleDateString()} · {w.method}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-sm font-medium">Withdrawal</span>
-                        <span className="text-xs text-muted-foreground block mt-0.5">
-                          {new Date(w.created_at).toLocaleDateString()} · {w.method}
+                      <div className="text-right">
+                        <span className="text-sm font-medium tabular-nums">
+                          -${Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "completed" ? "text-success" : w.status === "approved" ? "text-success" : "text-destructive"}`}>
+                          {w.status === "approved" ? "completed" : w.status}
                         </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-sm font-medium tabular-nums">
-                        -${Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </span>
-                      <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "approved" ? "text-success" : "text-destructive"}`}>
-                        {w.status}
-                      </span>
-                    </div>
+                    {w.wallet_address && (
+                      <div className="flex items-center gap-1.5 mt-2 pl-12">
+                        <Wallet className="h-3 w-3 text-muted-foreground" strokeWidth={1.5} />
+                        <span className="text-[10px] text-muted-foreground font-mono truncate">{w.wallet_address}</span>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
                 {(!history || history.length === 0) && (
