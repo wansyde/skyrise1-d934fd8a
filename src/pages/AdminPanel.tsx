@@ -525,7 +525,7 @@ const AdminPanel = () => {
                     </tr>
                   ))}
                   {filteredProfiles.length === 0 && (
-                    <tr><td colSpan={14} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
+                    <tr><td colSpan={17} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
                   )}
                 </tbody>
               </table>
