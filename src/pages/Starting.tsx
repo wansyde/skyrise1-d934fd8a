@@ -388,7 +388,7 @@ const Starting = () => {
             </div>
 
             <div
-              className="relative h-[340px] sm:h-[400px] flex items-center justify-center overflow-hidden"
+              className="relative h-[340px] md:h-[420px] flex items-center justify-center overflow-hidden"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
               style={{ background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.06) 0%, transparent 70%)" }}
@@ -402,22 +402,22 @@ const Starting = () => {
                     className="absolute cursor-pointer"
                     onClick={() => goTo(idx)}
                     animate={{ transform: style.transform, opacity: style.opacity, zIndex: style.zIndex, filter: style.filter }}
-                    transition={{ type: "spring", stiffness: 260, damping: 26 }}
+                    transition={{ type: "spring", stiffness: 220, damping: 28, mass: 0.9 }}
                     style={{ zIndex: style.zIndex }}
                   >
                     <div className="flex flex-col items-center">
                       <div
-                        className="w-40 h-56 sm:w-48 sm:h-64 rounded-2xl overflow-hidden relative"
+                        className="w-40 h-56 sm:w-48 sm:h-64 md:w-44 md:h-60 rounded-2xl overflow-hidden relative"
                         style={{ boxShadow: isCenter ? "0 20px 60px rgba(0,0,0,0.5), 0 0 30px hsl(var(--primary) / 0.12)" : "0 8px 24px rgba(0,0,0,0.35)" }}
                       >
                         <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                       </div>
                       <div
-                        className="w-36 sm:w-44 h-12 mt-0.5 rounded-b-2xl overflow-hidden opacity-30"
+                        className="w-36 sm:w-44 md:w-40 h-12 mt-0.5 rounded-b-2xl overflow-hidden opacity-30"
                         style={{ transform: "scaleY(-1) scaleX(0.92)", maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)", WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)" }}
                       >
-                        <img src={car.image} alt="" className="w-full h-56 sm:h-64 object-cover object-bottom" style={{ filter: "blur(2px)" }} />
+                        <img src={car.image} alt="" className="w-full h-56 sm:h-64 md:h-60 object-cover object-bottom" style={{ filter: "blur(2px)" }} />
                       </div>
                       {isCenter && (
                         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-24 h-4 rounded-full" style={{ background: "radial-gradient(ellipse, hsl(var(--primary) / 0.15) 0%, transparent 70%)" }} />
