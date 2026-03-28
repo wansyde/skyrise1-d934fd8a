@@ -326,6 +326,9 @@ const Starting = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Start Promoting</h1>
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                  {completedCount}/{DAILY_LIMIT} tasks today
+                </p>
               </div>
               <div className="relative px-4 py-1.5">
                 <span className="text-[11px] font-bold tracking-[0.18em] uppercase bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">{profile?.vip_level || "Junior"} Promoter</span>
