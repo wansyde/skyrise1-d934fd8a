@@ -360,43 +360,50 @@ const Starting = () => {
 
           {/* 3D Car Carousel + Showcase Combined */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.6 }} className="mb-6">
+            {/* Carousel Section */}
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Campaigns</h2>
+              <span className="text-[10px] text-muted-foreground">{total} available</span>
+            </div>
+
             <div
-              className="relative rounded-2xl overflow-hidden"
-              style={{ background: "linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0d0d0d 100%)" }}
+              className="relative h-[180px] sm:h-[200px] flex items-center justify-center overflow-hidden rounded-2xl"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              style={{ background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
             >
-              {/* Carousel Section */}
-              <div
-                className="relative h-[200px] flex items-center justify-center overflow-hidden"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
-                {visibleCards.map(({ idx, offset, car }) => {
-                  const style = getCardStyle(offset);
-                  const isCenter = offset === 0;
-                  return (
-                    <motion.div
-                      key={`${idx}-${car.brand}`}
-                      className="absolute cursor-pointer"
-                      onClick={() => goTo(idx)}
-                      animate={{ transform: style.transform, opacity: style.opacity, zIndex: style.zIndex, filter: style.filter }}
-                      transition={{ type: "spring", stiffness: 250, damping: 30, mass: 0.8 }}
-                      style={{ zIndex: style.zIndex }}
+              {visibleCards.map(({ idx, offset, car }) => {
+                const style = getCardStyle(offset);
+                const isCenter = offset === 0;
+                return (
+                  <motion.div
+                    key={`${idx}-${car.brand}`}
+                    className="absolute cursor-pointer"
+                    onClick={() => goTo(idx)}
+                    animate={{ transform: style.transform, opacity: style.opacity, zIndex: style.zIndex, filter: style.filter }}
+                    transition={{ type: "spring", stiffness: 250, damping: 30, mass: 0.8 }}
+                    style={{ zIndex: style.zIndex }}
+                  >
+                    <div
+                      className="w-[110px] h-[140px] sm:w-[125px] sm:h-[155px] rounded-xl overflow-hidden"
+                      style={{
+                        boxShadow: isCenter
+                          ? "0 12px 40px rgba(0,0,0,0.15), 0 0 0 1px hsl(var(--primary) / 0.1)"
+                          : "0 6px 20px rgba(0,0,0,0.08)",
+                      }}
                     >
-                      <div
-                        className="w-[130px] h-[160px] sm:w-[150px] sm:h-[185px] rounded-xl overflow-hidden"
-                        style={{
-                          boxShadow: isCenter
-                            ? "0 8px 40px rgba(0,0,0,0.7), 0 0 20px rgba(255,255,255,0.05)"
-                            : "0 4px 20px rgba(0,0,0,0.5)",
-                          border: isCenter ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.04)",
-                        }}
-                      >
-                        <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                      <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-center gap-1 mt-3">
+              {carCampaigns.map((_, i) => (
+                <button key={i} onClick={() => goTo(i)} className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-muted-foreground/30"}`} />
+              ))}
+            </div>
 
               {/* Featured Showcase on Platform */}
               <div
