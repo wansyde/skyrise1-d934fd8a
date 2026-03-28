@@ -160,15 +160,26 @@ const Starting = () => {
     goTo((activeIndex + 1) % total);
   }, [activeIndex, total, goTo]);
 
+  const MIN_BALANCE = 100;
+
   // Match Ad handler
   const handleMatchAd = () => {
-    if (completedCount >= DAILY_LIMIT) {
-      toast.error("Daily limit reached. Come back tomorrow!");
+    const currentBalance = Number(profile?.balance ?? 0);
+
+    if (currentBalance < MIN_BALANCE) {
+      toast.error("Minimum balance of $100 required to start tasks.");
       return;
     }
-    // Pick a random car
-    const randomIdx = Math.floor(Math.random() * carCampaigns.length);
-    const car = carCampaigns[randomIdx];
+    if (completedCount >= DAILY_LIMIT) {
+      toast.error("Daily task limit reached.");
+      return;
+    }
+
+    // Pick a random car whose totalAmount fits within balance
+    const affordable = carCampaigns.filter(c => c.totalAmount <= currentBalance);
+    const pool = affordable.length > 0 ? affordable : carCampaigns;
+    const car = pool[Math.floor(Math.random() * pool.length)];
+
     setMatchedCar(car);
     setAssignmentCode(generateAssignmentCode());
     setMatchProgress(0);
@@ -194,39 +205,90 @@ const Starting = () => {
 
   // Promote (submit) handler
   const handlePromote = async () => {
-    if (!user || !matchedCar || !profile) return;
-    setSubmitting(true);
-    try {
-      const earning = matchedCar.adSalary * vipTier.earningMultiplier;
-      
-      // Insert task record
-      const { error } = await supabase.from("task_records").insert({
+    if (!user || !matchedCar || !profile || submitting) return;
+    const currentBalance = Number(profile.balance);
+    const taskCost = matchedCar.totalAmount;
+
+    // Validate balance >= 100
+    if (currentBalance < MIN_BALANCE) {
+      toast.error("Minimum balance of $100 required to start tasks.");
+      setMatchState("idle");
+      setMatchedCar(null);
+      return;
+    }
+
+    // Validate balance >= task cost; if not, create pending record
+    if (currentBalance < taskCost) {
+      await supabase.from("task_records").insert({
         user_id: user.id,
         car_brand: matchedCar.brand,
         car_name: matchedCar.name,
         car_image_url: matchedCar.featured,
-        total_amount: matchedCar.totalAmount,
-        advertising_salary: earning,
+        total_amount: taskCost,
+        advertising_salary: 0,
+        assignment_code: assignmentCode,
+        status: "pending",
+      });
+      toast.error("Insufficient balance for this task. Record saved as pending.");
+      setMatchState("idle");
+      setMatchedCar(null);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // STEP 1: Deduct task cost from wallet balance (real lock)
+      const { error: deductError } = await supabase
+        .from("profiles")
+        .update({ balance: currentBalance - taskCost })
+        .eq("user_id", user.id);
+      if (deductError) throw deductError;
+
+      // STEP 2: Simulate processing (1-3s)
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+
+      // STEP 3: Calculate reward = 0.4% of task cost
+      const reward = taskCost * 0.004;
+
+      // STEP 4: Return funds + profit
+      const newBalance = currentBalance - taskCost + taskCost + reward; // original - cost + cost + reward = original + reward
+      const newAdSalary = Number(profile.advertising_salary) + reward;
+      const newTaskCount = (profile.tasks_completed_today || 0) + 1;
+
+      const { error: returnError } = await supabase
+        .from("profiles")
+        .update({
+          balance: newBalance,
+          advertising_salary: newAdSalary,
+          tasks_completed_today: newTaskCount,
+        })
+        .eq("user_id", user.id);
+      if (returnError) throw returnError;
+
+      // STEP 5: Create completed task record
+      const { error: recordError } = await supabase.from("task_records").insert({
+        user_id: user.id,
+        car_brand: matchedCar.brand,
+        car_name: matchedCar.name,
+        car_image_url: matchedCar.featured,
+        total_amount: taskCost,
+        advertising_salary: reward,
         assignment_code: assignmentCode,
         status: "completed",
       });
-      if (error) throw error;
-
-      // Update profile balances and task count
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          advertising_salary: Number(profile.advertising_salary) + earning,
-          tasks_completed_today: (profile.tasks_completed_today || 0) + 1,
-        })
-        .eq("user_id", user.id);
-      if (updateError) throw updateError;
+      if (recordError) throw recordError;
 
       await refreshProfile();
-      toast.success("Assignment submitted successfully!");
+      toast.success(`Task completed! +${reward.toFixed(4)} AC profit earned.`);
       setMatchState("idle");
       setMatchedCar(null);
     } catch (e: any) {
+      // If something failed after deduction, try to restore balance
+      await supabase
+        .from("profiles")
+        .update({ balance: currentBalance })
+        .eq("user_id", user.id);
+      await refreshProfile();
       toast.error("Failed to submit: " + e.message);
     } finally {
       setSubmitting(false);
