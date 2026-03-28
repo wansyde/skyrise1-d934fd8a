@@ -370,31 +370,34 @@ const Starting = () => {
             </div>
 
             <div
-              className="relative h-[210px] sm:h-[230px] overflow-hidden rounded-2xl"
+              ref={carouselRef}
+              className="relative overflow-hidden rounded-2xl"
+              style={{ height: cardWidth * 1.25 + 20, background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
-              style={{ background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
             >
-
-              {visibleCards.map(({ idx, offset, car }) => (
-                <motion.div
-                  key={idx}
-                  className="absolute top-1/2 cursor-pointer"
-                  onClick={() => goTo(idx)}
-                  animate={{
-                    x: `calc(50% + ${offset * CARD_STEP}px - ${CARD_WIDTH / 2}px)`,
-                    y: "-50%",
-                  }}
-                  transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  <div
-                    className="rounded-xl overflow-hidden"
-                    style={{ width: CARD_WIDTH, height: CARD_WIDTH * 1.25, boxShadow: "0 8px 25px rgba(0,0,0,0.1)" }}
+              {visibleCards.map(({ idx, offset, car }) => {
+                // offset ranges from -half to +half; position 0 = leftmost card
+                const posIndex = offset + half; // 0 to VISIBLE_COUNT-1
+                const xPos = posIndex * cardStep;
+                return (
+                  <motion.div
+                    key={idx}
+                    className="absolute cursor-pointer"
+                    style={{ top: 10 }}
+                    onClick={() => goTo(idx)}
+                    animate={{ x: xPos }}
+                    transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
                   >
-                    <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
-                  </div>
-                </motion.div>
-              ))}
+                    <div
+                      className="rounded-xl overflow-hidden"
+                      style={{ width: cardWidth, height: cardWidth * 1.25, boxShadow: "0 8px 25px rgba(0,0,0,0.1)" }}
+                    >
+                      <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
 
             <div className="flex justify-center gap-1 mt-3">
