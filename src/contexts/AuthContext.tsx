@@ -22,6 +22,11 @@ interface Profile {
   vip_level: string;
   tasks_completed_today: number;
   last_task_reset: string;
+  saved_wallet_name: string | null;
+  saved_wallet_address: string | null;
+  saved_wallet_username: string | null;
+  saved_wallet_network: string | null;
+  saved_wallet_email: string | null;
 }
 
 interface AuthContextType {
