@@ -115,6 +115,7 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           status: string
+          task_cycle_completed: boolean
           tasks_completed_today: number
           updated_at: string
           user_id: string
@@ -144,6 +145,7 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           status?: string
+          task_cycle_completed?: boolean
           tasks_completed_today?: number
           updated_at?: string
           user_id: string
@@ -173,6 +175,7 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           status?: string
+          task_cycle_completed?: boolean
           tasks_completed_today?: number
           updated_at?: string
           user_id?: string
