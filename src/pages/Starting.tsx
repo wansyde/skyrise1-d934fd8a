@@ -152,7 +152,7 @@ const Starting = () => {
   }, [handleInteraction]);
 
   // Showcase = the rightmost visible card on screen
-  const half = Math.floor(VISIBLE_COUNT / 2);
+  const half = Math.floor(visibleCount / 2);
   const showcaseIndex = ((activeIndex + half) % total + total) % total;
   const featuredCar = carCampaigns[showcaseIndex];
 
