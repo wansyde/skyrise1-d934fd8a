@@ -326,15 +326,9 @@ const Starting = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Start Promoting</h1>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Set {setProgress.currentSet}/{vipTier.totalSets} · {setProgress.allDone ? "All sets complete" : `${setProgress.tasksInCurrentSet}/${vipTier.tasksPerSet} in set`}
-                </p>
-                <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                  {completedCount}/{DAILY_LIMIT} total today
-                </p>
               </div>
-              <div className="relative px-4 py-1.5 rounded-full overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--primary) / 0.06) 100%)", boxShadow: "inset 0 0 0 1px hsl(var(--primary) / 0.2), 0 2px 8px hsl(var(--primary) / 0.1)" }}>
-                <span className="text-[10px] font-bold tracking-[0.15em] uppercase bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{profile?.vip_level || "Junior"} Promoter</span>
+              <div className="relative px-4 py-1.5">
+                <span className="text-[11px] font-bold tracking-[0.18em] uppercase bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">{profile?.vip_level || "Junior"} Promoter</span>
               </div>
             </div>
           </motion.div>
