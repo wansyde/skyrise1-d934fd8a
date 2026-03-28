@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const AppWithdraw = () => {
   const [tab, setTab] = useState<"withdraw" | "history">("withdraw");
+  const [step, setStep] = useState<1 | 2>(1);
   const [amount, setAmount] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
   const [password, setPassword] = useState("");
