@@ -350,7 +350,7 @@ const Login = () => {
                     <FieldWrapper label="Phone Number" error={regErrors.phone}>
                       <Input
                         type="tel"
-                        placeholder="+1 (555) 000-0000"
+                        placeholder=""
                         className="bg-background"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
