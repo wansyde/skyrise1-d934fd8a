@@ -331,7 +331,7 @@ const Starting = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Start Promoting</h1>
-                <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                <p className="text-xs text-muted-foreground/70 mt-0.5">
                   {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet} tasks
                 </p>
               </div>
