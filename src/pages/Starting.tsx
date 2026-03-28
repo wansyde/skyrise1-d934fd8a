@@ -370,8 +370,8 @@ const Starting = () => {
                   {completedCount}/{DAILY_LIMIT} completed today
                 </p>
               </div>
-              <div className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <span className="text-[10px] font-semibold tracking-wider uppercase text-primary">{profile?.vip_level || "Junior"}</span>
+              <div className="relative px-4 py-1.5 rounded-full overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--primary) / 0.06) 100%)", boxShadow: "inset 0 0 0 1px hsl(var(--primary) / 0.2), 0 2px 8px hsl(var(--primary) / 0.1)" }}>
+                <span className="text-[10px] font-bold tracking-[0.15em] uppercase bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{profile?.vip_level || "Junior"} Promoter</span>
               </div>
             </div>
           </motion.div>
