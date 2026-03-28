@@ -117,7 +117,9 @@ const Profile = () => {
           <div className="balance-card p-4 rounded-xl">
             <span className="text-xs text-white/50">Advertising Salary</span>
             <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-xl font-semibold tabular-nums">0</span>
+              <span className="text-xl font-semibold tabular-nums">
+                {Number(profile?.advertising_salary ?? 0).toFixed(2)}
+              </span>
               <span className="text-[10px] text-white/40 font-medium">AC</span>
             </div>
           </div>

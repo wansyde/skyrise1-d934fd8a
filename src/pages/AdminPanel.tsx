@@ -356,6 +356,8 @@ const AdminPanel = () => {
                 <th className="px-5 py-3 font-medium">Email</th>
                 <th className="px-5 py-3 font-medium">Phone</th>
                 <th className="px-5 py-3 font-medium">Referral Code</th>
+                <th className="px-5 py-3 font-medium">Referred By</th>
+                <th className="px-5 py-3 font-medium">Referrals</th>
                 <SortHeader field="balance">Wallet Balance</SortHeader>
                 <SortHeader field="advertising_salary">Ad Salary</SortHeader>
                 <th className="px-5 py-3 font-medium">VIP Level</th>
@@ -372,6 +374,17 @@ const AdminPanel = () => {
                   <td className="px-5 py-3 text-sm text-muted-foreground">{u.email || "—"}</td>
                   <td className="px-5 py-3 text-sm text-muted-foreground">{u.phone || "—"}</td>
                   <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">
+                    {u.referred_by
+                      ? (() => {
+                          const referrer = (profiles || []).find((p: any) => p.user_id === u.referred_by);
+                          return referrer ? referrer.username || referrer.email : u.referred_by;
+                        })()
+                      : "—"}
+                  </td>
+                  <td className="px-5 py-3 text-sm tabular-nums">
+                    {(profiles || []).filter((p: any) => p.referred_by === u.user_id).length}
+                  </td>
                   <td className="px-5 py-3">
                     {editingUser === u.user_id ? (
                       <Input type="number" value={editBalance} onChange={(e) => setEditBalance(e.target.value)} className="h-7 w-28 text-xs" min={0} />
@@ -474,7 +487,7 @@ const AdminPanel = () => {
                 </tr>
               ))}
               {filteredProfiles.length === 0 && (
-                <tr><td colSpan={11} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
+                <tr><td colSpan={13} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
               )}
             </tbody>
           </table>

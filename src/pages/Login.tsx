@@ -154,16 +154,16 @@ const Login = () => {
     setRegLoading(true);
 
     try {
-      // Validate referral code
+      // Validate referral code exists in the system
       const { data: referrer } = await supabase
         .from("profiles")
-        .select("id")
+        .select("user_id, referral_code")
         .eq("referral_code", referralCode.toUpperCase().trim())
         .maybeSingle();
 
       if (!referrer) {
-        setRegErrors({ referralCode: "Invalid referral code" });
-        toast.error("Invalid referral code");
+        setRegErrors({ referralCode: "Invalid referral code. Please enter a valid invite code." });
+        toast.error("Invalid referral code. Please enter a valid invite code.");
         setRegLoading(false);
         return;
       }
