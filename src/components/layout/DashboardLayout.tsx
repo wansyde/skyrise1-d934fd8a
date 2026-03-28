@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, ArrowDownToLine, ArrowUpFromLine,
-  Clock, Settings, LogOut, Menu, X, ChevronRight
+  Clock, Settings, LogOut, Menu, X, ChevronRight, PanelLeftClose, PanelLeft
 } from "lucide-react";
 import SkyriseLogo from "@/components/SkyriseLogo";
 
@@ -14,13 +14,19 @@ const navItems = [
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const SidebarContent = () => (
+  const SidebarContent = ({ showClose }: { showClose?: boolean }) => (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center px-6">
+      <div className="flex h-16 items-center justify-between px-6">
         <Link to="/" className="flex items-center">
-           <SkyriseLogo className="h-14 w-auto" />
+          <SkyriseLogo className="h-14 w-auto" />
         </Link>
+        {showClose && (
+          <button onClick={() => setSidebarOpen(false)} className="text-muted-foreground hover:text-foreground lg:hidden">
+            <X className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+        )}
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
         {navItems.map((item) => {
@@ -39,7 +45,14 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           );
         })}
       </nav>
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border p-3 space-y-1">
+        <button
+          onClick={() => setSidebarCollapsed(true)}
+          className="nav-pill flex items-center gap-3 w-full text-muted-foreground hover:text-foreground hidden lg:flex"
+        >
+          <PanelLeftClose className="h-4 w-4" strokeWidth={1.5} />
+          Collapse
+        </button>
         <Link to="/login" className="nav-pill flex items-center gap-3 text-destructive hover:text-destructive">
           <LogOut className="h-4 w-4" strokeWidth={1.5} />
           Sign Out
@@ -51,11 +64,21 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="hidden w-[260px] shrink-0 border-r border-border glass-sidebar lg:block">
-        <div className="sticky top-0 h-screen">
-          <SidebarContent />
-        </div>
-      </aside>
+      <AnimatePresence initial={false}>
+        {!sidebarCollapsed && (
+          <motion.aside
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 260, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="hidden shrink-0 border-r border-border glass-sidebar lg:block overflow-hidden"
+          >
+            <div className="sticky top-0 h-screen w-[260px]">
+              <SidebarContent />
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* Mobile sidebar */}
       <AnimatePresence>
@@ -75,7 +98,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="fixed inset-y-0 left-0 z-50 w-[260px] border-r border-border bg-card lg:hidden"
             >
-              <SidebarContent />
+              <SidebarContent showClose />
             </motion.aside>
           </>
         )}
@@ -83,12 +106,19 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Main */}
       <div className="flex flex-1 flex-col">
-        {/* Mobile header */}
-        <header className="flex h-16 items-center gap-4 border-b border-border px-6 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground">
+        {/* Header */}
+        <header className="flex h-16 items-center gap-4 border-b border-border px-6">
+          {/* Mobile menu button */}
+          <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground lg:hidden">
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
-          <span className="flex items-center">
+          {/* Desktop expand button (when collapsed) */}
+          {sidebarCollapsed && (
+            <button onClick={() => setSidebarCollapsed(false)} className="text-muted-foreground hover:text-foreground hidden lg:flex">
+              <PanelLeft className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+          )}
+          <span className="flex items-center lg:hidden">
             <SkyriseLogo className="h-14 w-auto" />
           </span>
         </header>
