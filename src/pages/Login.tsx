@@ -474,7 +474,7 @@ const Login = () => {
                     {/* Referral Code */}
                     <FieldWrapper label="Referral Code" error={regErrors.referralCode}>
                       <Input
-                        placeholder="Enter referral code"
+                        placeholder=""
                         className="bg-background uppercase"
                         value={referralCode}
                         onChange={(e) => setReferralCode(e.target.value)}
