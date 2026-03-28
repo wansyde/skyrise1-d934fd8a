@@ -459,6 +459,20 @@ const AdminPanel = () => {
                       <Power className="h-3 w-3" />
                       {(u.status || "active") === "active" ? "ON" : "OFF"}
                     </button>
+                   </td>
+                  <td className="px-5 py-3">
+                    {u.task_cycle_completed ? (
+                      <button
+                        onClick={() => handleResetCycle(u.user_id)}
+                        disabled={processingId === u.user_id}
+                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 transition-colors"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Reset
+                      </button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Active</span>
+                    )}
                   </td>
                   <td className="px-5 py-3 text-xs text-muted-foreground">
                     {new Date(u.created_at).toLocaleDateString()}
