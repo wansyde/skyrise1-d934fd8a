@@ -439,7 +439,7 @@ const Login = () => {
                       <div className="relative">
                         <Input
                           type={showWithdrawPw ? "text" : "password"}
-                          placeholder="••••••••"
+                          placeholder=""
                           className="bg-background pr-10"
                           value={withdrawPw}
                           onChange={(e) => setWithdrawPw(e.target.value)}
