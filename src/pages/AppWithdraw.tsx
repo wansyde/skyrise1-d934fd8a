@@ -306,6 +306,7 @@ const AppWithdraw = () => {
                     </motion.div>
                   )}
                 </AnimatePresence>
+                )}
               </motion.div>
             ) : (
               <motion.div
