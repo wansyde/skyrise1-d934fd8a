@@ -43,6 +43,7 @@ const AdminPanel = () => {
   const [editSalary, setEditSalary] = useState("");
   const [editVipLevel, setEditVipLevel] = useState("");
   const [editTasksCompleted, setEditTasksCompleted] = useState("");
+  const [editCreditScore, setEditCreditScore] = useState("");
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
