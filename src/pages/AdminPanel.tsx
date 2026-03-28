@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw } from "lucide-react";
+import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw, ScrollText, UserCog } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { VIP_LEVELS } from "@/lib/vip-config";
@@ -22,6 +22,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type SortField = "username" | "balance" | "advertising_salary" | "created_at" | "status";
 type SortDir = "asc" | "desc";
+
+const logAdminAction = async (actionType: string, targetUserId?: string | null, description?: string) => {
+  try {
+    await supabase.rpc("log_admin_action", {
+      _action_type: actionType,
+      _target_user_id: targetUserId || null,
+      _description: description || "",
+    } as any);
+  } catch (e) {
+    console.error("Failed to log admin action:", e);
+  }
+};
 
 const AdminPanel = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -54,6 +66,14 @@ const AdminPanel = () => {
   // User detail view
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
+  // Log filters
+  const [logSearch, setLogSearch] = useState("");
+  const [logActionFilter, setLogActionFilter] = useState("");
+  const [logAdminFilter, setLogAdminFilter] = useState("");
+
+  // Admin search
+  const [adminSearch, setAdminSearch] = useState("");
+
   const queryClient = useQueryClient();
 
   const { data: profiles } = useQuery({
@@ -80,6 +100,22 @@ const AdminPanel = () => {
     },
   });
 
+  const { data: adminRoles } = useQuery({
+    queryKey: ["admin-roles"],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_roles").select("*").in("role", ["admin", "moderator"]);
+      return data || [];
+    },
+  });
+
+  const { data: adminLogs } = useQuery({
+    queryKey: ["admin-logs"],
+    queryFn: async () => {
+      const { data } = await supabase.from("admin_logs").select("*").order("created_at", { ascending: false }).limit(500);
+      return (data || []) as any[];
+    },
+  });
+
   const getUserName = (userId: string) => {
     const p = (profiles || []).find((p: any) => p.user_id === userId);
     return p?.username || p?.email || userId.slice(0, 8);
@@ -103,9 +139,7 @@ const AdminPanel = () => {
     setDepSubmitting(true);
     try {
       const { data, error } = await supabase.rpc("admin_deposit", {
-        _user_id: depUserId,
-        _amount: amt,
-        _note: depNote || "",
+        _user_id: depUserId, _amount: amt, _note: depNote || "",
       } as any);
       if (error) throw error;
       const result = data as any;
@@ -114,6 +148,7 @@ const AdminPanel = () => {
       setDepAmount(""); setDepNote(""); setDepUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-deposits"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to deposit.");
     } finally {
@@ -129,9 +164,7 @@ const AdminPanel = () => {
     setWdSubmitting(true);
     try {
       const { data, error } = await supabase.rpc("admin_withdraw", {
-        _user_id: wdUserId,
-        _amount: amt,
-        _note: wdNote || "",
+        _user_id: wdUserId, _amount: amt, _note: wdNote || "",
       } as any);
       if (error) throw error;
       const result = data as any;
@@ -140,6 +173,7 @@ const AdminPanel = () => {
       setWdAmount(""); setWdNote(""); setWdUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to withdraw.");
     } finally {
@@ -147,7 +181,6 @@ const AdminPanel = () => {
     }
   };
 
-  // User management handlers (kept from original)
   const startEditing = (user: any) => {
     setEditingUser(user.user_id);
     setEditBalance(String(user.balance));
@@ -158,10 +191,7 @@ const AdminPanel = () => {
 
   const cancelEditing = () => {
     setEditingUser(null);
-    setEditBalance("");
-    setEditSalary("");
-    setEditVipLevel("");
-    setEditTasksCompleted("");
+    setEditBalance(""); setEditSalary(""); setEditVipLevel(""); setEditTasksCompleted("");
   };
 
   const saveBalances = async (userId: string) => {
@@ -172,14 +202,28 @@ const AdminPanel = () => {
     if (isNaN(newSalary) || newSalary < 0) { toast.error("Invalid advertising salary value."); return; }
     if (isNaN(newTasks) || newTasks < 0) { toast.error("Invalid tasks completed value."); return; }
     if (!VIP_LEVELS.includes(editVipLevel)) { toast.error("Invalid VIP level."); return; }
+
+    const oldUser = (profiles || []).find((p: any) => p.user_id === userId);
     const { error } = await supabase
       .from("profiles")
       .update({ balance: newBalance, advertising_salary: newSalary, vip_level: editVipLevel, tasks_completed_today: newTasks })
       .eq("user_id", userId);
     if (error) { toast.error("Failed to update user."); return; }
+
+    // Log changes
+    const changes: string[] = [];
+    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: $${oldUser.balance} → $${newBalance}`);
+    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: $${oldUser.advertising_salary} → $${newSalary}`);
+    if (oldUser && oldUser.vip_level !== editVipLevel) changes.push(`VIP: ${oldUser.vip_level} → ${editVipLevel}`);
+    if (oldUser && oldUser.tasks_completed_today !== newTasks) changes.push(`Tasks: ${oldUser.tasks_completed_today} → ${newTasks}`);
+    if (changes.length > 0) {
+      await logAdminAction("user_update", userId, changes.join("; "));
+    }
+
     toast.success("User updated successfully.");
     setEditingUser(null);
     queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
   };
 
   const handleToggleTaskAccess = async (userId: string, currentStatus: string) => {
@@ -188,8 +232,10 @@ const AdminPanel = () => {
     try {
       const { error } = await supabase.from("profiles").update({ status: newStatus } as any).eq("user_id", userId).select();
       if (error) { toast.error("Failed to update task access: " + error.message); return; }
+      await logAdminAction("task_access_toggle", userId, `Task access ${newStatus === "active" ? "enabled" : "disabled"}`);
       toast.success(`Task access ${newStatus === "active" ? "enabled" : "disabled"}.`);
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } finally {
       setProcessingId(null);
     }
@@ -197,6 +243,7 @@ const AdminPanel = () => {
 
   const handleDeleteUser = async (userId: string) => {
     setDeletingUser(userId);
+    const userName = getUserName(userId);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
@@ -209,8 +256,10 @@ const AdminPanel = () => {
       });
       const result = await res.json();
       if (!res.ok) { toast.error(result.error || "Failed to delete user."); return; }
+      await logAdminAction("user_delete", userId, `Deleted user: ${userName}`);
       toast.success("User deleted permanently.");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } catch (err: any) {
       toast.error(err.message || "Failed to delete user.");
     } finally {
@@ -223,8 +272,10 @@ const AdminPanel = () => {
     try {
       const { error } = await supabase.from("profiles").update({ task_cycle_completed: false, tasks_completed_today: 0 } as any).eq("user_id", userId);
       if (error) { toast.error("Failed to reset task cycle: " + error.message); return; }
+      await logAdminAction("task_cycle_reset", userId, "Reset task cycle");
       toast.success("Task cycle reset successfully.");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } finally {
       setProcessingId(null);
     }
@@ -261,27 +312,38 @@ const AdminPanel = () => {
 
   // Filter deposits
   const filteredDeposits = (allDeposits || []).filter((d: any) => {
-    if (depSearch) {
-      const name = getUserName(d.user_id).toLowerCase();
-      if (!name.includes(depSearch.toLowerCase())) return false;
-    }
-    if (depDateFilter) {
-      const dDate = new Date(d.created_at).toISOString().slice(0, 10);
-      if (dDate !== depDateFilter) return false;
-    }
+    if (depSearch) { const name = getUserName(d.user_id).toLowerCase(); if (!name.includes(depSearch.toLowerCase())) return false; }
+    if (depDateFilter) { const dDate = new Date(d.created_at).toISOString().slice(0, 10); if (dDate !== depDateFilter) return false; }
     return true;
   });
 
   // Filter withdrawals
   const filteredWithdrawals = (allWithdrawals || []).filter((w: any) => {
-    if (wdSearch) {
-      const name = getUserName(w.user_id).toLowerCase();
-      if (!name.includes(wdSearch.toLowerCase())) return false;
+    if (wdSearch) { const name = getUserName(w.user_id).toLowerCase(); if (!name.includes(wdSearch.toLowerCase())) return false; }
+    if (wdDateFilter) { const wDate = new Date(w.created_at).toISOString().slice(0, 10); if (wDate !== wdDateFilter) return false; }
+    return true;
+  });
+
+  // Admins list
+  const adminUsers = (adminRoles || []).map((role: any) => {
+    const profile = (profiles || []).find((p: any) => p.user_id === role.user_id);
+    return { ...role, profile };
+  }).filter((a: any) => {
+    if (!adminSearch) return true;
+    const q = adminSearch.toLowerCase();
+    return (a.profile?.username || "").toLowerCase().includes(q) || (a.profile?.email || "").toLowerCase().includes(q);
+  });
+
+  // Filter logs
+  const actionTypes = [...new Set((adminLogs || []).map((l: any) => l.action_type))];
+  const adminNames = [...new Set((adminLogs || []).map((l: any) => l.admin_username).filter(Boolean))];
+  const filteredLogs = (adminLogs || []).filter((l: any) => {
+    if (logSearch) {
+      const q = logSearch.toLowerCase();
+      if (!(l.target_username || "").toLowerCase().includes(q) && !(l.admin_username || "").toLowerCase().includes(q) && !(l.description || "").toLowerCase().includes(q)) return false;
     }
-    if (wdDateFilter) {
-      const wDate = new Date(w.created_at).toISOString().slice(0, 10);
-      if (wDate !== wdDateFilter) return false;
-    }
+    if (logActionFilter && l.action_type !== logActionFilter) return false;
+    if (logAdminFilter && l.admin_username !== logAdminFilter) return false;
     return true;
   });
 
@@ -301,14 +363,10 @@ const AdminPanel = () => {
 
   const SortHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <th className="px-5 py-3 font-medium cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort(field)}>
-      <span className="inline-flex items-center gap-1">
-        {children}
-        <ArrowUpDown className={`h-3 w-3 ${sortField === field ? "text-primary" : "text-muted-foreground/50"}`} />
-      </span>
+      <span className="inline-flex items-center gap-1">{children}<ArrowUpDown className={`h-3 w-3 ${sortField === field ? "text-primary" : "text-muted-foreground/50"}`} /></span>
     </th>
   );
 
-  // User select dropdown for forms
   const UserSelect = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <select value={value} onChange={(e) => onChange(e.target.value)} className="h-9 w-full rounded border border-border bg-background px-3 text-sm">
       <option value="">Select a user...</option>
@@ -318,13 +376,24 @@ const AdminPanel = () => {
     </select>
   );
 
+  const getActionColor = (actionType: string) => {
+    switch (actionType) {
+      case "user_delete": return "bg-destructive/15 text-destructive";
+      case "user_update": return "bg-amber-500/15 text-amber-400";
+      case "deposit": return "bg-green-500/15 text-green-400";
+      case "withdrawal": case "withdrawal_complete": return "bg-red-500/15 text-red-400";
+      case "task_access_toggle": case "task_cycle_reset": return "bg-blue-500/15 text-blue-400";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="mb-8 flex items-center gap-3">
         <Shield className="h-5 w-5 text-primary" strokeWidth={1.5} />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Admin Panel</h1>
-          <p className="text-sm text-muted-foreground">Manage users, deposits, and withdrawals.</p>
+          <p className="text-sm text-muted-foreground">Manage users, deposits, withdrawals, and view activity logs.</p>
         </div>
       </div>
 
@@ -363,7 +432,6 @@ const AdminPanel = () => {
               <div className="text-lg font-semibold tabular-nums">${Number((selectedUser as any).balance).toLocaleString()}</div>
             </div>
           </div>
-          {/* IP & Location Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Current IP</span>
@@ -412,10 +480,12 @@ const AdminPanel = () => {
       )}
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="deposits">Deposits</TabsTrigger>
           <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+          <TabsTrigger value="admins" className="flex items-center gap-1.5"><UserCog className="h-3.5 w-3.5" />Admins</TabsTrigger>
+          <TabsTrigger value="logs" className="flex items-center gap-1.5"><ScrollText className="h-3.5 w-3.5" />Logs</TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
@@ -555,29 +625,15 @@ const AdminPanel = () => {
         {/* DEPOSITS TAB */}
         <TabsContent value="deposits">
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Deposit Form */}
             <div className="glass-card p-5 space-y-4">
               <h2 className="text-sm font-medium flex items-center gap-2"><ArrowDownToLine className="h-4 w-4 text-green-400" /> Record Deposit</h2>
               <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Select User</label>
-                  <UserSelect value={depUserId} onChange={setDepUserId} />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label>
-                  <Input type="number" placeholder="0.00" value={depAmount} onChange={(e) => setDepAmount(e.target.value)} min={0} step="0.01" />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label>
-                  <Input placeholder="e.g. via customer service" value={depNote} onChange={(e) => setDepNote(e.target.value)} />
-                </div>
-                <Button onClick={handleAdminDeposit} disabled={depSubmitting} className="w-full">
-                  {depSubmitting ? "Processing..." : "Submit Deposit"}
-                </Button>
+                <div><label className="text-xs text-muted-foreground mb-1 block">Select User</label><UserSelect value={depUserId} onChange={setDepUserId} /></div>
+                <div><label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label><Input type="number" placeholder="0.00" value={depAmount} onChange={(e) => setDepAmount(e.target.value)} min={0} step="0.01" /></div>
+                <div><label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label><Input placeholder="e.g. via customer service" value={depNote} onChange={(e) => setDepNote(e.target.value)} /></div>
+                <Button onClick={handleAdminDeposit} disabled={depSubmitting} className="w-full">{depSubmitting ? "Processing..." : "Submit Deposit"}</Button>
               </div>
             </div>
-
-            {/* Deposit Records */}
             <div className="md:col-span-2 glass-card overflow-hidden">
               <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h2 className="text-sm font-medium">All Deposits</h2>
@@ -623,30 +679,16 @@ const AdminPanel = () => {
         {/* WITHDRAWALS TAB */}
         <TabsContent value="withdrawals">
           <div className="space-y-6">
-            {/* Admin manual withdrawal form */}
             <div className="grid md:grid-cols-3 gap-6">
               <div className="glass-card p-5 space-y-4">
                 <h2 className="text-sm font-medium flex items-center gap-2"><ArrowUpFromLine className="h-4 w-4 text-red-400" /> Record Withdrawal</h2>
                 <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">Select User</label>
-                    <UserSelect value={wdUserId} onChange={setWdUserId} />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label>
-                    <Input type="number" placeholder="0.00" value={wdAmount} onChange={(e) => setWdAmount(e.target.value)} min={0} step="0.01" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label>
-                    <Input placeholder="e.g. manual payout" value={wdNote} onChange={(e) => setWdNote(e.target.value)} />
-                  </div>
-                  <Button onClick={handleAdminWithdraw} disabled={wdSubmitting} variant="destructive" className="w-full">
-                    {wdSubmitting ? "Processing..." : "Submit Withdrawal"}
-                  </Button>
+                  <div><label className="text-xs text-muted-foreground mb-1 block">Select User</label><UserSelect value={wdUserId} onChange={setWdUserId} /></div>
+                  <div><label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label><Input type="number" placeholder="0.00" value={wdAmount} onChange={(e) => setWdAmount(e.target.value)} min={0} step="0.01" /></div>
+                  <div><label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label><Input placeholder="e.g. manual payout" value={wdNote} onChange={(e) => setWdNote(e.target.value)} /></div>
+                  <Button onClick={handleAdminWithdraw} disabled={wdSubmitting} variant="destructive" className="w-full">{wdSubmitting ? "Processing..." : "Submit Withdrawal"}</Button>
                 </div>
               </div>
-
-              {/* Withdrawal Requests */}
               <div className="md:col-span-2 glass-card overflow-hidden">
                 <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <h2 className="text-sm font-medium">Withdrawal Requests</h2>
@@ -689,29 +731,20 @@ const AdminPanel = () => {
                           <td className="px-5 py-3">
                             {w.status === "pending" ? (
                               <Button
-                                size="sm"
-                                variant="outline"
+                                size="sm" variant="outline"
                                 className="h-7 text-xs gap-1.5 text-green-400 border-green-400/30 hover:bg-green-500/10"
                                 disabled={processingId === w.id}
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   setProcessingId(w.id);
                                   try {
-                                    const { error } = await supabase
-                                      .from("withdrawals")
-                                      .update({ status: "completed", admin_note: w.admin_note || "Processed by admin", updated_at: new Date().toISOString() })
-                                      .eq("id", w.id);
+                                    const { error } = await supabase.from("withdrawals").update({ status: "completed", admin_note: w.admin_note || "Processed by admin", updated_at: new Date().toISOString() }).eq("id", w.id);
                                     if (error) throw error;
-                                    // Also update the matching transaction
-                                    await supabase
-                                      .from("transactions")
-                                      .update({ status: "approved" } as any)
-                                      .eq("user_id", w.user_id)
-                                      .eq("type", "withdrawal")
-                                      .eq("status", "pending")
-                                      .eq("amount", -Number(w.amount));
+                                    await supabase.from("transactions").update({ status: "approved" } as any).eq("user_id", w.user_id).eq("type", "withdrawal").eq("status", "pending").eq("amount", -Number(w.amount));
+                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of $${Number(w.amount).toLocaleString()}`);
                                     toast.success("Withdrawal marked as completed.");
                                     queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
+                                    queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
                                   } catch (err: any) {
                                     toast.error(err.message || "Failed to update status.");
                                   } finally {
@@ -734,6 +767,106 @@ const AdminPanel = () => {
                   </table>
                 </div>
               </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* ADMINS TAB */}
+        <TabsContent value="admins">
+          <div className="glass-card overflow-hidden">
+            <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-sm font-medium flex items-center gap-2"><UserCog className="h-4 w-4 text-primary" /> Authorized Admins</h2>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input placeholder="Search admin..." value={adminSearch} onChange={(e) => setAdminSearch(e.target.value)} className="pl-9 h-8 text-xs" />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-t border-border text-left text-xs text-muted-foreground">
+                    <th className="px-5 py-3 font-medium">Username</th>
+                    <th className="px-5 py-3 font-medium">Email</th>
+                    <th className="px-5 py-3 font-medium">Role</th>
+                    <th className="px-5 py-3 font-medium">Status</th>
+                    <th className="px-5 py-3 font-medium">Last Login (US)</th>
+                    <th className="px-5 py-3 font-medium">Date Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminUsers.map((admin: any) => (
+                    <tr key={admin.id} className="border-t border-border">
+                      <td className="px-5 py-3 text-sm font-medium">{admin.profile?.username || "—"}</td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{admin.profile?.email || "—"}</td>
+                      <td className="px-5 py-3">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary capitalize">{admin.role}</span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span>
+                      </td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{admin.profile?.last_login_at ? formatUSTime(admin.profile.last_login_at) : "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{formatUSTime(admin.created_at)}</td>
+                    </tr>
+                  ))}
+                  {adminUsers.length === 0 && (
+                    <tr><td colSpan={6} className="px-5 py-6 text-center text-sm text-muted-foreground">No admins found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* ACTIVITY LOGS TAB */}
+        <TabsContent value="logs">
+          <div className="glass-card overflow-hidden">
+            <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-sm font-medium flex items-center gap-2"><ScrollText className="h-4 w-4 text-primary" /> Admin Activity Log</h2>
+              <div className="flex flex-wrap gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input placeholder="Search..." value={logSearch} onChange={(e) => setLogSearch(e.target.value)} className="pl-9 h-8 text-xs w-40" />
+                </div>
+                <select value={logActionFilter} onChange={(e) => setLogActionFilter(e.target.value)} className="h-8 rounded border border-border bg-background px-2 text-xs">
+                  <option value="">All Actions</option>
+                  {actionTypes.map((t) => (<option key={t} value={t}>{t.replace(/_/g, " ")}</option>))}
+                </select>
+                <select value={logAdminFilter} onChange={(e) => setLogAdminFilter(e.target.value)} className="h-8 rounded border border-border bg-background px-2 text-xs">
+                  <option value="">All Admins</option>
+                  {adminNames.map((n) => (<option key={n} value={n}>{n}</option>))}
+                </select>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-t border-border text-left text-xs text-muted-foreground">
+                    <th className="px-5 py-3 font-medium">Admin</th>
+                    <th className="px-5 py-3 font-medium">Action</th>
+                    <th className="px-5 py-3 font-medium">Target User</th>
+                    <th className="px-5 py-3 font-medium">Description</th>
+                    <th className="px-5 py-3 font-medium">Date (US)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLogs.map((log: any) => (
+                    <tr key={log.id} className="border-t border-border">
+                      <td className="px-5 py-3 text-sm font-medium">{log.admin_username || "—"}</td>
+                      <td className="px-5 py-3">
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${getActionColor(log.action_type)}`}>
+                          {log.action_type.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{log.target_username || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground max-w-[300px] truncate" title={log.description}>{log.description || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{formatUSTime(log.created_at)}</td>
+                    </tr>
+                  ))}
+                  {filteredLogs.length === 0 && (
+                    <tr><td colSpan={5} className="px-5 py-6 text-center text-sm text-muted-foreground">No activity logs found.</td></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </TabsContent>
