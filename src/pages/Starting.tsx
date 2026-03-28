@@ -160,6 +160,16 @@ const Starting = () => {
 
   const featuredCar = carCampaigns[activeIndex];
 
+  // Preload adjacent featured images for smooth transitions
+  useEffect(() => {
+    const nextIdx = (activeIndex + 1) % total;
+    const prevIdx = (activeIndex - 1 + total) % total;
+    [nextIdx, prevIdx].forEach((i) => {
+      const img = new Image();
+      img.src = carCampaigns[i].featured;
+    });
+  }, [activeIndex, total]);
+
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -448,23 +458,24 @@ const Starting = () => {
               onTouchEnd={handleFeaturedTouchEnd}
               style={{ background: "radial-gradient(ellipse at 50% 60%, hsl(var(--muted) / 0.5) 0%, hsl(var(--background)) 80%)" }}
             >
-              <div className="relative flex items-center justify-center py-4 md:py-8" style={{ perspective: "1400px" }}>
-                <AnimatePresence mode="wait">
+              <div className="relative flex items-center justify-center py-4 md:py-8 overflow-hidden" style={{ perspective: "1400px" }}>
+                <AnimatePresence initial={false} mode="popLayout">
                   <motion.div
                     key={`showcase-${activeIndex}`}
                     className="relative w-full flex items-center justify-center"
-                    initial={{ opacity: 0, scale: 1.08, x: 60, rotateY: -8 }}
-                    animate={{ opacity: 1, scale: 1, x: 0, rotateY: 0 }}
-                    exit={{ opacity: 0, scale: 0.94, x: -60, rotateY: 8 }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ willChange: "transform, opacity" }}
+                    initial={{ opacity: 0, x: "30%", scale: 0.95 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: "-20%", scale: 0.97 }}
+                    transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
                   >
                     <img
                       src={featuredCar.featured}
                       alt={featuredCar.name}
-                      className="w-[85%] md:w-[65%] lg:w-[55%] aspect-[2/1] object-contain drop-shadow-2xl"
-                      style={{ filter: "brightness(1.06) contrast(1.04) saturate(1.1)" }}
+                      className="w-[85%] md:w-[65%] lg:w-[55%] aspect-[2/1] object-contain"
+                      style={{ filter: "brightness(1.06) contrast(1.04) saturate(1.1)", imageRendering: "auto" }}
+                      draggable={false}
                     />
-                    {/* Ground shadow ellipse */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70%] md:w-[50%] h-6 md:h-8 rounded-[50%]" style={{ background: "radial-gradient(ellipse, rgba(0,0,0,0.18) 0%, transparent 70%)", filter: "blur(6px)" }} />
                   </motion.div>
                 </AnimatePresence>
