@@ -15,8 +15,6 @@ const AppWithdraw = () => {
   const [tab, setTab] = useState<"withdraw" | "history">("withdraw");
   const [step, setStep] = useState<1 | 2>(1);
   const [amount, setAmount] = useState("");
-  const [walletName, setWalletName] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
