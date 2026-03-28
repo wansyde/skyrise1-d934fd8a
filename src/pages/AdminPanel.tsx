@@ -363,6 +363,25 @@ const AdminPanel = () => {
               <div className="text-lg font-semibold tabular-nums">${Number((selectedUser as any).balance).toLocaleString()}</div>
             </div>
           </div>
+          {/* IP & Location Info */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Current IP</span>
+              <div className="text-sm font-mono mt-1">{(selectedUser as any).ip_address || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Last Login IP</span>
+              <div className="text-sm font-mono mt-1">{(selectedUser as any).last_login_ip || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Country</span>
+              <div className="text-sm mt-1">{(selectedUser as any).country || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Region</span>
+              <div className="text-sm mt-1">{(selectedUser as any).region || "—"}</div>
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-xs font-medium text-muted-foreground mb-2">Recent Deposits</h3>
