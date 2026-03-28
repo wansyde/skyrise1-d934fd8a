@@ -381,9 +381,9 @@ const Starting = () => {
               >
                 {carCampaigns.map((car, i) => {
                   // Outward U-curve: edges sit higher, center dips down
-                  const visibleCenter = activeIndex + (VISIBLE_COUNT - 1) / 2;
+                  const visibleCenter = activeIndex + (visibleCount - 1) / 2;
                   const distFromCenter = Math.abs(i - visibleCenter);
-                  const maxDist = (VISIBLE_COUNT - 1) / 2;
+                  const maxDist = (visibleCount - 1) / 2;
                   const normalizedDist = Math.min(distFromCenter / maxDist, 1);
                   const curveY = (1 - normalizedDist * normalizedDist) * 18; // center dips 18px
                   const rotateY = (i - visibleCenter) * 4; // subtle outward rotation
