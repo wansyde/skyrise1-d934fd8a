@@ -48,7 +48,7 @@ const AdminPanel = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("deposits")
-        .select("*, profiles!deposits_user_id_fkey(full_name, email, username)")
+        .select("*")
         .eq("status", "pending")
         .order("created_at", { ascending: false });
       return data || [];
