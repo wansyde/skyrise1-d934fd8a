@@ -19,7 +19,7 @@ const financialItems = [
 const detailItems = [
   { label: "KYC", icon: IdCard, href: "/app/kyc" },
   { label: "Personal Information", icon: UserCircle, href: "/app/settings" },
-  { label: "Payment Methods", icon: Wallet, href: "/app/wallet" },
+  { label: "Payment Methods", icon: Wallet, href: "/app/wallet/payment-methods" },
 ];
 
 const otherItems = [
