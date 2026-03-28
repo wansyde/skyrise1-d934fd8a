@@ -258,7 +258,6 @@ const Starting = () => {
       return;
     }
     const currentBalance = Number(profile.balance);
-    const taskCost = matchedCar.totalAmount;
 
     // Validate balance >= 100
     if (currentBalance < MIN_BALANCE) {
@@ -268,78 +267,38 @@ const Starting = () => {
       return;
     }
 
-    // Validate balance >= task cost; if not, create pending record
-    if (currentBalance < taskCost) {
-      await supabase.from("task_records").insert({
-        user_id: user.id,
-        car_brand: matchedCar.brand,
-        car_name: matchedCar.name,
-        car_image_url: matchedCar.featured,
-        total_amount: taskCost,
-        advertising_salary: 0,
-        assignment_code: assignmentCode,
-        status: "pending",
-      });
-      toast.error("Insufficient balance for this task. Record saved as pending.");
-      setMatchState("idle");
-      setMatchedCar(null);
-      return;
-    }
-
     setSubmitting(true);
     try {
-      // STEP 1: Deduct task cost from wallet balance (real lock)
-      const { error: deductError } = await supabase
-        .from("profiles")
-        .update({ balance: currentBalance - taskCost })
-        .eq("user_id", user.id);
-      if (deductError) throw deductError;
-
-      // STEP 2: Simulate processing (1-3s)
+      // Simulate processing (1-3s)
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
 
-      // STEP 3: Calculate reward = 0.4% of task cost
-      const reward = taskCost * 0.004;
-
-      // STEP 4: Return funds + profit
-      const newBalance = parseFloat((currentBalance - taskCost + taskCost + reward).toFixed(2)); // original - cost + cost + reward = original + reward
-      const newAdSalary = parseFloat((Number(profile.advertising_salary) + reward).toFixed(2));
-      const newTaskCount = (profile.tasks_completed_today || 0) + 1;
-
-      const { error: returnError } = await supabase
-        .from("profiles")
-        .update({
-          balance: newBalance,
-          advertising_salary: newAdSalary,
-          tasks_completed_today: newTaskCount,
-        })
-        .eq("user_id", user.id);
-      if (returnError) throw returnError;
-
-      // STEP 5: Create completed task record
-      const { error: recordError } = await supabase.from("task_records").insert({
-        user_id: user.id,
-        car_brand: matchedCar.brand,
-        car_name: matchedCar.name,
-        car_image_url: matchedCar.featured,
-        total_amount: taskCost,
-        advertising_salary: reward,
-        assignment_code: assignmentCode,
-        status: "completed",
+      // Call secure server-side RPC
+      const { data, error } = await supabase.rpc("complete_task", {
+        _car_brand: matchedCar.brand,
+        _car_name: matchedCar.name,
+        _car_image_url: matchedCar.featured,
+        _total_amount: matchedCar.totalAmount,
+        _assignment_code: assignmentCode,
       });
-      if (recordError) throw recordError;
+
+      if (error) throw error;
+
+      const result = data as any;
+      if (result?.error) {
+        if (result.status === "pending") {
+          toast.error("Insufficient balance for this task. Record saved as pending.");
+        } else {
+          toast.error(result.error);
+        }
+        setMatchState("idle");
+        setMatchedCar(null);
+        return;
+      }
 
       await refreshProfile();
-      // Task completed silently — no toast
       setMatchState("idle");
       setMatchedCar(null);
     } catch (e: any) {
-      // If something failed after deduction, try to restore balance
-      await supabase
-        .from("profiles")
-        .update({ balance: currentBalance })
-        .eq("user_id", user.id);
-      await refreshProfile();
       toast.error("Failed to submit: " + e.message);
     } finally {
       setSubmitting(false);

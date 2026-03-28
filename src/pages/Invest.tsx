@@ -30,34 +30,20 @@ const Invest = () => {
       return;
     }
 
-    const endsAt = new Date();
-    endsAt.setDate(endsAt.getDate() + plan.duration_days);
-
-    const { error } = await supabase.from("user_investments").insert({
-      user_id: user.id,
-      plan_id: plan.id,
-      amount: plan.min_amount,
-      ends_at: endsAt.toISOString(),
-    });
+    const { data, error } = await supabase.rpc("invest_in_plan", {
+      _plan_id: plan.id,
+      _amount: plan.min_amount,
+    } as any);
 
     if (error) {
       toast.error("Failed to activate plan: " + error.message);
     } else {
-      // Deduct from balance
-      await supabase
-        .from("profiles")
-        .update({ balance: balance - plan.min_amount })
-        .eq("user_id", user.id);
-
-      await supabase.from("transactions").insert({
-        user_id: user.id,
-        type: "investment",
-        amount: -plan.min_amount,
-        status: "approved",
-        description: `Invested in ${plan.name}`,
-      });
-
-      toast.success(`${plan.name} plan activated!`);
+      const result = data as any;
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`${plan.name} plan activated!`);
+      }
     }
   };
 

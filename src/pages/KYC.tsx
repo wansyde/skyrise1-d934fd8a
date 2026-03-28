@@ -83,19 +83,14 @@ const KYC = () => {
         uploadFile(selfieFile, "selfie"),
       ]);
 
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          kyc_name: name.trim(),
-          kyc_id_number: idNumber.trim(),
-          kyc_id_type: idType,
-          kyc_front_url: frontUrl,
-          kyc_back_url: backUrl,
-          kyc_selfie_url: selfieUrl,
-          kyc_status: "submitted",
-          kyc_submitted_at: new Date().toISOString(),
-        } as any)
-        .eq("user_id", user.id);
+      const { error } = await supabase.rpc("submit_kyc", {
+        _kyc_name: name.trim(),
+        _kyc_id_number: idNumber.trim(),
+        _kyc_id_type: idType,
+        _kyc_front_url: frontUrl,
+        _kyc_back_url: backUrl,
+        _kyc_selfie_url: selfieUrl,
+      });
 
       if (error) throw error;
       toast.success("KYC documents submitted successfully");

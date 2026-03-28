@@ -366,6 +366,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_task: {
+        Args: {
+          _assignment_code: string
+          _car_brand: string
+          _car_image_url: string
+          _car_name: string
+          _total_amount: number
+        }
+        Returns: Json
+      }
       get_email_by_username: { Args: { _username: string }; Returns: string }
       has_role: {
         Args: {
@@ -373,6 +383,21 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      invest_in_plan: {
+        Args: { _amount: number; _plan_id: string }
+        Returns: Json
+      }
+      submit_kyc: {
+        Args: {
+          _kyc_back_url: string
+          _kyc_front_url: string
+          _kyc_id_number: string
+          _kyc_id_type: string
+          _kyc_name: string
+          _kyc_selfie_url: string
+        }
+        Returns: Json
       }
     }
     Enums: {
