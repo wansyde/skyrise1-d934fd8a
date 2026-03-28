@@ -73,7 +73,7 @@ const Starting = () => {
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
   const DAILY_LIMIT = vipTier.taskLimit;
 
-  const todaySalary = 0;
+  const todaySalary = Number(profile?.advertising_salary ?? 0).toFixed(2);
   const userName = profile?.full_name || "User";
   const total = carCampaigns.length;
 
@@ -88,7 +88,7 @@ const Starting = () => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % total);
-    }, 4000);
+    }, 2000);
     return () => clearInterval(interval);
   }, [isPaused, total]);
 
@@ -415,7 +415,7 @@ const Starting = () => {
                     initial={{ opacity: 0, scale: 1.06, x: 40 }}
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.96, x: -40 }}
-                    transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
                   >
                     <img src={featuredCar.featured} alt={featuredCar.brand} className="w-full aspect-[2/1] object-contain rounded-2xl" style={{ filter: "brightness(1.08) contrast(1.06) saturate(1.12)" }} />
                     <div className="absolute -bottom-3 left-[10%] right-[10%] h-8 rounded-full" style={{ background: "radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, transparent 70%)", filter: "blur(8px)" }} />
