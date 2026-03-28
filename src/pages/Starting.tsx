@@ -73,7 +73,7 @@ const Starting = () => {
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
   const DAILY_LIMIT = vipTier.taskLimit;
 
-  const todaySalary = 0;
+  const todaySalary = Number(profile?.advertising_salary ?? 0).toFixed(2);
   const userName = profile?.full_name || "User";
   const total = carCampaigns.length;
 
