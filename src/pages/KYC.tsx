@@ -188,7 +188,7 @@ const KYC = () => {
               <p className="text-xs text-muted-foreground mt-0.5">
                 {isVerified
                   ? "Your identity has been verified. Withdrawal is enabled."
-                  : "Your documents are being reviewed. This usually takes 24–48 hours."}
+                  : "Your documents have been submitted and are being reviewed. Verification will be completed within 24 hours."}
               </p>
             </div>
           </motion.div>

@@ -384,6 +384,7 @@ const AdminPanel = () => {
       case "deposit": return "bg-green-500/15 text-green-400";
       case "withdrawal": case "withdrawal_complete": return "bg-red-500/15 text-red-400";
       case "task_access_toggle": case "task_cycle_reset": return "bg-blue-500/15 text-blue-400";
+      case "kyc_verify": return "bg-emerald-500/15 text-emerald-400";
       default: return "bg-muted text-muted-foreground";
     }
   };
