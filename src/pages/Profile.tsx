@@ -107,19 +107,26 @@ const Profile = () => {
             </div>
 
             {/* Credit Score */}
-            <div className="mt-4 flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Credit Score:</span>
-              <span className="font-medium">{profile?.credit_score ?? 100}%</span>
-            </div>
-            <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ backgroundColor: (profile?.credit_score ?? 100) >= 80 ? 'hsl(var(--primary))' : (profile?.credit_score ?? 100) >= 50 ? 'hsl(45 93% 47%)' : 'hsl(var(--destructive))' }}
-                initial={{ width: 0 }}
-                animate={{ width: `${profile?.credit_score ?? 100}%` }}
-                transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              />
-            </div>
+            {(() => {
+              const score = (profile as any)?.credit_score ?? 100;
+              return (
+                <>
+                  <div className="mt-4 flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Credit Score:</span>
+                    <span className="font-medium">{score}%</span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: score >= 80 ? 'hsl(var(--primary))' : score >= 50 ? 'hsl(45 93% 47%)' : 'hsl(var(--destructive))' }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${score}%` }}
+                      transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    />
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
 
