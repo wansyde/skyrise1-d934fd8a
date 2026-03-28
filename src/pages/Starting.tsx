@@ -327,7 +327,7 @@ const Starting = () => {
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Start Promoting</h1>
                 <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                  {completedCount}/{DAILY_LIMIT} tasks today
+                  {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet} tasks
                 </p>
               </div>
               <div className="relative px-4 py-1.5">
