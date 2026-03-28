@@ -74,17 +74,7 @@ const AppWithdraw = () => {
       return;
     }
 
-    // First-time user: needs wallet fields filled
-    if (!hasSavedWallet) {
-      if (!walletName.trim()) {
-        toast.error("Please enter a wallet name.");
-        return;
-      }
-      if (!walletAddress.trim()) {
-        toast.error("Please enter your crypto wallet address.");
-        return;
-      }
-    }
+    if (!checkPaymentMethod()) return;
 
     setStep(2);
   };
