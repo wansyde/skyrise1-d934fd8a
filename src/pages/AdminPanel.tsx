@@ -190,7 +190,7 @@ const AdminPanel = () => {
 
   const handleToggleTaskAccess = async (userId: string, currentStatus: string) => {
     setProcessingId(userId);
-    const newStatus = currentStatus === "active" ? "restricted" : "active";
+    const newStatus = currentStatus === "active" ? "suspended" : "active";
     try {
       const { error, data } = await supabase
         .from("profiles")
