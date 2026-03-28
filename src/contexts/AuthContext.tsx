@@ -128,6 +128,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsAdmin(false);
   };
 
+  useInactivityTimeout(!!session);
+
   return (
     <AuthContext.Provider value={{ session, user, profile, isAdmin, loading, signOut, refreshProfile }}>
       {children}
