@@ -373,7 +373,7 @@ const Login = () => {
                       <div className="relative">
                         <Input
                           type={showRegPw ? "text" : "password"}
-                          placeholder="••••••••"
+                          placeholder=""
                           className="bg-background pr-10"
                           value={regPassword}
                           onChange={(e) => setRegPassword(e.target.value)}
