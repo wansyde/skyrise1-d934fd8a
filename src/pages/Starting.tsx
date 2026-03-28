@@ -384,7 +384,6 @@ const Starting = () => {
             >
               {visibleCards.map(({ idx, offset, car }) => {
                 const style = getCardStyle(offset);
-                const isActive = offset === 0;
                 return (
                   <motion.div
                     key={`${idx}-${car.brand}`}
@@ -396,11 +395,7 @@ const Starting = () => {
                   >
                     <div
                       className="w-[130px] h-[165px] sm:w-[145px] sm:h-[180px] rounded-xl overflow-hidden"
-                      style={{
-                        boxShadow: isActive
-                          ? "0 14px 45px rgba(0,0,0,0.18), 0 0 0 2px hsl(var(--primary) / 0.2)"
-                          : "0 6px 20px rgba(0,0,0,0.08)",
-                      }}
+                      style={{ boxShadow: "0 8px 25px rgba(0,0,0,0.1)" }}
                     >
                       <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
                     </div>
