@@ -42,7 +42,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between px-4 border-b border-border bg-background/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between px-4 border-b border-border bg-background">
         <button
           onClick={() => setMenuOpen(true)}
           className="flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
