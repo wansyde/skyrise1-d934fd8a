@@ -193,6 +193,18 @@ const AppWithdraw = () => {
                   </div>
                 </div>
 
+                {/* Wallet Address - after password */}
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-2">Crypto Wallet Address</label>
+                  <Input
+                    type="text"
+                    placeholder="Enter your USDT (TRC-20) wallet address"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                    className="bg-transparent border-0 border-b border-border rounded-none h-12 text-sm font-mono focus-visible:border-muted-foreground/40"
+                  />
+                </div>
+
                 {/* Submit */}
                 <Button
                   className="btn-press h-12 w-full text-sm mt-2"
