@@ -72,7 +72,7 @@ const carCampaigns = [
   { brand: "Tesla", name: "Tesla Model S 2025 Plaid", image: teslaModelSImg, featured: teslaModelSFeatured, totalAmount: 44, adSalary: 0.18 },
 ];
 
-const VISIBLE_COUNT = 5;
+const VISIBLE_COUNT = 7;
 
 const generateAssignmentCode = () => {
   const now = new Date();
