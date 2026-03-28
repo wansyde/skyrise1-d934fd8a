@@ -451,16 +451,19 @@ const Starting = () => {
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.5 }} className="mb-6 relative">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Showcase</h2>
-              <span className="text-[10px] text-muted-foreground">{featuredCar.brand}</span>
             </div>
 
             <div
-              className="relative rounded-2xl overflow-hidden"
+              className="relative rounded-2xl overflow-hidden bg-white"
               onTouchStart={handleFeaturedTouchStart}
               onTouchEnd={handleFeaturedTouchEnd}
-              style={{ background: "radial-gradient(ellipse at 50% 60%, hsl(var(--muted) / 0.5) 0%, hsl(var(--background)) 80%)" }}
             >
-              <div className="relative flex items-center justify-center py-4 md:py-8 overflow-hidden" style={{ perspective: "1400px" }}>
+              {/* Brand text watermark */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                <p className="text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase text-muted-foreground/20">Luxury Car Manufacturer Brand</p>
+              </div>
+
+              <div className="relative flex items-center justify-center py-6 md:py-10 overflow-hidden z-10">
                 <AnimatePresence initial={false} mode="popLayout">
                   <motion.div
                     key={`showcase-${activeIndex}`}
@@ -474,28 +477,19 @@ const Starting = () => {
                     <img
                       src={featuredCar.featured}
                       alt={featuredCar.name}
-                      className="w-[85%] md:w-[65%] lg:w-[55%] aspect-[2/1] object-contain"
-                      style={{ filter: "brightness(1.06) contrast(1.04) saturate(1.1)", imageRendering: "auto" }}
+                      className="w-[80%] md:w-[60%] lg:w-[50%] aspect-[2/1] object-contain"
+                      style={{ filter: "brightness(1.02) contrast(1.02) saturate(1.05)" }}
                       draggable={false}
                     />
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70%] md:w-[50%] h-6 md:h-8 rounded-[50%]" style={{ background: "radial-gradient(ellipse, rgba(0,0,0,0.18) 0%, transparent 70%)", filter: "blur(6px)" }} />
                   </motion.div>
                 </AnimatePresence>
               </div>
 
-              {/* Turntable platform ring */}
-              <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 w-[60%] pointer-events-none">
-                <svg viewBox="0 0 400 60" className="w-full" style={{ opacity: 0.25 }}>
-                  <ellipse cx="200" cy="30" rx="190" ry="25" fill="none" stroke="hsl(var(--foreground))" strokeWidth="0.8" strokeDasharray="4 3" />
-                  <ellipse cx="200" cy="30" rx="160" ry="18" fill="none" stroke="hsl(var(--foreground))" strokeWidth="0.4" />
-                </svg>
-              </div>
-
-              <button onClick={goFeaturedPrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background/80 transition-colors">
-                <ChevronLeft className="h-4 w-4 text-foreground/70" />
+              <button onClick={goFeaturedPrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-white transition-colors">
+                <ChevronLeft className="h-4 w-4 text-foreground/50" />
               </button>
-              <button onClick={goFeaturedNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background/80 transition-colors">
-                <ChevronRight className="h-4 w-4 text-foreground/70" />
+              <button onClick={goFeaturedNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-white transition-colors">
+                <ChevronRight className="h-4 w-4 text-foreground/50" />
               </button>
             </div>
 
