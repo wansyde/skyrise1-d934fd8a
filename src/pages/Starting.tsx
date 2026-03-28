@@ -494,7 +494,7 @@ const Starting = () => {
                 <Headphones className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
                 <div>
                   <p className="text-xs font-medium">Contact Support</p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">support@skyrise.com</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">Please contact customer support service for further questions.</p>
                 </div>
               </div>
             </div>
