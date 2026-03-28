@@ -211,6 +211,12 @@ const Starting = () => {
   // Promote (submit) handler
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting) return;
+    if (isRestricted) {
+      toast.error("Your account is currently restricted. Please contact support.");
+      setMatchState("idle");
+      setMatchedCar(null);
+      return;
+    }
     const currentBalance = Number(profile.balance);
     const taskCost = matchedCar.totalAmount;
 
