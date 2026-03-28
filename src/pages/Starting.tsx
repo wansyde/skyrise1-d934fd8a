@@ -150,17 +150,13 @@ const Starting = () => {
     handleInteraction();
   }, [handleInteraction]);
 
-  // Build a window of cards centered on activeIndex for the flowing strip
+  // Showcase = the rightmost visible card on screen
   const half = Math.floor(VISIBLE_COUNT / 2);
-  const visibleCards = [];
-  for (let offset = -half; offset <= half; offset++) {
-    const idx = ((activeIndex + offset) % total + total) % total;
-    visibleCards.push({ idx, offset, car: carCampaigns[idx] });
-  }
-
-  // Showcase = the card that just entered from the right (rightmost visible)
   const showcaseIndex = ((activeIndex + half) % total + total) % total;
   const featuredCar = carCampaigns[showcaseIndex];
+
+  // Strip offset: slide the entire row so activeIndex card is at the left edge
+  const stripOffset = -(activeIndex * cardStep);
 
   // Preload adjacent featured images for smooth transitions
   useEffect(() => {
