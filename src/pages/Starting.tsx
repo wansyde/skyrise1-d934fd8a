@@ -393,7 +393,7 @@ const Starting = () => {
                     style={{ zIndex: style.zIndex }}
                   >
                     <div
-                      className="w-[130px] h-[165px] sm:w-[145px] sm:h-[180px] rounded-xl overflow-hidden"
+                      className="w-[140px] h-[175px] sm:w-[155px] sm:h-[195px] rounded-xl overflow-hidden"
                       style={{ boxShadow: "0 8px 25px rgba(0,0,0,0.1)" }}
                     >
                       <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
