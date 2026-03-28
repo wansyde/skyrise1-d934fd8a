@@ -136,19 +136,17 @@ const Starting = () => {
 
   const getCardStyle = (offset: number) => {
     const absOffset = Math.abs(offset);
-    const scale = offset === 0 ? 1.08 : Math.max(0.68, 1 - absOffset * 0.14);
-    const rotateY = offset * -22;
-    const translateX = offset * 95;
-    const translateZ = offset === 0 ? 60 : -absOffset * 70;
-    const opacity = offset === 0 ? 1 : Math.max(0.45, 1 - absOffset * 0.25);
+    const scale = offset === 0 ? 1.05 : Math.max(0.72, 1 - absOffset * 0.12);
+    const rotateY = offset * -25;
+    const translateX = offset * 110;
+    const translateZ = offset === 0 ? 50 : -absOffset * 80;
+    const opacity = offset === 0 ? 1 : Math.max(0.5, 1 - absOffset * 0.22);
     const zIndex = 10 - absOffset;
-    const brightness = offset === 0 ? 1.12 : Math.max(0.7, 1 - absOffset * 0.15);
-    const contrast = offset === 0 ? 1.1 : 1;
-    const saturate = offset === 0 ? 1.15 : Math.max(0.85, 1 - absOffset * 0.1);
+    const brightness = offset === 0 ? 1.05 : Math.max(0.55, 1 - absOffset * 0.2);
     return {
-      transform: `perspective(1200px) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+      transform: `perspective(900px) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
       opacity, zIndex,
-      filter: `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`,
+      filter: `brightness(${brightness})`,
     };
   };
 
@@ -360,113 +358,105 @@ const Starting = () => {
             </motion.div>
           </div>
 
-          {/* 3D Car Carousel */}
+          {/* 3D Car Carousel + Showcase Combined */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.6 }} className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Campaigns</h2>
-              <span className="text-[10px] text-muted-foreground">{total} available</span>
-            </div>
-
             <div
-              className="relative h-[340px] md:h-[420px] flex items-center justify-center overflow-hidden"
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              style={{ background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.06) 0%, transparent 70%)" }}
+              className="relative rounded-2xl overflow-hidden"
+              style={{ background: "linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0d0d0d 100%)" }}
             >
-              {visibleCards.map(({ idx, offset, car }) => {
-                const style = getCardStyle(offset);
-                const isCenter = offset === 0;
-                return (
-                  <motion.div
-                    key={`${idx}-${car.brand}`}
-                    className="absolute cursor-pointer"
-                    onClick={() => goTo(idx)}
-                    animate={{ transform: style.transform, opacity: style.opacity, zIndex: style.zIndex, filter: style.filter }}
-                    transition={{ type: "spring", stiffness: 220, damping: 28, mass: 0.9 }}
-                    style={{ zIndex: style.zIndex }}
-                  >
-                    <div className="flex flex-col items-center">
+              {/* Carousel Section */}
+              <div
+                className="relative h-[200px] flex items-center justify-center overflow-hidden"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                {visibleCards.map(({ idx, offset, car }) => {
+                  const style = getCardStyle(offset);
+                  const isCenter = offset === 0;
+                  return (
+                    <motion.div
+                      key={`${idx}-${car.brand}`}
+                      className="absolute cursor-pointer"
+                      onClick={() => goTo(idx)}
+                      animate={{ transform: style.transform, opacity: style.opacity, zIndex: style.zIndex, filter: style.filter }}
+                      transition={{ type: "spring", stiffness: 250, damping: 30, mass: 0.8 }}
+                      style={{ zIndex: style.zIndex }}
+                    >
                       <div
-                        className="w-40 h-56 sm:w-48 sm:h-64 md:w-44 md:h-60 rounded-2xl overflow-hidden relative"
-                        style={{ boxShadow: isCenter ? "0 20px 60px rgba(0,0,0,0.5), 0 0 30px hsl(var(--primary) / 0.12)" : "0 8px 24px rgba(0,0,0,0.35)" }}
+                        className="w-[130px] h-[160px] sm:w-[150px] sm:h-[185px] rounded-xl overflow-hidden"
+                        style={{
+                          boxShadow: isCenter
+                            ? "0 8px 40px rgba(0,0,0,0.7), 0 0 20px rgba(255,255,255,0.05)"
+                            : "0 4px 20px rgba(0,0,0,0.5)",
+                          border: isCenter ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.04)",
+                        }}
                       >
                         <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
-                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                       </div>
-                      <div
-                        className="w-36 sm:w-44 md:w-40 h-12 mt-0.5 rounded-b-2xl overflow-hidden opacity-30"
-                        style={{ transform: "scaleY(-1) scaleX(0.92)", maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)", WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)" }}
-                      >
-                        <img src={car.image} alt="" className="w-full h-56 sm:h-64 md:h-60 object-cover object-bottom" style={{ filter: "blur(2px)" }} />
-                      </div>
-                      {isCenter && (
-                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-24 h-4 rounded-full" style={{ background: "radial-gradient(ellipse, hsl(var(--primary) / 0.15) 0%, transparent 70%)" }} />
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
 
-            <div className="flex justify-center gap-1 mt-3">
-              {carCampaigns.map((_, i) => (
-                <button key={i} onClick={() => goTo(i)} className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-muted-foreground/30"}`} />
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Featured Car Showcase */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.5 }} className="mb-6 relative">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Showcase</h2>
-            </div>
-
-            <div
-              className="relative rounded-2xl overflow-hidden bg-white"
-              onTouchStart={handleFeaturedTouchStart}
-              onTouchEnd={handleFeaturedTouchEnd}
-            >
-
-              <div className="relative flex items-center justify-center py-6 md:py-10 overflow-hidden z-10">
+              {/* Featured Showcase on Platform */}
+              <div
+                className="relative flex flex-col items-center pb-6"
+                onTouchStart={handleFeaturedTouchStart}
+                onTouchEnd={handleFeaturedTouchEnd}
+              >
                 <AnimatePresence initial={false} mode="popLayout">
                   <motion.div
                     key={`showcase-${activeIndex}`}
                     className="relative w-full flex items-center justify-center"
                     style={{ willChange: "transform, opacity" }}
-                    initial={{ opacity: 0, x: "30%", scale: 0.95 }}
+                    initial={{ opacity: 0, x: "25%", scale: 0.95 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     exit={{ opacity: 0, x: "-20%", scale: 0.97 }}
-                    transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                   >
                     <img
                       src={featuredCar.featured}
                       alt={featuredCar.name}
-                      className="w-[80%] md:w-[60%] lg:w-[50%] aspect-[2/1] object-contain"
-                      style={{ filter: "brightness(1.02) contrast(1.02) saturate(1.05)" }}
+                      className="w-[75%] sm:w-[65%] aspect-[2/1] object-contain relative z-10"
+                      style={{ filter: "brightness(1.05) contrast(1.03) drop-shadow(0 10px 30px rgba(0,0,0,0.5))" }}
                       draggable={false}
                     />
                   </motion.div>
                 </AnimatePresence>
+
+                {/* Circular Platform / Stage */}
+                <div
+                  className="w-[80%] sm:w-[70%] h-[30px] -mt-3 relative z-0"
+                  style={{
+                    background: "radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 50%, transparent 70%)",
+                    borderRadius: "50%",
+                  }}
+                />
+
+                {/* Navigation Arrows */}
+                <button onClick={goFeaturedPrev} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                  <ChevronLeft className="h-4 w-4 text-white/60" />
+                </button>
+                <button onClick={goFeaturedNext} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                  <ChevronRight className="h-4 w-4 text-white/60" />
+                </button>
               </div>
 
-              <button onClick={goFeaturedPrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-white transition-colors">
-                <ChevronLeft className="h-4 w-4 text-foreground/50" />
-              </button>
-              <button onClick={goFeaturedNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-white transition-colors">
-                <ChevronRight className="h-4 w-4 text-foreground/50" />
-              </button>
-            </div>
+              {/* Car Name + Progress Bar */}
+              <div className="px-5 pb-5">
+                <AnimatePresence mode="wait">
+                  <motion.p key={`name-${activeIndex}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.35 }} className="text-center text-[11px] font-medium text-white/50 tracking-widest uppercase mb-3">
+                    {featuredCar.name}
+                  </motion.p>
+                </AnimatePresence>
 
-            <AnimatePresence mode="wait">
-              <motion.p key={`name-${activeIndex}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="text-center text-xs font-medium text-muted-foreground mt-3 tracking-widest uppercase">
-                {featuredCar.name}
-              </motion.p>
-            </AnimatePresence>
-
-            <div className="flex justify-center gap-1 mt-2">
-              {carCampaigns.map((_, i) => (
-                <button key={i} onClick={() => goTo(i)} className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-4 h-1 bg-primary/70" : "w-1 h-1 bg-muted-foreground/20"}`} />
-              ))}
+                {/* Progress dots */}
+                <div className="flex justify-center gap-1">
+                  {carCampaigns.map((_, i) => (
+                    <button key={i} onClick={() => goTo(i)} className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-white/20"}`} />
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.div>
 
