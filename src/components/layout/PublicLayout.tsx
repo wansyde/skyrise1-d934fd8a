@@ -34,7 +34,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           {/* Mobile menu button */}
           <button
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
             onClick={() => setSlideMenuOpen(true)}
           >
             <Menu className="h-5 w-5" strokeWidth={1.5} />
