@@ -1,6 +1,6 @@
 import logoImg from "@/assets/skyrise-logo.jpg";
 
-const SkyriseLogo = ({ className = "h-12 w-auto" }: { className?: string }) => (
+const SkyriseLogo = ({ className = "h-14 w-auto" }: { className?: string }) => (
   <img
     src={logoImg}
     alt="Skyrise"

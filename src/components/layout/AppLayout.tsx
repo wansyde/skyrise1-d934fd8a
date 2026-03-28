@@ -50,7 +50,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
           <Menu className="h-5 w-5" strokeWidth={1.5} />
         </button>
         <Link to="/" className="flex items-center">
-          <SkyriseLogo className="h-11 w-auto" />
+          <SkyriseLogo className="h-14 w-auto" />
         </Link>
         <div className="w-9" />
       </header>
@@ -78,7 +78,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               {/* Menu header */}
               <div className="flex h-14 items-center justify-between px-5">
                 <Link to="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
-                  <SkyriseLogo className="h-11 w-auto" />
+                  <SkyriseLogo className="h-14 w-auto" />
                 </Link>
                 <button
                   onClick={() => setMenuOpen(false)}

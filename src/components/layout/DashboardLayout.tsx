@@ -24,7 +24,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-6">
         <Link to="/" className="flex items-center">
-           <SkyriseLogo className="h-11 w-auto" />
+           <SkyriseLogo className="h-14 w-auto" />
         </Link>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
@@ -94,7 +94,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
           <span className="flex items-center">
-            <SkyriseLogo className="h-11 w-auto" />
+            <SkyriseLogo className="h-14 w-auto" />
           </span>
         </header>
 
