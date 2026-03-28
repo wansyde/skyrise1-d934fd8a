@@ -24,7 +24,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-6">
         <Link to="/" className="flex items-center">
-          <SkyriseLogo className="h-7 w-auto" />
+           <SkyriseLogo className="h-9 w-auto" />
         </Link>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
