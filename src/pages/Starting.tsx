@@ -161,9 +161,14 @@ const Starting = () => {
   }, [activeIndex, total, goTo]);
 
   const MIN_BALANCE = 100;
+  const isRestricted = profile?.status === "restricted";
 
   // Match Ad handler
   const handleMatchAd = () => {
+    if (isRestricted) {
+      toast.error("Your account is currently restricted. Please contact support.");
+      return;
+    }
     const currentBalance = Number(profile?.balance ?? 0);
 
     if (currentBalance < MIN_BALANCE) {
@@ -206,6 +211,12 @@ const Starting = () => {
   // Promote (submit) handler
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting) return;
+    if (isRestricted) {
+      toast.error("Your account is currently restricted. Please contact support.");
+      setMatchState("idle");
+      setMatchedCar(null);
+      return;
+    }
     const currentBalance = Number(profile.balance);
     const taskCost = matchedCar.totalAmount;
 

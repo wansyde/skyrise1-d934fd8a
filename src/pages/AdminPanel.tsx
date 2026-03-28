@@ -3,10 +3,24 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pencil, Check, X } from "lucide-react";
+import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { VIP_LEVELS } from "@/lib/vip-config";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+type SortField = "username" | "balance" | "advertising_salary" | "created_at" | "status";
+type SortDir = "asc" | "desc";
 
 const AdminPanel = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -16,6 +30,9 @@ const AdminPanel = () => {
   const [editSalary, setEditSalary] = useState("");
   const [editVipLevel, setEditVipLevel] = useState("");
   const [editTasksCompleted, setEditTasksCompleted] = useState("");
+  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: profiles } = useQuery({
@@ -171,18 +188,110 @@ const AdminPanel = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
   };
 
+  const handleToggleTaskAccess = async (userId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "active" ? "restricted" : "active";
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status: newStatus })
+      .eq("user_id", userId);
+    if (error) {
+      toast.error("Failed to update task access.");
+      return;
+    }
+    toast.success(`Task access ${newStatus === "active" ? "enabled" : "disabled"}.`);
+    queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    setDeletingUser(userId);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) {
+        toast.error("Not authenticated.");
+        return;
+      }
+
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/delete-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ user_id: userId }),
+        }
+      );
+      const result = await res.json();
+      if (!res.ok) {
+        toast.error(result.error || "Failed to delete user.");
+        return;
+      }
+      toast.success("User deleted permanently.");
+      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete user.");
+    } finally {
+      setDeletingUser(null);
+    }
+  };
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  };
+
   const totalUsers = profiles?.length ?? 0;
   const totalAUM = profiles?.reduce((s, p) => s + Number(p.balance), 0) ?? 0;
 
-  const filteredProfiles = (profiles || []).filter((p: any) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      (p.username || "").toLowerCase().includes(q) ||
-      (p.email || "").toLowerCase().includes(q) ||
-      (p.full_name || "").toLowerCase().includes(q)
-    );
-  });
+  const filteredProfiles = (profiles || [])
+    .filter((p: any) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        (p.username || "").toLowerCase().includes(q) ||
+        (p.email || "").toLowerCase().includes(q) ||
+        (p.full_name || "").toLowerCase().includes(q) ||
+        (p.phone || "").toLowerCase().includes(q)
+      );
+    })
+    .sort((a: any, b: any) => {
+      let aVal: any, bVal: any;
+      switch (sortField) {
+        case "username":
+          aVal = (a.username || "").toLowerCase();
+          bVal = (b.username || "").toLowerCase();
+          break;
+        case "balance":
+          aVal = Number(a.balance);
+          bVal = Number(b.balance);
+          break;
+        case "advertising_salary":
+          aVal = Number(a.advertising_salary);
+          bVal = Number(b.advertising_salary);
+          break;
+        case "created_at":
+          aVal = new Date(a.created_at).getTime();
+          bVal = new Date(b.created_at).getTime();
+          break;
+        case "status":
+          aVal = a.status || "active";
+          bVal = b.status || "active";
+          break;
+        default:
+          return 0;
+      }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
 
   const stats = [
     { label: "Total Users", value: totalUsers.toLocaleString(), icon: Users },
@@ -190,6 +299,18 @@ const AdminPanel = () => {
     { label: "Pending Withdrawals", value: String(pendingWithdrawals?.length ?? 0), icon: ArrowUpFromLine },
     { label: "Total AUM", value: `$${(totalAUM / 1000).toFixed(1)}K`, icon: DollarSign },
   ];
+
+  const SortHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <th
+      className="px-5 py-3 font-medium cursor-pointer select-none hover:text-foreground transition-colors"
+      onClick={() => toggleSort(field)}
+    >
+      <span className="inline-flex items-center gap-1">
+        {children}
+        <ArrowUpDown className={`h-3 w-3 ${sortField === field ? "text-primary" : "text-muted-foreground/50"}`} />
+      </span>
+    </th>
+  );
 
   return (
     <DashboardLayout>
@@ -220,7 +341,7 @@ const AdminPanel = () => {
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search by username or email..."
+              placeholder="Search username, email, phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-8 text-xs"
@@ -231,13 +352,17 @@ const AdminPanel = () => {
           <table className="w-full">
             <thead>
               <tr className="border-t border-border text-left text-xs text-muted-foreground">
-                <th className="px-5 py-3 font-medium">Username</th>
+                <SortHeader field="username">Username</SortHeader>
                 <th className="px-5 py-3 font-medium">Email</th>
-                <th className="px-5 py-3 font-medium">Wallet Balance</th>
-                <th className="px-5 py-3 font-medium">Ad Salary</th>
+                <th className="px-5 py-3 font-medium">Phone</th>
+                <th className="px-5 py-3 font-medium">Referral Code</th>
+                <SortHeader field="balance">Wallet Balance</SortHeader>
+                <SortHeader field="advertising_salary">Ad Salary</SortHeader>
                 <th className="px-5 py-3 font-medium">VIP Level</th>
                 <th className="px-5 py-3 font-medium">Tasks Today</th>
-                <th className="px-5 py-3 font-medium">Action</th>
+                <SortHeader field="status">Task Access</SortHeader>
+                <SortHeader field="created_at">Registered</SortHeader>
+                <th className="px-5 py-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -245,6 +370,8 @@ const AdminPanel = () => {
                 <tr key={u.user_id} className="border-t border-border">
                   <td className="px-5 py-3 text-sm font-medium">{u.username || "—"}</td>
                   <td className="px-5 py-3 text-sm text-muted-foreground">{u.email || "—"}</td>
+                  <td className="px-5 py-3 text-sm text-muted-foreground">{u.phone || "—"}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
                   <td className="px-5 py-3">
                     {editingUser === u.user_id ? (
                       <Input type="number" value={editBalance} onChange={(e) => setEditBalance(e.target.value)} className="h-7 w-28 text-xs" min={0} />
@@ -282,25 +409,72 @@ const AdminPanel = () => {
                     )}
                   </td>
                   <td className="px-5 py-3">
+                    <button
+                      onClick={() => handleToggleTaskAccess(u.user_id, u.status || "active")}
+                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                        (u.status || "active") === "active"
+                          ? "bg-green-500/15 text-green-400 hover:bg-green-500/25"
+                          : "bg-destructive/15 text-destructive hover:bg-destructive/25"
+                      }`}
+                    >
+                      <Power className="h-3 w-3" />
+                      {(u.status || "active") === "active" ? "ON" : "OFF"}
+                    </button>
+                  </td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">
+                    {new Date(u.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-5 py-3">
                     {editingUser === u.user_id ? (
                       <div className="flex gap-1.5">
                         <Button size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => saveBalances(u.user_id)}>
-                          <Check className="h-3.5 w-3.5 text-success" />
+                          <Check className="h-3.5 w-3.5 text-green-400" />
                         </Button>
                         <Button size="sm" variant="outline" className="h-7 w-7 p-0" onClick={cancelEditing}>
                           <X className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>
                     ) : (
-                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => startEditing(u)}>
-                        <Pencil className="h-3 w-3" /> Edit
-                      </Button>
+                      <div className="flex gap-1.5">
+                        <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => startEditing(u)}>
+                          <Pencil className="h-3 w-3" /> Edit
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 w-7 p-0 text-destructive border-destructive/30 hover:bg-destructive/10"
+                              disabled={deletingUser === u.user_id}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete User</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete <strong>{u.username || u.email}</strong>? This action is irreversible. All account data, balances, and task records will be permanently removed.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteUser(u.user_id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete Permanently
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     )}
                   </td>
                 </tr>
               ))}
               {filteredProfiles.length === 0 && (
-                <tr><td colSpan={7} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
+                <tr><td colSpan={11} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
               )}
             </tbody>
           </table>
