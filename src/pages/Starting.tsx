@@ -458,10 +458,6 @@ const Starting = () => {
               onTouchStart={handleFeaturedTouchStart}
               onTouchEnd={handleFeaturedTouchEnd}
             >
-              {/* Brand text watermark */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                <p className="text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase text-muted-foreground/20">Luxury Car Manufacturer Brand</p>
-              </div>
 
               <div className="relative flex items-center justify-center py-6 md:py-10 overflow-hidden z-10">
                 <AnimatePresence initial={false} mode="popLayout">
