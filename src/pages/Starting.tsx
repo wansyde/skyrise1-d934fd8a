@@ -136,19 +136,17 @@ const Starting = () => {
 
   const getCardStyle = (offset: number) => {
     const absOffset = Math.abs(offset);
-    const scale = offset === 0 ? 1.08 : Math.max(0.68, 1 - absOffset * 0.14);
-    const rotateY = offset * -22;
-    const translateX = offset * 95;
-    const translateZ = offset === 0 ? 60 : -absOffset * 70;
-    const opacity = offset === 0 ? 1 : Math.max(0.45, 1 - absOffset * 0.25);
+    const scale = offset === 0 ? 1.05 : Math.max(0.72, 1 - absOffset * 0.12);
+    const rotateY = offset * -25;
+    const translateX = offset * 110;
+    const translateZ = offset === 0 ? 50 : -absOffset * 80;
+    const opacity = offset === 0 ? 1 : Math.max(0.5, 1 - absOffset * 0.22);
     const zIndex = 10 - absOffset;
-    const brightness = offset === 0 ? 1.12 : Math.max(0.7, 1 - absOffset * 0.15);
-    const contrast = offset === 0 ? 1.1 : 1;
-    const saturate = offset === 0 ? 1.15 : Math.max(0.85, 1 - absOffset * 0.1);
+    const brightness = offset === 0 ? 1.05 : Math.max(0.55, 1 - absOffset * 0.2);
     return {
-      transform: `perspective(1200px) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+      transform: `perspective(900px) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
       opacity, zIndex,
-      filter: `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`,
+      filter: `brightness(${brightness})`,
     };
   };
 
