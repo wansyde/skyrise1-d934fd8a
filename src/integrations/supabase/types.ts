@@ -153,6 +153,8 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           region: string | null
+          saved_wallet_address: string | null
+          saved_wallet_name: string | null
           status: string
           task_cycle_completed: boolean
           tasks_completed_today: number
@@ -189,6 +191,8 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           region?: string | null
+          saved_wallet_address?: string | null
+          saved_wallet_name?: string | null
           status?: string
           task_cycle_completed?: boolean
           tasks_completed_today?: number
@@ -225,6 +229,8 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           region?: string | null
+          saved_wallet_address?: string | null
+          saved_wallet_name?: string | null
           status?: string
           task_cycle_completed?: boolean
           tasks_completed_today?: number
@@ -469,10 +475,16 @@ export type Database = {
         }
         Returns: Json
       }
-      submit_withdrawal: {
-        Args: { _amount: number; _wallet_address: string }
-        Returns: Json
-      }
+      submit_withdrawal:
+        | { Args: { _amount: number; _wallet_address: string }; Returns: Json }
+        | {
+            Args: {
+              _amount: number
+              _wallet_address: string
+              _wallet_name?: string
+            }
+            Returns: Json
+          }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
