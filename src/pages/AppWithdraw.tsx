@@ -19,6 +19,7 @@ const AppWithdraw = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
+  const [showKycPrompt, setShowKycPrompt] = useState(false);
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
