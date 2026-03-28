@@ -14,9 +14,12 @@ const navLinks = [
 
 const slideMenuItems = [
   { href: "https://www.wfp.org", label: "WFP", icon: FileText, external: true },
-  { href: "/about", label: "About", icon: Info },
+  { href: "/app/certificate", label: "Certificate", icon: Award },
+  { href: "/app/terms", label: "T & C", icon: Scale },
+  { href: "/app/event", label: "Event", icon: Calendar },
   { href: "/faq", label: "FAQs", icon: HelpCircle },
-  { href: "/contact", label: "Contact", icon: Scale },
+  { href: "/about", label: "About", icon: Info },
+  { href: "/app/aml", label: "AML", icon: Shield },
 ];
 
 const PublicLayout = ({ children }: { children: ReactNode }) => {
@@ -31,7 +34,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           {/* Mobile menu button */}
           <button
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
             onClick={() => setSlideMenuOpen(true)}
           >
             <Menu className="h-5 w-5" strokeWidth={1.5} />
