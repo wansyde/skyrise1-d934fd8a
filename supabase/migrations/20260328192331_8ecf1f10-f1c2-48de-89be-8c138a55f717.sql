@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN credit_score integer NOT NULL DEFAULT 100;
