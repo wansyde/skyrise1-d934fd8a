@@ -37,6 +37,195 @@ const KYC = () => {
   const isVerified = kycStatus === "verified";
   const isSubmitted = kycStatus === "submitted";
 
+  // Full-screen status for submitted/verified states
+  if (isSubmitted) {
+    return (
+      <AppLayout>
+        <div className="px-4 py-5 pb-24 max-w-lg mx-auto">
+          <div className="flex items-center gap-3 mb-8">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center justify-center h-9 w-9 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+            </button>
+            <h1 className="text-lg font-semibold tracking-tight">KYC Verification</h1>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="flex flex-col items-center text-center pt-8"
+          >
+            {/* Animated rings */}
+            <div className="relative mb-8">
+              <motion.div
+                animate={{ scale: [1, 1.15, 1], opacity: [0.15, 0.05, 0.15] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 -m-6 rounded-full bg-amber-400/20"
+              />
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.08, 0.2] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute inset-0 -m-3 rounded-full bg-amber-400/15"
+              />
+              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-amber-400/20 to-amber-500/10 border border-amber-400/30 flex items-center justify-center">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                >
+                  <Loader2 className="h-8 w-8 text-amber-500" strokeWidth={1.5} />
+                </motion.div>
+              </div>
+            </div>
+
+            <h2 className="text-xl font-bold tracking-tight mb-2">Verification In Progress</h2>
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed mb-6">
+              Your identity documents have been submitted and are currently being reviewed by our compliance team.
+            </p>
+
+            {/* Timeline */}
+            <div className="w-full max-w-xs space-y-0">
+              <div className="flex items-center gap-3 p-3">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="h-4 w-4 text-primary" strokeWidth={2} />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-semibold">Documents Submitted</p>
+                  <p className="text-[10px] text-muted-foreground">Successfully uploaded</p>
+                </div>
+              </div>
+              <div className="ml-[15px] h-5 border-l border-dashed border-amber-400/40" />
+              <div className="flex items-center gap-3 p-3">
+                <div className="h-8 w-8 rounded-full bg-amber-400/10 border border-amber-400/30 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="h-4 w-4 text-amber-500" strokeWidth={2} />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-semibold">Under Review</p>
+                  <p className="text-[10px] text-muted-foreground">Estimated within 24 hours</p>
+                </div>
+              </div>
+              <div className="ml-[15px] h-5 border-l border-dashed border-border" />
+              <div className="flex items-center gap-3 p-3 opacity-40">
+                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" strokeWidth={2} />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-semibold">Verified</p>
+                  <p className="text-[10px] text-muted-foreground">Pending completion</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Info card */}
+            <div className="w-full rounded-xl border border-border bg-card p-4 mt-8">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" strokeWidth={2} />
+                <p className="text-[11px] text-muted-foreground leading-relaxed text-left">
+                  You will be notified once your identity has been verified. Withdrawals will be enabled automatically upon approval.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isVerified) {
+    return (
+      <AppLayout>
+        <div className="px-4 py-5 pb-24 max-w-lg mx-auto">
+          <div className="flex items-center gap-3 mb-8">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center justify-center h-9 w-9 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+            </button>
+            <h1 className="text-lg font-semibold tracking-tight">KYC Verification</h1>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="flex flex-col items-center text-center pt-8"
+          >
+            {/* Success icon */}
+            <div className="relative mb-8">
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="absolute inset-0 -m-6 rounded-full bg-emerald-500"
+              />
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.15 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="absolute inset-0 -m-3 rounded-full bg-emerald-500"
+              />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.4, type: "spring", stiffness: 200 }}
+                className="relative h-20 w-20 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25"
+              >
+                <CheckCircle2 className="h-9 w-9 text-white" strokeWidth={2} />
+              </motion.div>
+            </div>
+
+            <h2 className="text-xl font-bold tracking-tight mb-2">Identity Verified</h2>
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed mb-8">
+              Your identity has been successfully verified. All platform features including withdrawals are now fully enabled.
+            </p>
+
+            {/* Verified details card */}
+            <div className="w-full rounded-xl border border-emerald-500/20 bg-emerald-500/[0.03] p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Status</span>
+                <span className="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  <ShieldCheck className="h-3 w-3" strokeWidth={2} />
+                  Verified
+                </span>
+              </div>
+              {(profile as any)?.kyc_name && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Name</span>
+                  <span className="text-xs font-medium">{(profile as any).kyc_name}</span>
+                </div>
+              )}
+              {(profile as any)?.kyc_id_type && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Document</span>
+                  <span className="text-xs font-medium">{(profile as any).kyc_id_type}</span>
+                </div>
+              )}
+              {(profile as any)?.kyc_id_number && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">ID Number</span>
+                  <span className="text-xs font-medium">
+                    ••••{(profile as any).kyc_id_number.slice(-4)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={() => navigate("/app/profile")}
+              variant="outline"
+              className="mt-6 w-full"
+            >
+              Back to Profile
+            </Button>
+          </motion.div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   const handleFileSelect = (
     file: File | undefined,
     setFile: (f: File | null) => void,
