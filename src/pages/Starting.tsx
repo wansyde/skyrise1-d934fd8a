@@ -382,9 +382,9 @@ const Starting = () => {
               onTouchEnd={handleTouchEnd}
               style={{ background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
             >
-              {visibleCards.map(({ idx, position, car }) => {
-                const style = getCardStyle(position);
-                const isActive = position === 0;
+              {visibleCards.map(({ idx, offset, car }) => {
+                const style = getCardStyle(offset);
+                const isActive = offset === 0;
                 return (
                   <motion.div
                     key={`${idx}-${car.brand}`}
