@@ -22,13 +22,15 @@ const PaymentMethods = () => {
   const [email, setEmail] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const hasSaved = !!(profile as any)?.saved_wallet_address;
+  const hasSaved = !!profile?.saved_wallet_address;
 
   useEffect(() => {
     if (authenticated && hasSaved) {
-      setWalletName((profile as any)?.saved_wallet_name || "");
-      setWalletAddress((profile as any)?.saved_wallet_address || "");
-      // Load extended fields from profile if available
+      setWalletName(profile?.saved_wallet_name || "");
+      setWalletAddress(profile?.saved_wallet_address || "");
+      setWalletUsername(profile?.saved_wallet_username || "");
+      setNetwork(profile?.saved_wallet_network || "");
+      setEmail(profile?.saved_wallet_email || "");
     }
   }, [authenticated, profile]);
 

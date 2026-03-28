@@ -23,7 +23,7 @@ const AppWithdraw = () => {
   const queryClient = useQueryClient();
   const balance = profile?.balance ?? 0;
 
-  const hasSavedWallet = !!(profile as any)?.saved_wallet_address;
+  const hasSavedWallet = !!profile?.saved_wallet_address;
 
   const checkPaymentMethod = () => {
     if (!hasSavedWallet) {
