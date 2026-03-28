@@ -117,7 +117,7 @@ const Login = () => {
             .maybeSingle();
           if (adminRole) {
             toast.success("Logged in", { duration: 2000, position: "top-center" });
-            navigate("/admin-sky-987");
+            navigate("/admin-sky-987/dashboard");
             return;
           }
         }
