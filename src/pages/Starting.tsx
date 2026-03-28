@@ -112,7 +112,8 @@ const Starting = () => {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const cardWidth = containerWidth > 0 ? (containerWidth - (VISIBLE_COUNT - 1) * CARD_GAP) / VISIBLE_COUNT : 155;
+  const visibleCount = containerWidth > 0 ? (containerWidth < 480 ? 3 : containerWidth < 768 ? 5 : 7) : 7;
+  const cardWidth = containerWidth > 0 ? (containerWidth - (visibleCount - 1) * CARD_GAP) / visibleCount : 155;
   const cardStep = cardWidth + CARD_GAP;
 
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
