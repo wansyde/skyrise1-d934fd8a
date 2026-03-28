@@ -189,11 +189,12 @@ const AdminPanel = () => {
     setEditSalary(String(user.advertising_salary ?? 0));
     setEditVipLevel(user.vip_level || "Junior");
     setEditTasksCompleted(String(user.tasks_completed_today ?? 0));
+    setEditCreditScore(String(user.credit_score ?? 100));
   };
 
   const cancelEditing = () => {
     setEditingUser(null);
-    setEditBalance(""); setEditSalary(""); setEditVipLevel(""); setEditTasksCompleted("");
+    setEditBalance(""); setEditSalary(""); setEditVipLevel(""); setEditTasksCompleted(""); setEditCreditScore("");
   };
 
   const saveBalances = async (userId: string) => {
