@@ -597,67 +597,117 @@ const AdminPanel = () => {
 
         {/* WITHDRAWALS TAB */}
         <TabsContent value="withdrawals">
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Withdrawal Form */}
-            <div className="glass-card p-5 space-y-4">
-              <h2 className="text-sm font-medium flex items-center gap-2"><ArrowUpFromLine className="h-4 w-4 text-red-400" /> Record Withdrawal</h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Select User</label>
-                  <UserSelect value={wdUserId} onChange={setWdUserId} />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label>
-                  <Input type="number" placeholder="0.00" value={wdAmount} onChange={(e) => setWdAmount(e.target.value)} min={0} step="0.01" />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label>
-                  <Input placeholder="e.g. manual payout" value={wdNote} onChange={(e) => setWdNote(e.target.value)} />
-                </div>
-                <Button onClick={handleAdminWithdraw} disabled={wdSubmitting} variant="destructive" className="w-full">
-                  {wdSubmitting ? "Processing..." : "Submit Withdrawal"}
-                </Button>
-              </div>
-            </div>
-
-            {/* Withdrawal Records */}
-            <div className="md:col-span-2 glass-card overflow-hidden">
-              <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h2 className="text-sm font-medium">All Withdrawals</h2>
-                <div className="flex gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input placeholder="Search username..." value={wdSearch} onChange={(e) => setWdSearch(e.target.value)} className="pl-9 h-8 text-xs w-40" />
+          <div className="space-y-6">
+            {/* Admin manual withdrawal form */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="glass-card p-5 space-y-4">
+                <h2 className="text-sm font-medium flex items-center gap-2"><ArrowUpFromLine className="h-4 w-4 text-red-400" /> Record Withdrawal</h2>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Select User</label>
+                    <UserSelect value={wdUserId} onChange={setWdUserId} />
                   </div>
-                  <Input type="date" value={wdDateFilter} onChange={(e) => setWdDateFilter(e.target.value)} className="h-8 text-xs w-36" />
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label>
+                    <Input type="number" placeholder="0.00" value={wdAmount} onChange={(e) => setWdAmount(e.target.value)} min={0} step="0.01" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label>
+                    <Input placeholder="e.g. manual payout" value={wdNote} onChange={(e) => setWdNote(e.target.value)} />
+                  </div>
+                  <Button onClick={handleAdminWithdraw} disabled={wdSubmitting} variant="destructive" className="w-full">
+                    {wdSubmitting ? "Processing..." : "Submit Withdrawal"}
+                  </Button>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-t border-border text-left text-xs text-muted-foreground">
-                      <th className="px-5 py-3 font-medium">Username</th>
-                      <th className="px-5 py-3 font-medium">Amount</th>
-                      <th className="px-5 py-3 font-medium">Note</th>
-                      <th className="px-5 py-3 font-medium">Date (US)</th>
-                      <th className="px-5 py-3 font-medium">Admin</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredWithdrawals.map((w: any) => (
-                      <tr key={w.id} className="border-t border-border">
-                        <td className="px-5 py-3 text-sm font-medium">{getUserName(w.user_id)}</td>
-                        <td className="px-5 py-3 text-sm tabular-nums text-red-400">-${Number(w.amount).toLocaleString()}</td>
-                        <td className="px-5 py-3 text-xs text-muted-foreground">{w.admin_note || "—"}</td>
-                        <td className="px-5 py-3 text-xs text-muted-foreground">{formatUSTime(w.created_at)}</td>
-                        <td className="px-5 py-3 text-xs text-muted-foreground">{getAdminName(w.wallet_address)}</td>
+
+              {/* Withdrawal Requests */}
+              <div className="md:col-span-2 glass-card overflow-hidden">
+                <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <h2 className="text-sm font-medium">Withdrawal Requests</h2>
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                      <Input placeholder="Search username..." value={wdSearch} onChange={(e) => setWdSearch(e.target.value)} className="pl-9 h-8 text-xs w-40" />
+                    </div>
+                    <Input type="date" value={wdDateFilter} onChange={(e) => setWdDateFilter(e.target.value)} className="h-8 text-xs w-36" />
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-t border-border text-left text-xs text-muted-foreground">
+                        <th className="px-5 py-3 font-medium">Username</th>
+                        <th className="px-5 py-3 font-medium">Amount</th>
+                        <th className="px-5 py-3 font-medium">Crypto Address</th>
+                        <th className="px-5 py-3 font-medium">Note</th>
+                        <th className="px-5 py-3 font-medium">Status</th>
+                        <th className="px-5 py-3 font-medium">Date (US)</th>
+                        <th className="px-5 py-3 font-medium">Action</th>
                       </tr>
-                    ))}
-                    {filteredWithdrawals.length === 0 && (
-                      <tr><td colSpan={5} className="px-5 py-6 text-center text-sm text-muted-foreground">No withdrawals found.</td></tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredWithdrawals.map((w: any) => (
+                        <tr key={w.id} className="border-t border-border">
+                          <td className="px-5 py-3 text-sm font-medium">{getUserName(w.user_id)}</td>
+                          <td className="px-5 py-3 text-sm tabular-nums text-red-400">-${Number(w.amount).toLocaleString()}</td>
+                          <td className="px-5 py-3 text-xs text-muted-foreground font-mono max-w-[180px] truncate" title={w.wallet_address || ""}>
+                            {w.wallet_address && !w.wallet_address.match(/^[0-9a-f]{8}-/) ? w.wallet_address : "—"}
+                          </td>
+                          <td className="px-5 py-3 text-xs text-muted-foreground">{w.admin_note || "—"}</td>
+                          <td className="px-5 py-3">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${w.status === "pending" ? "bg-amber-500/15 text-amber-400" : "bg-green-500/15 text-green-400"}`}>
+                              {w.status === "approved" ? "completed" : w.status}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 text-xs text-muted-foreground">{formatUSTime(w.created_at)}</td>
+                          <td className="px-5 py-3">
+                            {w.status === "pending" ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs gap-1.5 text-green-400 border-green-400/30 hover:bg-green-500/10"
+                                disabled={processingId === w.id}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setProcessingId(w.id);
+                                  try {
+                                    const { error } = await supabase
+                                      .from("withdrawals")
+                                      .update({ status: "completed", admin_note: w.admin_note || "Processed by admin", updated_at: new Date().toISOString() })
+                                      .eq("id", w.id);
+                                    if (error) throw error;
+                                    // Also update the matching transaction
+                                    await supabase
+                                      .from("transactions")
+                                      .update({ status: "approved" } as any)
+                                      .eq("user_id", w.user_id)
+                                      .eq("type", "withdrawal")
+                                      .eq("status", "pending")
+                                      .eq("amount", -Number(w.amount));
+                                    toast.success("Withdrawal marked as completed.");
+                                    queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Failed to update status.");
+                                  } finally {
+                                    setProcessingId(null);
+                                  }
+                                }}
+                              >
+                                <Check className="h-3 w-3" /> Complete
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Done</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredWithdrawals.length === 0 && (
+                        <tr><td colSpan={7} className="px-5 py-6 text-center text-sm text-muted-foreground">No withdrawals found.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
