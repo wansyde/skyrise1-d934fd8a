@@ -71,8 +71,9 @@ const AdminPanel = () => {
   const [logActionFilter, setLogActionFilter] = useState("");
   const [logAdminFilter, setLogAdminFilter] = useState("");
 
-  // Admin search
   const [adminSearch, setAdminSearch] = useState("");
+  const [kycSearch, setKycSearch] = useState("");
+  const [kycFilter, setKycFilter] = useState<string>("");
 
   const queryClient = useQueryClient();
 
