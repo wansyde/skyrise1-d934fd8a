@@ -274,7 +274,7 @@ const Login = () => {
                       <label className="text-sm font-medium">User ID</label>
                       <Input
                         type="text"
-                        placeholder="Enter your username"
+                        placeholder=""
                         required
                         className="bg-background"
                         value={loginAccount}
