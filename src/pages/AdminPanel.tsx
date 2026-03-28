@@ -438,6 +438,9 @@ const AdminPanel = () => {
                       <td className="px-5 py-3 text-sm font-medium">{u.username || "—"}</td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{u.email || "—"}</td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{u.phone || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.ip_address || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{u.country || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{u.region || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">
                         {u.referred_by ? (() => { const r = (profiles || []).find((p: any) => p.user_id === u.referred_by); return r ? r.username || r.email : u.referred_by; })() : "—"}
