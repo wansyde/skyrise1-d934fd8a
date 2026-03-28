@@ -246,6 +246,24 @@ const AdminPanel = () => {
     }
   };
 
+  const handleResetCycle = async (userId: string) => {
+    setProcessingId(userId);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ task_cycle_completed: false, tasks_completed_today: 0 } as any)
+        .eq("user_id", userId);
+      if (error) {
+        toast.error("Failed to reset task cycle: " + error.message);
+        return;
+      }
+      toast.success("Task cycle reset successfully.");
+      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDir(sortDir === "asc" ? "desc" : "asc");
