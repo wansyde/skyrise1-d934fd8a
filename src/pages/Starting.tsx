@@ -134,15 +134,16 @@ const Starting = () => {
     handleInteraction();
   }, [handleInteraction]);
 
-  const getCardStyle = (offset: number) => {
+  const getCardStyle = (index: number, active: number, totalVisible: number) => {
+    const offset = index - active;
     const absOffset = Math.abs(offset);
-    const scale = offset === 0 ? 1.08 : Math.max(0.75, 1 - absOffset * 0.08);
-    // Inward curve: cards rotate inward toward center
-    const rotateY = offset * 20;
+    const scale = offset === 0 ? 1.1 : Math.max(0.75, 1 - absOffset * 0.07);
+    // Outward curve: cards rotate away from center
+    const rotateY = offset * -20;
     const translateX = offset * 145;
-    const translateZ = offset === 0 ? 60 : -absOffset * 60;
-    // Slight vertical arc — cards at edges dip down
-    const translateY = absOffset * absOffset * 4;
+    const translateZ = offset === 0 ? 60 : -absOffset * 55;
+    // Outward vertical arc — cards at edges rise up
+    const translateY = offset === 0 ? 8 : -(absOffset * absOffset * 3);
     const opacity = offset === 0 ? 1 : Math.max(0.45, 1 - absOffset * 0.18);
     const zIndex = 10 - absOffset;
     const brightness = offset === 0 ? 1.08 : Math.max(0.6, 1 - absOffset * 0.15);
