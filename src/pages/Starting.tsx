@@ -203,11 +203,16 @@ const Starting = () => {
 
   const MIN_BALANCE = 100;
   const isRestricted = profile?.status === "suspended";
+  const isCycleCompleted = (profile as any)?.task_cycle_completed === true;
 
   // Match Ad handler
   const handleMatchAd = () => {
     if (isRestricted) {
       toast.error("Your account is currently restricted. Please contact support.");
+      return;
+    }
+    if (isCycleCompleted) {
+      toast.error("Your task sets are completed. Please contact customer service to renew or upgrade your plan.");
       return;
     }
     const currentBalance = Number(profile?.balance ?? 0);
