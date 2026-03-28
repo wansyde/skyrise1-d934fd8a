@@ -10,8 +10,10 @@ import { getCarImage } from "@/lib/car-images";
 
 const FALLBACK_CAR = "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=400&fit=crop&q=80";
 
-const CarImage = ({ src, alt }: { src: string | null; alt: string }) => {
-  const [imgSrc, setImgSrc] = useState(src || FALLBACK_CAR);
+const CarImage = ({ carName }: { carName: string }) => {
+  const resolvedSrc = getCarImage(carName);
+  const [imgSrc, setImgSrc] = useState(resolvedSrc);
+  const [loaded, setLoaded] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
 
