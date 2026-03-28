@@ -368,26 +368,41 @@ const Starting = () => {
             <div
               ref={carouselRef}
               className="relative overflow-hidden rounded-2xl"
-              style={{ height: cardWidth * 1.25 + 20, background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
+              style={{ height: cardWidth * 1.25 + 40, background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
               <motion.div
                 className="flex absolute"
-                style={{ gap: CARD_GAP, top: 10 }}
+                style={{ gap: CARD_GAP, top: 0 }}
                 animate={{ x: stripOffset }}
                 transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
               >
-                {carCampaigns.map((car, i) => (
-                  <div
-                    key={i}
-                    className="flex-shrink-0 rounded-xl overflow-hidden cursor-pointer"
-                    style={{ width: cardWidth, height: cardWidth * 1.25, boxShadow: "0 8px 25px rgba(0,0,0,0.1)" }}
-                    onClick={() => goTo(i)}
-                  >
-                    <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
-                  </div>
-                ))}
+                {carCampaigns.map((car, i) => {
+                  // Outward U-curve: edges sit higher, center dips down
+                  const visibleCenter = activeIndex + (VISIBLE_COUNT - 1) / 2;
+                  const distFromCenter = Math.abs(i - visibleCenter);
+                  const maxDist = (VISIBLE_COUNT - 1) / 2;
+                  const normalizedDist = Math.min(distFromCenter / maxDist, 1);
+                  const curveY = (1 - normalizedDist * normalizedDist) * 18; // center dips 18px
+                  const rotateY = (i - visibleCenter) * 4; // subtle outward rotation
+
+                  return (
+                    <div
+                      key={i}
+                      className="flex-shrink-0 rounded-xl overflow-hidden cursor-pointer transition-transform duration-700"
+                      style={{
+                        width: cardWidth,
+                        height: cardWidth * 1.25,
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        transform: `perspective(800px) translateY(${curveY}px) rotateY(${rotateY}deg)`,
+                      }}
+                      onClick={() => goTo(i)}
+                    >
+                      <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
+                    </div>
+                  );
+                })}
               </motion.div>
             </div>
 
