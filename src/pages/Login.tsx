@@ -361,7 +361,7 @@ const Login = () => {
                     <FieldWrapper label="Email" error={regErrors.email}>
                       <Input
                         type="email"
-                        placeholder="you@example.com"
+                        placeholder=""
                         className="bg-background"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
