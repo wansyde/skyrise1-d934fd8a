@@ -339,7 +339,7 @@ const Login = () => {
                     {/* Username */}
                     <FieldWrapper label="Username" error={regErrors.username}>
                       <Input
-                        placeholder="johndoe"
+                        placeholder=""
                         className="bg-background"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
