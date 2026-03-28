@@ -112,7 +112,8 @@ const Starting = () => {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const cardWidth = containerWidth > 0 ? (containerWidth - (VISIBLE_COUNT - 1) * CARD_GAP) / VISIBLE_COUNT : 155;
+  const visibleCount = containerWidth > 0 ? (containerWidth < 480 ? 3 : containerWidth < 768 ? 5 : 7) : 7;
+  const cardWidth = containerWidth > 0 ? (containerWidth - (visibleCount - 1) * CARD_GAP) / visibleCount : 155;
   const cardStep = cardWidth + CARD_GAP;
 
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
@@ -151,7 +152,7 @@ const Starting = () => {
   }, [handleInteraction]);
 
   // Showcase = the rightmost visible card on screen
-  const half = Math.floor(VISIBLE_COUNT / 2);
+  const half = Math.floor(visibleCount / 2);
   const showcaseIndex = ((activeIndex + half) % total + total) % total;
   const featuredCar = carCampaigns[showcaseIndex];
 
@@ -380,9 +381,9 @@ const Starting = () => {
               >
                 {carCampaigns.map((car, i) => {
                   // Outward U-curve: edges sit higher, center dips down
-                  const visibleCenter = activeIndex + (VISIBLE_COUNT - 1) / 2;
+                  const visibleCenter = activeIndex + (visibleCount - 1) / 2;
                   const distFromCenter = Math.abs(i - visibleCenter);
-                  const maxDist = (VISIBLE_COUNT - 1) / 2;
+                  const maxDist = (visibleCount - 1) / 2;
                   const normalizedDist = Math.min(distFromCenter / maxDist, 1);
                   const curveY = (1 - normalizedDist * normalizedDist) * 18; // center dips 18px
                   const rotateY = (i - visibleCenter) * 4; // subtle outward rotation
