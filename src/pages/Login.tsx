@@ -410,7 +410,7 @@ const Login = () => {
                       <div className="relative">
                         <Input
                           type={showRegConfirm ? "text" : "password"}
-                          placeholder="••••••••"
+                          placeholder=""
                           className="bg-background pr-10"
                           value={regConfirm}
                           onChange={(e) => setRegConfirm(e.target.value)}
