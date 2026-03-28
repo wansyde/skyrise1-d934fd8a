@@ -29,21 +29,19 @@ const HeroSection = () => (
         }}
       />
 
-      {/* Label on image */}
-      <div className="absolute inset-0 flex flex-col justify-end px-6 sm:px-10 pb-6">
-        <motion.span
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-muted-foreground"
-        >
-          Luxury Car Manufacturer Brand
-        </motion.span>
-      </div>
     </div>
 
     {/* Text below image */}
     <div className="px-6 sm:px-10 pt-6 pb-2">
+      <motion.span
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-muted-foreground block mb-3"
+      >
+        Luxury Car Manufacturer Brand
+      </motion.span>
+
       <motion.h1
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
