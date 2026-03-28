@@ -370,6 +370,13 @@ const Starting = () => {
                   {completedCount}/{DAILY_LIMIT} completed today
                 </p>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                  <span className="text-[10px] font-semibold tracking-wider uppercase text-primary">{profile?.vip_level || "Junior"}</span>
+                </div>
+              </div>
+                </p>
+              </div>
               <span className="text-sm font-bold text-primary">{completedCount}/{DAILY_LIMIT}</span>
             </div>
           </motion.div>
