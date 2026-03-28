@@ -60,7 +60,7 @@ const AdminPanel = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("withdrawals")
-        .select("*, profiles!withdrawals_user_id_fkey(full_name, email, username)")
+        .select("*")
         .eq("status", "pending")
         .order("created_at", { ascending: false });
       return data || [];
