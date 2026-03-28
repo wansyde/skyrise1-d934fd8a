@@ -97,11 +97,14 @@ export type Database = {
           advertising_salary: number
           avatar_url: string | null
           balance: number
+          city: string | null
+          country: string | null
           created_at: string
           email: string
           full_name: string
           gender: string | null
           id: string
+          ip_address: string | null
           kyc_back_url: string | null
           kyc_front_url: string | null
           kyc_id_number: string | null
@@ -110,10 +113,13 @@ export type Database = {
           kyc_selfie_url: string | null
           kyc_status: string
           kyc_submitted_at: string | null
+          last_login_at: string | null
+          last_login_ip: string | null
           last_task_reset: string
           phone: string | null
           referral_code: string | null
           referred_by: string | null
+          region: string | null
           status: string
           task_cycle_completed: boolean
           tasks_completed_today: number
@@ -127,11 +133,14 @@ export type Database = {
           advertising_salary?: number
           avatar_url?: string | null
           balance?: number
+          city?: string | null
+          country?: string | null
           created_at?: string
           email?: string
           full_name?: string
           gender?: string | null
           id?: string
+          ip_address?: string | null
           kyc_back_url?: string | null
           kyc_front_url?: string | null
           kyc_id_number?: string | null
@@ -140,10 +149,13 @@ export type Database = {
           kyc_selfie_url?: string | null
           kyc_status?: string
           kyc_submitted_at?: string | null
+          last_login_at?: string | null
+          last_login_ip?: string | null
           last_task_reset?: string
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          region?: string | null
           status?: string
           task_cycle_completed?: boolean
           tasks_completed_today?: number
@@ -157,11 +169,14 @@ export type Database = {
           advertising_salary?: number
           avatar_url?: string | null
           balance?: number
+          city?: string | null
+          country?: string | null
           created_at?: string
           email?: string
           full_name?: string
           gender?: string | null
           id?: string
+          ip_address?: string | null
           kyc_back_url?: string | null
           kyc_front_url?: string | null
           kyc_id_number?: string | null
@@ -170,10 +185,13 @@ export type Database = {
           kyc_selfie_url?: string | null
           kyc_status?: string
           kyc_submitted_at?: string | null
+          last_login_at?: string | null
+          last_login_ip?: string | null
           last_task_reset?: string
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          region?: string | null
           status?: string
           task_cycle_completed?: boolean
           tasks_completed_today?: number

@@ -84,6 +84,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (mounted) setLoading(false);
     }, 5000);
 
+    const trackLogin = async (accessToken: string) => {
+      try {
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        await fetch(`https://${projectId}.supabase.co/functions/v1/track-login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        });
+      } catch (e) {
+        console.error("Track login failed:", e);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (!mounted) return;
@@ -92,6 +108,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           fetchProfile(session.user.id);
           checkAdmin(session.user.id);
+          if (_event === "SIGNED_IN" && session.access_token) {
+            trackLogin(session.access_token);
+          }
         } else {
           setProfile(null);
           setIsAdmin(false);

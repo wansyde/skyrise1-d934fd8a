@@ -363,6 +363,25 @@ const AdminPanel = () => {
               <div className="text-lg font-semibold tabular-nums">${Number((selectedUser as any).balance).toLocaleString()}</div>
             </div>
           </div>
+          {/* IP & Location Info */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Current IP</span>
+              <div className="text-sm font-mono mt-1">{(selectedUser as any).ip_address || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Last Login IP</span>
+              <div className="text-sm font-mono mt-1">{(selectedUser as any).last_login_ip || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Country</span>
+              <div className="text-sm mt-1">{(selectedUser as any).country || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Region</span>
+              <div className="text-sm mt-1">{(selectedUser as any).region || "—"}</div>
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-xs font-medium text-muted-foreground mb-2">Recent Deposits</h3>
@@ -416,6 +435,9 @@ const AdminPanel = () => {
                     <SortHeader field="username">Username</SortHeader>
                     <th className="px-5 py-3 font-medium">Email</th>
                     <th className="px-5 py-3 font-medium">Phone</th>
+                    <th className="px-5 py-3 font-medium">IP Address</th>
+                    <th className="px-5 py-3 font-medium">Country</th>
+                    <th className="px-5 py-3 font-medium">Region</th>
                     <th className="px-5 py-3 font-medium">Referral Code</th>
                     <th className="px-5 py-3 font-medium">Referred By</th>
                     <th className="px-5 py-3 font-medium">Referrals</th>
@@ -435,6 +457,9 @@ const AdminPanel = () => {
                       <td className="px-5 py-3 text-sm font-medium">{u.username || "—"}</td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{u.email || "—"}</td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{u.phone || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.ip_address || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{u.country || "—"}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{u.region || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">
                         {u.referred_by ? (() => { const r = (profiles || []).find((p: any) => p.user_id === u.referred_by); return r ? r.username || r.email : u.referred_by; })() : "—"}
@@ -519,7 +544,7 @@ const AdminPanel = () => {
                     </tr>
                   ))}
                   {filteredProfiles.length === 0 && (
-                    <tr><td colSpan={14} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
+                    <tr><td colSpan={17} className="px-5 py-6 text-center text-sm text-muted-foreground">No users found.</td></tr>
                   )}
                 </tbody>
               </table>
