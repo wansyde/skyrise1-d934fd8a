@@ -128,7 +128,7 @@ const Profile = () => {
         {/* Admin link */}
         {isAdmin && (
           <Link
-            to="/admin"
+            to="/admin-sky-987/dashboard"
             className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3.5 mb-5 transition-colors hover:bg-primary/10"
           >
             <Shield className="h-[18px] w-[18px] text-primary" strokeWidth={1.5} />
