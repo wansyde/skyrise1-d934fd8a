@@ -136,17 +136,16 @@ const Starting = () => {
 
   const getCardStyle = (offset: number) => {
     const absOffset = Math.abs(offset);
-    // U-shape: edges big, middle smaller — all same treatment, no highlight
-    const edgeScale = 0.95;
-    const midScale = 0.78;
+    const edgeScale = 1.0;
+    const midScale = 0.85;
     let scale: number;
     if (absOffset >= 3) scale = edgeScale;
     else if (absOffset === 0) scale = midScale;
     else scale = midScale + (edgeScale - midScale) * (absOffset / 3);
 
     const rotateY = offset * -12;
-    const translateX = offset * 140;
-    const translateZ = -absOffset * 30;
+    const translateX = offset * 120;
+    const translateZ = -absOffset * 25;
     const opacity = Math.max(0.55, 1 - absOffset * 0.1);
     const zIndex = 10 - absOffset;
     const brightness = Math.max(0.7, 1 - absOffset * 0.08);
