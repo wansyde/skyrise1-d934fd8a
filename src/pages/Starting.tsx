@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getVipTier } from "@/lib/vip-config";
+import { getVipTier, getSetProgress } from "@/lib/vip-config";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
@@ -101,7 +101,8 @@ const Starting = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
-  const DAILY_LIMIT = vipTier.taskLimit;
+  const DAILY_LIMIT = vipTier.totalTasks;
+  const setProgress = useMemo(() => getSetProgress(completedCount, vipTier), [completedCount, vipTier]);
 
   const todaySalary = Number(profile?.advertising_salary ?? 0).toFixed(2);
   const userName = profile?.full_name || "User";
@@ -326,7 +327,10 @@ const Starting = () => {
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Start Promoting</h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {completedCount}/{DAILY_LIMIT} completed today
+                  Set {setProgress.currentSet}/{vipTier.totalSets} · {setProgress.allDone ? "All sets complete" : `${setProgress.tasksInCurrentSet}/${vipTier.tasksPerSet} in set`}
+                </p>
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                  {completedCount}/{DAILY_LIMIT} total today
                 </p>
               </div>
               <div className="relative px-4 py-1.5 rounded-full overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--primary) / 0.06) 100%)", boxShadow: "inset 0 0 0 1px hsl(var(--primary) / 0.2), 0 2px 8px hsl(var(--primary) / 0.1)" }}>
