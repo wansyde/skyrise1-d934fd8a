@@ -38,6 +38,16 @@ import bmwBlueFeatured from "@/assets/cars/featured/bmw-blue.png";
 import bmwPurpleFeatured from "@/assets/cars/featured/bmw-purple.png";
 import ferrariYellowFeatured from "@/assets/cars/featured/ferrari-yellow.png";
 import bentleyWhiteFeatured from "@/assets/cars/featured/bentley-white.png";
+import bentleyBlueFeatured from "@/assets/cars/featured/bentley-blue.png";
+import fordMustangFeatured from "@/assets/cars/featured/ford-mustang.png";
+import ferrariRomaFeatured from "@/assets/cars/featured/ferrari-roma.png";
+import cadillacCt5Featured from "@/assets/cars/featured/cadillac-ct5.png";
+import rangeRoverFeatured from "@/assets/cars/featured/range-rover.png";
+import lexusLcFeatured from "@/assets/cars/featured/lexus-lc.png";
+import mclarenArturaFeatured from "@/assets/cars/featured/mclaren-artura.png";
+import mclarenGtFeatured from "@/assets/cars/featured/mclaren-gt.png";
+import lexusEsFeatured from "@/assets/cars/featured/lexus-es.png";
+import teslaModelSFeatured from "@/assets/cars/featured/tesla-model-s.png";
 
 const carCampaigns = [
   { brand: "Audi", name: "Audi A1 2025 Sportback Premium Edition", image: audiA1Img, featured: audiA1Featured, totalAmount: 41, adSalary: 0.16 },
@@ -50,16 +60,16 @@ const carCampaigns = [
   { brand: "BMW", name: "BMW iX M60 2025 Electric SUV", image: bmwPurpleImg, featured: bmwPurpleFeatured, totalAmount: 46, adSalary: 0.18 },
   { brand: "Ferrari", name: "Ferrari 296 GTB 2025 Assetto Fiorano", image: ferrariYellowImg, featured: ferrariYellowFeatured, totalAmount: 58, adSalary: 0.23 },
   { brand: "Bentley", name: "Bentley Continental GT 2025 Speed", image: bentleyWhiteImg, featured: bentleyWhiteFeatured, totalAmount: 50, adSalary: 0.20 },
-  { brand: "Bentley", name: "Bentley Continental GT 2025 Azure", image: bentleyBlueImg, featured: bentleyBlueImg, totalAmount: 51, adSalary: 0.20 },
-  { brand: "Ford", name: "Ford Mustang GT 2025 Premium", image: fordMustangImg, featured: fordMustangImg, totalAmount: 39, adSalary: 0.15 },
-  { brand: "Ferrari", name: "Ferrari Roma 2025 Spider", image: ferrariRomaImg, featured: ferrariRomaImg, totalAmount: 56, adSalary: 0.22 },
-  { brand: "Cadillac", name: "Cadillac CT5-V 2025 Blackwing", image: cadillacCt5Img, featured: cadillacCt5Img, totalAmount: 47, adSalary: 0.19 },
-  { brand: "Range Rover", name: "Range Rover Autobiography 2025 LWB", image: rangeRoverImg, featured: rangeRoverImg, totalAmount: 53, adSalary: 0.21 },
-  { brand: "Lexus", name: "Lexus LC 500 2025 Inspiration Series", image: lexusLcImg, featured: lexusLcImg, totalAmount: 49, adSalary: 0.19 },
-  { brand: "McLaren", name: "McLaren Artura 2025 Spider", image: mclarenArturaImg, featured: mclarenArturaImg, totalAmount: 57, adSalary: 0.23 },
-  { brand: "McLaren", name: "McLaren GT 2025 Luxe", image: mclarenGtImg, featured: mclarenGtImg, totalAmount: 54, adSalary: 0.21 },
-  { brand: "Lexus", name: "Lexus ES 350 2025 F Sport", image: lexusEsImg, featured: lexusEsImg, totalAmount: 42, adSalary: 0.17 },
-  { brand: "Tesla", name: "Tesla Model S 2025 Plaid", image: teslaModelSImg, featured: teslaModelSImg, totalAmount: 44, adSalary: 0.18 },
+  { brand: "Bentley", name: "Bentley Continental GT 2025 Azure", image: bentleyBlueImg, featured: bentleyBlueFeatured, totalAmount: 51, adSalary: 0.20 },
+  { brand: "Ford", name: "Ford Mustang GT 2025 Premium", image: fordMustangImg, featured: fordMustangFeatured, totalAmount: 39, adSalary: 0.15 },
+  { brand: "Ferrari", name: "Ferrari Roma 2025 Spider", image: ferrariRomaImg, featured: ferrariRomaFeatured, totalAmount: 56, adSalary: 0.22 },
+  { brand: "Cadillac", name: "Cadillac CT5-V 2025 Blackwing", image: cadillacCt5Img, featured: cadillacCt5Featured, totalAmount: 47, adSalary: 0.19 },
+  { brand: "Range Rover", name: "Range Rover Autobiography 2025 LWB", image: rangeRoverImg, featured: rangeRoverFeatured, totalAmount: 53, adSalary: 0.21 },
+  { brand: "Lexus", name: "Lexus LC 500 2025 Inspiration Series", image: lexusLcImg, featured: lexusLcFeatured, totalAmount: 49, adSalary: 0.19 },
+  { brand: "McLaren", name: "McLaren Artura 2025 Spider", image: mclarenArturaImg, featured: mclarenArturaFeatured, totalAmount: 57, adSalary: 0.23 },
+  { brand: "McLaren", name: "McLaren GT 2025 Luxe", image: mclarenGtImg, featured: mclarenGtFeatured, totalAmount: 54, adSalary: 0.21 },
+  { brand: "Lexus", name: "Lexus ES 350 2025 F Sport", image: lexusEsImg, featured: lexusEsFeatured, totalAmount: 42, adSalary: 0.17 },
+  { brand: "Tesla", name: "Tesla Model S 2025 Plaid", image: teslaModelSImg, featured: teslaModelSFeatured, totalAmount: 44, adSalary: 0.18 },
 ];
 
 const VISIBLE_COUNT = 5;
@@ -108,7 +118,7 @@ const Starting = () => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % total);
-    }, 2000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [isPaused, total]);
 
