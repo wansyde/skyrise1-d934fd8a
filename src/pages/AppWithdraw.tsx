@@ -40,31 +40,35 @@ const AppWithdraw = () => {
     setAmount(balance.toFixed(2));
   };
 
-  const handleSubmit = async () => {
+  const handleProceedToAddress = () => {
     if (!user) return;
     const num = Number(amount);
     if (num <= 0 || num > balance) {
       toast.error("Invalid amount. Cannot exceed your balance.");
       return;
     }
-    if (!walletAddress.trim()) {
-      toast.error("Please enter your crypto wallet address.");
-      return;
-    }
     if (!password) {
       toast.error("Please enter your transaction password.");
       return;
     }
-
     if (profile?.withdraw_password && password !== profile.withdraw_password) {
       toast.error("Incorrect transaction password.");
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleSubmit = async () => {
+    if (!user) return;
+    if (!walletAddress.trim()) {
+      toast.error("Please enter your crypto wallet address.");
       return;
     }
 
     setLoading(true);
     try {
       const { data, error } = await supabase.rpc("submit_withdrawal", {
-        _amount: num,
+        _amount: Number(amount),
         _wallet_address: walletAddress.trim(),
       } as any);
       if (error) throw error;
@@ -77,6 +81,7 @@ const AppWithdraw = () => {
       setAmount("");
       setWalletAddress("");
       setPassword("");
+      setStep(1);
       queryClient.invalidateQueries({ queryKey: ["withdrawal-history"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to submit withdrawal.");
