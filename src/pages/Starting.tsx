@@ -386,7 +386,7 @@ const Starting = () => {
                     key={`${idx}-${car.brand}`}
                     className="absolute cursor-pointer"
                     onClick={() => goTo(idx)}
-                    animate={{ transform: style.transform, opacity: style.opacity, zIndex: style.zIndex, filter: style.filter }}
+                    animate={{ transform: style.transform, opacity: style.opacity, zIndex: style.zIndex }}
                     transition={{ type: "spring", stiffness: 250, damping: 30, mass: 0.8 }}
                     style={{ zIndex: style.zIndex }}
                   >
