@@ -321,17 +321,37 @@ const Starting = () => {
         }}
       >
         <div className="relative z-10">
-          {/* Balance Cards - horizontal stretch */}
-          <div className="flex gap-3 mb-4">
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.4 }} className="glass-card p-3.5 flex-1 min-w-0">
-              <Wallet className="h-3.5 w-3.5 text-primary mb-1.5" strokeWidth={1.5} />
-              <div className="text-lg font-bold tabular-nums tracking-tight truncate">{profile?.balance ?? 0} AC</div>
-              <span className="text-[10px] text-muted-foreground">Wallet Balance</span>
+          {/* Balance Cards - vertical stacked */}
+          <div className="flex flex-col gap-2.5 mb-4">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.4 }} className="glass-card p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <Wallet className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">Wallet Balance</span>
+                  <p className="text-[11px] text-muted-foreground/60 leading-tight">The total balance reflects both the deposited amount and profits earned</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold tabular-nums tracking-tight text-success">{Number(profile?.balance ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}</div>
+                <span className="text-[10px] text-muted-foreground">AC</span>
+              </div>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }} className="glass-card p-3.5 flex-1 min-w-0">
-              <DollarSign className="h-3.5 w-3.5 text-success mb-1.5" strokeWidth={1.5} />
-              <div className="text-lg font-bold tabular-nums tracking-tight truncate">{Number(profile?.advertising_salary ?? 0).toFixed(2)} AC</div>
-              <span className="text-[10px] text-muted-foreground">Ad Salary</span>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }} className="glass-card p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+                  <DollarSign className="h-5 w-5 text-success" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">Advertising Salary</span>
+                  <p className="text-[11px] text-muted-foreground/60 leading-tight">Advertising salary</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold tabular-nums tracking-tight text-success">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</div>
+                <span className="text-[10px] text-muted-foreground">AC</span>
+              </div>
             </motion.div>
           </div>
 
