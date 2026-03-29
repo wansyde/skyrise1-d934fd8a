@@ -274,7 +274,7 @@ const Starting = () => {
     setSubmitting(true);
     try {
       // Simulate processing (1-3s)
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
 
       // Call secure server-side RPC
       const { data, error } = await supabase.rpc("complete_task", {
@@ -315,61 +315,66 @@ const Starting = () => {
   return (
     <AppLayout>
       <div
-        className="px-4 py-5 pb-8 min-h-screen relative"
+        className="px-4 py-4 pb-8 relative"
         style={{
-          background: "radial-gradient(ellipse at 50% 20%, hsl(var(--primary) / 0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, hsl(var(--primary) / 0.03) 0%, transparent 40%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.97) 100%)",
+          background: "radial-gradient(ellipse at 50% 20%, hsl(var(--primary) / 0.04) 0%, transparent 50%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.97) 100%)",
         }}
       >
-        {/* Subtle tire track accent */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.03]">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-gradient-to-b from-transparent via-foreground to-transparent" />
-          <div className="absolute top-0 left-[calc(50%-3px)] w-px h-full bg-gradient-to-b from-transparent via-foreground/50 to-transparent" />
-          <div className="absolute top-0 left-[calc(50%+3px)] w-px h-full bg-gradient-to-b from-transparent via-foreground/50 to-transparent" />
-        </div>
         <div className="relative z-10">
-          {/* Header */}
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="glass-card p-4 mb-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-lg font-semibold tracking-tight">Start Promoting</h1>
-                <p className="text-xs text-muted-foreground/70 mt-0.5">
-                  {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet} tasks
-                </p>
-              </div>
-              <div className="relative px-4 py-1.5">
-                <span className="text-[11px] font-bold tracking-[0.18em] uppercase bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">{profile?.vip_level || "Junior"} Promoter</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Balance Cards */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="glass-card p-4">
-              <Wallet className="h-4 w-4 text-primary mb-2" strokeWidth={1.5} />
-              <div className="text-xl font-bold tabular-nums tracking-tight">{profile?.balance ?? 0} AC</div>
+          {/* Balance Cards - horizontal stretch */}
+          <div className="flex gap-3 mb-4">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.4 }} className="glass-card p-3.5 flex-1 min-w-0">
+              <Wallet className="h-3.5 w-3.5 text-primary mb-1.5" strokeWidth={1.5} />
+              <div className="text-lg font-bold tabular-nums tracking-tight truncate">{profile?.balance ?? 0} AC</div>
               <span className="text-[10px] text-muted-foreground">Wallet Balance</span>
-              <p className="text-[9px] text-muted-foreground/60 mt-1.5 leading-snug">The total balance reflects both the deposited amount and profits earned.</p>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }} className="glass-card p-4">
-              <DollarSign className="h-4 w-4 text-success mb-2" strokeWidth={1.5} />
-              <div className="text-xl font-bold tabular-nums tracking-tight">{Number(profile?.advertising_salary ?? 0).toFixed(2)} AC</div>
-              <span className="text-[10px] text-muted-foreground">Advertising Salary</span>
-              <p className="text-[9px] text-muted-foreground/60 mt-1.5 leading-snug">Fixed balance where there is a mixed product pending in process.</p>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }} className="glass-card p-3.5 flex-1 min-w-0">
+              <DollarSign className="h-3.5 w-3.5 text-success mb-1.5" strokeWidth={1.5} />
+              <div className="text-lg font-bold tabular-nums tracking-tight truncate">{Number(profile?.advertising_salary ?? 0).toFixed(2)} AC</div>
+              <span className="text-[10px] text-muted-foreground">Ad Salary</span>
             </motion.div>
           </div>
 
-          {/* 3D Car Carousel + Showcase Combined */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.6 }} className="mb-6">
-            {/* Carousel Section */}
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Campaigns</h2>
+          {/* Promote Button - above fold, with task count */}
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }} className="mb-4">
+            {isCycleCompleted ? (
+              <div className="glass-card p-4 text-center space-y-2.5">
+                <p className="text-sm font-semibold text-foreground">Task sets completed</p>
+                <p className="text-xs text-muted-foreground">Contact support to renew or upgrade.</p>
+                <a
+                  href="#"
+                  onClick={(e) => e.preventDefault()}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  style={{ boxShadow: "0 4px 20px hsl(var(--primary) / 0.3)" }}
+                >
+                  <Headphones className="h-3.5 w-3.5" />
+                  Contact Support
+                </a>
+              </div>
+            ) : (
+              <button
+                onClick={handleMatchAd}
+                disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT}
+                className="w-full py-4 rounded-2xl font-semibold text-sm tracking-wide flex items-center justify-center gap-2.5 btn-press transition-all duration-300 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ boxShadow: isRestricted ? "none" : "0 4px 20px hsl(var(--primary) / 0.3)" }}
+              >
+                <Play className="h-4 w-4" fill="currentColor" />
+                Promote ({setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet})
+              </button>
+            )}
+          </motion.div>
+
+          {/* 3D Car Carousel */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Campaigns</h2>
               <span className="text-[10px] text-muted-foreground">{total} available</span>
             </div>
 
             <div
               ref={carouselRef}
               className="relative overflow-hidden rounded-2xl"
-              style={{ height: cardWidth * 1.25 + 40, background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
+              style={{ height: cardWidth * 1.25 + 20, background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
@@ -380,13 +385,12 @@ const Starting = () => {
                 transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {carCampaigns.map((car, i) => {
-                  // Outward U-curve: edges sit higher, center dips down
                   const visibleCenter = activeIndex + (visibleCount - 1) / 2;
                   const distFromCenter = Math.abs(i - visibleCenter);
                   const maxDist = (visibleCount - 1) / 2;
                   const normalizedDist = Math.min(distFromCenter / maxDist, 1);
-                  const curveY = (1 - normalizedDist * normalizedDist) * 18; // center dips 18px
-                  const rotateY = (i - visibleCenter) * 4; // subtle outward rotation
+                  const curveY = (1 - normalizedDist * normalizedDist) * 18;
+                  const rotateY = (i - visibleCenter) * 4;
 
                   return (
                     <div
@@ -407,7 +411,7 @@ const Starting = () => {
               </motion.div>
             </div>
 
-            <div className="flex justify-center gap-1 mt-3">
+            <div className="flex justify-center gap-1 mt-2">
               {carCampaigns.map((_, i) => (
                 <button key={i} onClick={() => goTo(i)} className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-muted-foreground/30"}`} />
               ))}
@@ -415,9 +419,9 @@ const Starting = () => {
           </motion.div>
 
           {/* Featured Car Showcase */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.5 }} className="mb-6 relative">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Showcase</h2>
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25, duration: 0.5 }} className="mb-4 relative">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Showcase</h2>
             </div>
 
             <div
@@ -425,7 +429,7 @@ const Starting = () => {
               onTouchStart={handleFeaturedTouchStart}
               onTouchEnd={handleFeaturedTouchEnd}
             >
-              <div className="relative flex items-center justify-center py-6 md:py-10 overflow-hidden z-10">
+              <div className="relative flex items-center justify-center py-5 md:py-8 overflow-hidden z-10">
                 <AnimatePresence initial={false} mode="popLayout">
                   <motion.div
                     key={`showcase-${activeIndex}`}
@@ -456,63 +460,36 @@ const Starting = () => {
             </div>
 
             <AnimatePresence mode="wait">
-              <motion.p key={`name-${activeIndex}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="text-center text-xs font-medium text-muted-foreground mt-3 tracking-widest uppercase">
+              <motion.p key={`name-${activeIndex}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="text-center text-xs font-medium text-muted-foreground mt-2 tracking-widest uppercase">
                 {featuredCar.name}
               </motion.p>
             </AnimatePresence>
-
-            <div className="flex justify-center gap-1 mt-2">
-              {carCampaigns.map((_, i) => (
-                <button key={i} onClick={() => goTo(i)} className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-4 h-1 bg-primary/70" : "w-1 h-1 bg-muted-foreground/20"}`} />
-              ))}
-            </div>
           </motion.div>
 
-          {/* Match Ad Button */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.5 }} className="mb-6">
-            {isCycleCompleted ? (
-              <div className="glass-card p-5 text-center space-y-3">
-                <p className="text-sm font-semibold text-foreground">Your task sets are completed.</p>
-                <p className="text-xs text-muted-foreground">Please contact customer service to renew or upgrade your plan.</p>
-                <a
-                  href="#"
-                  onClick={(e) => e.preventDefault()}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                  style={{ boxShadow: "0 4px 20px hsl(var(--primary) / 0.3)" }}
-                >
-                  <Headphones className="h-3.5 w-3.5" />
-                  Contact Support
-                </a>
+          {/* Start Promoting header + daily salary */}
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }} className="glass-card p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h1 className="text-base font-semibold tracking-tight">Start Promoting</h1>
+                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                  {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet} tasks · Set {setProgress.currentSet}/{vipTier.totalSets}
+                </p>
               </div>
-            ) : (
-              <button
-                onClick={handleMatchAd}
-                disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT}
-                className="w-full py-4 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 btn-press transition-all duration-300 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
-                style={{ boxShadow: isRestricted ? "none" : "0 4px 20px hsl(var(--primary) / 0.3)" }}
-              >
-                <Play className="h-4 w-4" fill="currentColor" />
-                Match Ad
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            )}
-          </motion.div>
-
-          {/* Daily Earnings */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }} className="glass-card p-4 mb-5">
-            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold tracking-[0.15em] uppercase bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">{profile?.vip_level || "Junior"}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-border/30">
               <div className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
-                <span className="text-xs text-muted-foreground">Today Advertising Salary</span>
+                <span className="text-xs text-muted-foreground">Today's Ad Salary</span>
               </div>
-              <span className="text-base font-bold tabular-nums">{todaySalary}</span>
+              <span className="text-sm font-bold tabular-nums">{todaySalary}</span>
             </div>
           </motion.div>
 
           {/* Important Notes */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.5 }} className="glass-card p-5 border border-border/50">
-            <h3 className="text-sm font-semibold mb-3">Important Notes</h3>
-            <div className="space-y-3">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }} className="glass-card p-4 border border-border/50">
+            <h3 className="text-sm font-semibold mb-2">Important Notes</h3>
+            <div className="space-y-2">
               <div className="flex items-start gap-3">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
                 <div>
@@ -524,7 +501,7 @@ const Starting = () => {
                 <Headphones className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
                 <div>
                   <p className="text-xs font-medium">Contact Support</p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">Please contact customer support service for further questions.</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">Please contact customer support for further questions.</p>
                 </div>
               </div>
             </div>
