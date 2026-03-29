@@ -274,7 +274,7 @@ const Starting = () => {
     setSubmitting(true);
     try {
       // Simulate processing (1-3s)
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
 
       // Call secure server-side RPC
       const { data, error } = await supabase.rpc("complete_task", {
