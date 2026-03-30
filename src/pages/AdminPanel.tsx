@@ -1025,6 +1025,68 @@ const AdminPanel = () => {
             </div>
           </div>
         </TabsContent>
+        {/* REFERRALS TAB */}
+        <TabsContent value="referrals">
+          <div className="glass-card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" />Referral Tracking</h2>
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input value={refSearch} onChange={(e) => setRefSearch(e.target.value)} className="pl-9 h-8 text-xs" />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-xs text-muted-foreground">
+                    <th className="px-4 py-3 text-left font-medium">User</th>
+                    <th className="px-4 py-3 text-left font-medium">Referral Code</th>
+                    <th className="px-4 py-3 text-left font-medium">Referred By</th>
+                    <th className="px-4 py-3 text-center font-medium">Referral Count</th>
+                    <th className="px-4 py-3 text-left font-medium">Referred Users</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(profiles || [])
+                    .filter((p: any) => {
+                      if (!refSearch) return true;
+                      const q = refSearch.toLowerCase();
+                      return (p.username || "").toLowerCase().includes(q) || (p.email || "").toLowerCase().includes(q) || (p.referral_code || "").toLowerCase().includes(q);
+                    })
+                    .map((p: any) => {
+                      const referredUsers = (profiles || []).filter((r: any) => r.referred_by === p.user_id || r.referred_by === p.referral_code);
+                      const referrerProfile = p.referred_by ? (profiles || []).find((r: any) => r.user_id === p.referred_by || r.referral_code === p.referred_by) : null;
+                      return (
+                        <tr key={p.user_id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-3 font-medium">{p.username || p.email}</td>
+                          <td className="px-4 py-3">
+                            <span className="font-mono text-xs bg-primary/10 text-primary px-2 py-1 rounded">{p.referral_code || "—"}</span>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{referrerProfile ? (referrerProfile as any).username || (referrerProfile as any).email : p.referred_by || "—"}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full text-xs font-bold ${referredUsers.length > 0 ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
+                              {referredUsers.length}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {referredUsers.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {referredUsers.map((ru: any) => (
+                                  <span key={ru.user_id} className="text-xs bg-muted px-2 py-0.5 rounded">{ru.username || ru.email}</span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">No referrals</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
     </DashboardLayout>
   );
