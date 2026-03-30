@@ -488,10 +488,11 @@ const AdminPanel = () => {
       )}
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="deposits">Deposits</TabsTrigger>
           <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+          <TabsTrigger value="referrals" className="flex items-center gap-1.5"><Link2 className="h-3.5 w-3.5" />Referrals</TabsTrigger>
           <TabsTrigger value="kyc" className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" />KYC</TabsTrigger>
           <TabsTrigger value="admins" className="flex items-center gap-1.5"><UserCog className="h-3.5 w-3.5" />Admins</TabsTrigger>
           <TabsTrigger value="logs" className="flex items-center gap-1.5"><ScrollText className="h-3.5 w-3.5" />Logs</TabsTrigger>
