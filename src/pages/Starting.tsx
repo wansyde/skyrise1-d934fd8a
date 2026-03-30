@@ -1,6 +1,6 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, DollarSign, Play, ChevronRight, Clock, Headphones, ChevronLeft, X, Loader2, Check } from "lucide-react";
+import { Wallet, DollarSign, Play, ChevronRight, ChevronLeft, X, Loader2, Check, Headphones, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,8 +72,7 @@ const carCampaigns = [
   { brand: "Tesla", name: "Tesla Model S 2025 Plaid", image: teslaModelSImg, featured: teslaModelSFeatured, totalAmount: 44, adSalary: 0.18 },
 ];
 
-const VISIBLE_COUNT = 7;
-const CARD_GAP = 10; // px
+const CARD_GAP = 8;
 
 const generateAssignmentCode = () => {
   const now = new Date();
@@ -112,26 +111,24 @@ const Starting = () => {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const visibleCount = containerWidth > 0 ? (containerWidth < 480 ? 3 : containerWidth < 768 ? 5 : 7) : 7;
-  const cardWidth = containerWidth > 0 ? (containerWidth - (visibleCount - 1) * CARD_GAP) / visibleCount : 155;
+  const visibleCount = containerWidth > 0 ? (containerWidth < 480 ? 4 : containerWidth < 768 ? 5 : 7) : 4;
+  const cardWidth = containerWidth > 0 ? (containerWidth - (visibleCount - 1) * CARD_GAP) / visibleCount : 80;
   const cardStep = cardWidth + CARD_GAP;
 
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
   const DAILY_LIMIT = vipTier.totalTasks;
   const setProgress = useMemo(() => getSetProgress(completedCount, vipTier), [completedCount, vipTier]);
 
-  const todaySalary = Number(profile?.advertising_salary ?? 0).toFixed(2);
-  const userName = profile?.full_name || "User";
+  const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
 
-  // Use profile tasks_completed_today directly
   useEffect(() => {
     if (profile) {
       setCompletedCount(profile.tasks_completed_today || 0);
     }
   }, [profile]);
 
-  // Auto-scroll: increment so cards flow from right to left
+  // Auto-scroll
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
@@ -151,15 +148,14 @@ const Starting = () => {
     handleInteraction();
   }, [handleInteraction]);
 
-  // Showcase = the rightmost visible card on screen
+  // Showcase = rightmost visible card
   const half = Math.floor(visibleCount / 2);
   const showcaseIndex = ((activeIndex + half) % total + total) % total;
   const featuredCar = carCampaigns[showcaseIndex];
 
-  // Strip offset: slide the entire row so activeIndex card is at the left edge
   const stripOffset = -(activeIndex * cardStep);
 
-  // Preload adjacent featured images for smooth transitions
+  // Preload adjacent featured images
   useEffect(() => {
     const nextIdx = (activeIndex + 1) % total;
     const prevIdx = (activeIndex - 1 + total) % total;
@@ -191,40 +187,20 @@ const Starting = () => {
     setFeaturedTouchStart(null);
   };
 
-  const goFeaturedPrev = useCallback(() => {
-    goTo((activeIndex - 1 + total) % total);
-  }, [activeIndex, total, goTo]);
-
-  const goFeaturedNext = useCallback(() => {
-    goTo((activeIndex + 1) % total);
-  }, [activeIndex, total, goTo]);
+  const goFeaturedPrev = useCallback(() => goTo((activeIndex - 1 + total) % total), [activeIndex, total, goTo]);
+  const goFeaturedNext = useCallback(() => goTo((activeIndex + 1) % total), [activeIndex, total, goTo]);
 
   const MIN_BALANCE = 100;
   const isRestricted = profile?.status === "suspended";
   const isCycleCompleted = (profile as any)?.task_cycle_completed === true;
 
-  // Match Ad handler
   const handleMatchAd = () => {
-    if (isRestricted) {
-      toast.error("Your account is currently restricted. Please contact support.");
-      return;
-    }
-    if (isCycleCompleted) {
-      toast.error("Your task sets are completed. Please contact customer service to renew or upgrade your plan.");
-      return;
-    }
+    if (isRestricted) { toast.error("Your account is currently restricted. Please contact support."); return; }
+    if (isCycleCompleted) { toast.error("Your task sets are completed. Please contact customer service to renew or upgrade your plan."); return; }
     const currentBalance = Number(profile?.balance ?? 0);
+    if (currentBalance < MIN_BALANCE) { toast.error("Minimum balance of $100 required to start tasks."); return; }
+    if (completedCount >= DAILY_LIMIT) { toast.error("Daily task limit reached."); return; }
 
-    if (currentBalance < MIN_BALANCE) {
-      toast.error("Minimum balance of $100 required to start tasks.");
-      return;
-    }
-    if (completedCount >= DAILY_LIMIT) {
-      toast.error("Daily task limit reached.");
-      return;
-    }
-
-    // Pick a random car whose totalAmount fits within balance
     const affordable = carCampaigns.filter(c => c.totalAmount <= currentBalance);
     const pool = affordable.length > 0 ? affordable : carCampaigns;
     const car = pool[Math.floor(Math.random() * pool.length)];
@@ -234,7 +210,6 @@ const Starting = () => {
     setMatchProgress(0);
     setMatchState("matching");
 
-    // Animate progress bar
     let progress = 0;
     const interval = setInterval(() => {
       progress += Math.random() * 15 + 5;
@@ -242,41 +217,21 @@ const Starting = () => {
         progress = 100;
         clearInterval(interval);
         setMatchProgress(100);
-        setTimeout(() => {
-          setMatchedAt(new Date());
-          setMatchState("matched");
-        }, 400);
+        setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 400);
       } else {
         setMatchProgress(progress);
       }
     }, 200);
   };
 
-  // Promote (submit) handler
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting) return;
-    if (isRestricted) {
-      toast.error("Your account is currently restricted. Please contact support.");
-      setMatchState("idle");
-      setMatchedCar(null);
-      return;
-    }
-    const currentBalance = Number(profile.balance);
-
-    // Validate balance >= 100
-    if (currentBalance < MIN_BALANCE) {
-      toast.error("Minimum balance of $100 required to start tasks.");
-      setMatchState("idle");
-      setMatchedCar(null);
-      return;
-    }
+    if (isRestricted) { toast.error("Your account is currently restricted."); setMatchState("idle"); setMatchedCar(null); return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum balance of $100 required."); setMatchState("idle"); setMatchedCar(null); return; }
 
     setSubmitting(true);
     try {
-      // Simulate processing (1-3s)
       await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
-
-      // Call secure server-side RPC
       const { data, error } = await supabase.rpc("complete_task", {
         _car_brand: matchedCar.brand,
         _car_name: matchedCar.name,
@@ -284,27 +239,16 @@ const Starting = () => {
         _total_amount: matchedCar.totalAmount,
         _assignment_code: assignmentCode,
       });
-
       if (error) throw error;
-
       const result = data as any;
       if (result?.error) {
-        if (result.status === "pending") {
-          toast.error("Insufficient balance for this task. Record saved as pending.");
-        } else {
-          toast.error(result.error);
-        }
-        setMatchState("idle");
-        setMatchedCar(null);
-        return;
+        if (result.status === "pending") toast.error("Insufficient balance. Record saved as pending.");
+        else toast.error(result.error);
+        setMatchState("idle"); setMatchedCar(null); return;
       }
-
       await refreshProfile();
       setMatchState("submitted");
-      setTimeout(() => {
-        setMatchState("idle");
-        setMatchedCar(null);
-      }, 1500);
+      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
     } catch (e: any) {
       toast.error("Failed to submit: " + e.message);
     } finally {
@@ -314,198 +258,188 @@ const Starting = () => {
 
   return (
     <AppLayout>
-      <div
-        className="px-4 py-4 pb-8 relative"
-        style={{
-          background: "radial-gradient(ellipse at 50% 20%, hsl(var(--primary) / 0.04) 0%, transparent 50%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.97) 100%)",
-        }}
-      >
-        <div className="relative z-10">
-          {/* Balance Cards - horizontal stretch */}
-          <div className="flex gap-3 mb-4">
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.4 }} className="glass-card p-3.5 flex-1 min-w-0">
-              <Wallet className="h-3.5 w-3.5 text-primary mb-1.5" strokeWidth={1.5} />
-              <div className="text-lg font-bold tabular-nums tracking-tight truncate">{profile?.balance ?? 0} AC</div>
-              <span className="text-[10px] text-muted-foreground">Wallet Balance</span>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }} className="glass-card p-3.5 flex-1 min-w-0">
-              <DollarSign className="h-3.5 w-3.5 text-success mb-1.5" strokeWidth={1.5} />
-              <div className="text-lg font-bold tabular-nums tracking-tight truncate">{Number(profile?.advertising_salary ?? 0).toFixed(2)} AC</div>
-              <span className="text-[10px] text-muted-foreground">Ad Salary</span>
-            </motion.div>
+      <div className="px-4 pt-3 pb-8 min-h-[calc(100dvh-120px)] flex flex-col">
+        {/* User Greeting + VIP Badge */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-sm font-bold text-primary">{userName.charAt(0).toUpperCase()}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-bold font-[Montserrat] tracking-tight truncate">Hi, {userName}</p>
+          </div>
+          <span className="px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide bg-primary/10 text-primary whitespace-nowrap">
+            {profile?.vip_level || "Junior"} Promoter
+          </span>
+        </div>
+
+        {/* Balance Cards - full width stacked like reference */}
+        <div className="space-y-2.5 mb-4">
+          <div className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4" style={{ boxShadow: "0 2px 12px hsl(var(--foreground) / 0.04)" }}>
+            <div className="h-10 w-10 rounded-xl bg-success/15 flex items-center justify-center flex-shrink-0">
+              <Wallet className="h-5 w-5 text-success" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold font-[Montserrat]">Wallet Balance</p>
+              <p className="text-[11px] text-muted-foreground leading-snug">The total balance reflects both the deposited amount and profits earned</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-success">{Number(profile?.balance ?? 0).toFixed(2)}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">AC</p>
+            </div>
           </div>
 
-          {/* Promote Button - above fold, with task count */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }} className="mb-4">
-            {isCycleCompleted ? (
-              <div className="glass-card p-4 text-center space-y-2.5">
-                <p className="text-sm font-semibold text-foreground">Task sets completed</p>
-                <p className="text-xs text-muted-foreground">Contact support to renew or upgrade.</p>
-                <a
-                  href="#"
-                  onClick={(e) => e.preventDefault()}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                  style={{ boxShadow: "0 4px 20px hsl(var(--primary) / 0.3)" }}
-                >
-                  <Headphones className="h-3.5 w-3.5" />
-                  Contact Support
-                </a>
-              </div>
-            ) : (
-              <button
-                onClick={handleMatchAd}
-                disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT}
-                className="w-full py-4 rounded-2xl font-semibold text-sm tracking-wide flex items-center justify-center gap-2.5 btn-press transition-all duration-300 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ boxShadow: isRestricted ? "none" : "0 4px 20px hsl(var(--primary) / 0.3)" }}
-              >
-                <Play className="h-4 w-4" fill="currentColor" />
-                Promote ({setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet})
-              </button>
-            )}
-          </motion.div>
-
-          {/* 3D Car Carousel */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Campaigns</h2>
-              <span className="text-[10px] text-muted-foreground">{total} available</span>
+          <div className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4" style={{ boxShadow: "0 2px 12px hsl(var(--foreground) / 0.04)" }}>
+            <div className="h-10 w-10 rounded-xl bg-success/15 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="h-5 w-5 text-success" strokeWidth={1.5} />
             </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold font-[Montserrat]">Advertising Salary</p>
+              <p className="text-[11px] text-muted-foreground leading-snug">Advertising salary</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-success">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">AC</p>
+            </div>
+          </div>
+        </div>
 
-            <div
-              ref={carouselRef}
-              className="relative overflow-hidden rounded-2xl"
-              style={{ height: cardWidth * 1.25 + 20, background: "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.04) 0%, transparent 60%)" }}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
+        {/* Start Promoting Header with task count */}
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-bold font-[Montserrat] tracking-tight text-foreground">Start Promoting</h2>
+          <span className="text-base font-bold font-[Montserrat] tabular-nums text-success">
+            {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet}
+          </span>
+        </div>
+
+        {/* Car Carousel Strip */}
+        <div className="mb-3">
+          <div
+            ref={carouselRef}
+            className="relative overflow-hidden rounded-xl"
+            style={{ height: cardWidth * 1.3 }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <motion.div
+              className="flex absolute"
+              style={{ gap: CARD_GAP, top: 0 }}
+              animate={{ x: stripOffset }}
+              transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              <motion.div
-                className="flex absolute"
-                style={{ gap: CARD_GAP, top: 0 }}
-                animate={{ x: stripOffset }}
-                transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-              >
-                {carCampaigns.map((car, i) => {
-                  const visibleCenter = activeIndex + (visibleCount - 1) / 2;
-                  const distFromCenter = Math.abs(i - visibleCenter);
-                  const maxDist = (visibleCount - 1) / 2;
-                  const normalizedDist = Math.min(distFromCenter / maxDist, 1);
-                  const curveY = (1 - normalizedDist * normalizedDist) * 18;
-                  const rotateY = (i - visibleCenter) * 4;
+              {carCampaigns.map((car, i) => {
+                const visibleCenter = activeIndex + (visibleCount - 1) / 2;
+                const distFromCenter = Math.abs(i - visibleCenter);
+                const maxDist = (visibleCount - 1) / 2;
+                const normalizedDist = Math.min(distFromCenter / maxDist, 1);
+                const curveY = (1 - normalizedDist * normalizedDist) * 14;
+                const rotateY = (i - visibleCenter) * 3;
 
-                  return (
-                    <div
-                      key={i}
-                      className="flex-shrink-0 rounded-xl overflow-hidden cursor-pointer transition-transform duration-700"
-                      style={{
-                        width: cardWidth,
-                        height: cardWidth * 1.25,
-                        boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
-                        transform: `perspective(800px) translateY(${curveY}px) rotateY(${rotateY}deg)`,
-                      }}
-                      onClick={() => goTo(i)}
-                    >
-                      <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
-                    </div>
-                  );
-                })}
-              </motion.div>
-            </div>
-
-            <div className="flex justify-center gap-1 mt-2">
-              {carCampaigns.map((_, i) => (
-                <button key={i} onClick={() => goTo(i)} className={`rounded-full transition-all duration-300 ${i === activeIndex ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-muted-foreground/30"}`} />
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Featured Car Showcase */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25, duration: 0.5 }} className="mb-4 relative">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Showcase</h2>
-            </div>
-
-            <div
-              className="relative rounded-2xl overflow-hidden bg-card border border-border"
-              onTouchStart={handleFeaturedTouchStart}
-              onTouchEnd={handleFeaturedTouchEnd}
-            >
-              <div className="relative flex items-center justify-center py-5 md:py-8 overflow-hidden z-10">
-                <AnimatePresence initial={false} mode="popLayout">
-                  <motion.div
-                    key={`showcase-${activeIndex}`}
-                    className="relative w-full flex items-center justify-center"
-                    style={{ willChange: "transform, opacity" }}
-                    initial={{ opacity: 0, x: "25%", scale: 0.95 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: "-20%", scale: 0.97 }}
-                    transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                return (
+                  <div
+                    key={i}
+                    className="flex-shrink-0 rounded-lg overflow-hidden cursor-pointer"
+                    style={{
+                      width: cardWidth,
+                      height: cardWidth * 1.3,
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                      transform: `perspective(800px) translateY(${curveY}px) rotateY(${rotateY}deg)`,
+                      transition: "transform 0.7s ease",
+                    }}
+                    onClick={() => goTo(i)}
                   >
-                    <img
-                      src={featuredCar.featured}
-                      alt={featuredCar.name}
-                      className="w-[75%] sm:w-[65%] aspect-[2/1] object-contain"
-                      style={{ filter: "brightness(1.02) contrast(1.02) saturate(1.05)" }}
-                      draggable={false}
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+                    <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
+                  </div>
+                );
+              })}
+            </motion.div>
+          </div>
+        </div>
 
-              <button onClick={goFeaturedPrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-background transition-colors">
-                <ChevronLeft className="h-4 w-4 text-foreground/50" />
-              </button>
-              <button onClick={goFeaturedNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-background transition-colors">
-                <ChevronRight className="h-4 w-4 text-foreground/50" />
-              </button>
+        {/* Featured Car Showcase */}
+        <div className="mb-3 relative">
+          <div
+            className="relative rounded-2xl overflow-hidden bg-card"
+            onTouchStart={handleFeaturedTouchStart}
+            onTouchEnd={handleFeaturedTouchEnd}
+          >
+            <div className="relative flex items-center justify-center py-4 overflow-hidden">
+              <AnimatePresence initial={false} mode="popLayout">
+                <motion.div
+                  key={`showcase-${activeIndex}`}
+                  className="relative w-full flex items-center justify-center"
+                  style={{ willChange: "transform, opacity" }}
+                  initial={{ opacity: 0, x: "25%", scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: "-20%", scale: 0.97 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <img
+                    src={featuredCar.featured}
+                    alt={featuredCar.name}
+                    className="w-[85%] aspect-[2/1] object-contain drop-shadow-lg"
+                    style={{ filter: "brightness(1.02) contrast(1.02) saturate(1.05)" }}
+                    draggable={false}
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.p key={`name-${activeIndex}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="text-center text-xs font-medium text-muted-foreground mt-2 tracking-widest uppercase">
-                {featuredCar.name}
-              </motion.p>
-            </AnimatePresence>
-          </motion.div>
+            <button onClick={goFeaturedPrev} className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center">
+              <ChevronLeft className="h-3.5 w-3.5 text-foreground/50" />
+            </button>
+            <button onClick={goFeaturedNext} className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center">
+              <ChevronRight className="h-3.5 w-3.5 text-foreground/50" />
+            </button>
+          </div>
+        </div>
 
-          {/* Start Promoting header + daily salary */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }} className="glass-card p-4 mb-4">
-            <div className="flex items-center justify-between mb-2">
+        {/* Ad Match Button - CRITICAL: always visible */}
+        <div className="mb-4">
+          {isCycleCompleted ? (
+            <div className="rounded-2xl bg-card border border-border p-4 text-center space-y-2.5">
+              <p className="text-sm font-semibold text-foreground">Task sets completed</p>
+              <p className="text-xs text-muted-foreground">Contact support to renew or upgrade.</p>
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <Headphones className="h-3.5 w-3.5" />
+                Contact Support
+              </a>
+            </div>
+          ) : (
+            <motion.button
+              onClick={handleMatchAd}
+              disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT}
+              whileTap={{ scale: 0.97 }}
+              className="w-full py-4 rounded-2xl font-bold text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-200 bg-success text-success-foreground disabled:opacity-50 disabled:cursor-not-allowed font-[Montserrat]"
+              style={{ boxShadow: "0 6px 24px hsl(var(--success) / 0.35)" }}
+            >
+              Ad Match ({setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet})
+            </motion.button>
+          )}
+        </div>
+
+        {/* Important Notes */}
+        <div className="rounded-2xl bg-card border border-border p-4 mt-auto" style={{ boxShadow: "0 2px 12px hsl(var(--foreground) / 0.04)" }}>
+          <h3 className="text-sm font-semibold mb-2 font-[Montserrat]">Important Notes</h3>
+          <div className="space-y-2">
+            <div className="flex items-start gap-3">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
               <div>
-                <h1 className="text-base font-semibold tracking-tight">Start Promoting</h1>
-                <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-                  {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet} tasks · Set {setProgress.currentSet}/{vipTier.totalSets}
-                </p>
-              </div>
-              <span className="text-[11px] font-bold tracking-[0.15em] uppercase bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">{profile?.vip_level || "Junior"}</span>
-            </div>
-            <div className="flex items-center justify-between pt-2 border-t border-border/30">
-              <div className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
-                <span className="text-xs text-muted-foreground">Today's Ad Salary</span>
-              </div>
-              <span className="text-sm font-bold tabular-nums">{todaySalary}</span>
-            </div>
-          </motion.div>
-
-          {/* Important Notes */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }} className="glass-card p-4 border border-border/50">
-            <h3 className="text-sm font-semibold mb-2">Important Notes</h3>
-            <div className="space-y-2">
-              <div className="flex items-start gap-3">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
-                <div>
-                  <p className="text-xs font-medium">Support Hours</p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">Mon – Fri, 9:00 AM – 6:00 PM (UTC)</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Headphones className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
-                <div>
-                  <p className="text-xs font-medium">Contact Support</p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">Please contact customer support for further questions.</p>
-                </div>
+                <p className="text-xs font-medium">Support Hours</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">Mon – Fri, 9:00 AM – 6:00 PM (UTC)</p>
               </div>
             </div>
-          </motion.div>
+            <div className="flex items-start gap-3">
+              <Headphones className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+              <div>
+                <p className="text-xs font-medium">Contact Support</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">Please contact customer support for further questions.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -527,7 +461,6 @@ const Starting = () => {
               className="w-full max-w-md bg-card rounded-t-3xl p-6 pb-8 relative shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Submitted overlay */}
               <AnimatePresence>
                 {matchState === "submitted" && (
                   <motion.div
@@ -537,76 +470,49 @@ const Starting = () => {
                     className="absolute inset-0 z-10 flex items-center justify-center rounded-t-3xl bg-card/95 backdrop-blur-sm"
                   >
                     <div className="flex flex-col items-center gap-3">
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
-                        className="h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center"
-                      >
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }} className="h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center">
                         <Check className="h-8 w-8 text-primary" strokeWidth={2.5} />
                       </motion.div>
-                      <motion.p
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.25 }}
-                        className="text-lg font-semibold tracking-tight"
-                      >
-                        Submitted
-                      </motion.p>
+                      <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="text-lg font-semibold tracking-tight">Submitted</motion.p>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Close button */}
-              <button
-                onClick={() => { setMatchState("idle"); setMatchedCar(null); }}
-                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
-              >
+              <button onClick={() => { setMatchState("idle"); setMatchedCar(null); }} className="absolute top-4 right-4 h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
 
-              <h3 className="text-lg font-semibold text-primary mb-6">Assignment Submission</h3>
+              <h3 className="text-lg font-semibold text-primary mb-6 font-[Montserrat]">Assignment Submission</h3>
 
-              {/* Car Image */}
               <div className="flex justify-center mb-4">
                 <img src={matchedCar.featured} alt={matchedCar.name} className="h-28 object-contain" />
               </div>
 
               <p className="text-center text-sm font-semibold mb-4 px-4">{matchedCar.name}</p>
 
-              {/* Progress / Slider */}
               <div className="flex justify-center mb-5">
                 <div className="w-48 h-8 rounded-full bg-muted/50 border border-border/50 relative overflow-hidden">
-                  <motion.div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/30 to-primary/60 rounded-full"
-                    animate={{ width: `${matchProgress}%` }}
-                    transition={{ duration: 0.2 }}
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-white border-2 border-primary shadow-lg transition-all duration-200"
-                    style={{ left: `calc(${Math.min(matchProgress, 95)}% - 12px)` }}
-                  />
+                  <motion.div className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/30 to-primary/60 rounded-full" animate={{ width: `${matchProgress}%` }} transition={{ duration: 0.2 }} />
+                  <div className="absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-white border-2 border-primary shadow-lg transition-all duration-200" style={{ left: `calc(${Math.min(matchProgress, 95)}% - 12px)` }} />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-5 border-t border-border/30 pt-4">
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
-                  <p className="text-lg font-bold text-primary">AC {matchedCar.totalAmount}</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.totalAmount}</p>
                 </div>
                 <div className="text-center border-l border-border/30">
                   <p className="text-xs text-muted-foreground mb-1">Advertising salary</p>
-                  <p className="text-lg font-bold text-primary">AC {matchedCar.adSalary}</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.adSalary}</p>
                 </div>
               </div>
 
               <div className="space-y-3 mb-6">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Created At</span>
-                  <span className="font-medium text-foreground">
-                    {matchedAt ? matchedAt.toISOString().replace('T', ' ').substring(0, 19) : "Matching..."}
-                  </span>
+                  <span className="font-medium">{matchedAt ? matchedAt.toISOString().replace('T', ' ').substring(0, 19) : "Matching..."}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Assignment Code</span>
@@ -620,13 +526,7 @@ const Starting = () => {
                 className="w-full py-3.5 rounded-xl font-semibold text-sm tracking-wide flex items-center justify-center gap-2 transition-all duration-300 bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90"
                 style={{ boxShadow: "0 4px 16px hsl(var(--primary) / 0.3)" }}
               >
-                {submitting ? (
-                  <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</>
-                ) : matchState === "matching" ? (
-                  "Matching..."
-                ) : (
-                  "Promote"
-                )}
+                {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : matchState === "matching" ? "Matching..." : "Promote"}
               </button>
             </motion.div>
           </motion.div>
