@@ -138,7 +138,7 @@ const Event = () => {
                 <p className="text-sm text-muted-foreground">Unlock tiers by increasing your deposit</p>
               </div>
             </div>
-            <button onClick={() => downloadImage(memberRef, "membership")} className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+            <button onClick={() => saveImage(memberRef, "membership")} className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
               <Download className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
