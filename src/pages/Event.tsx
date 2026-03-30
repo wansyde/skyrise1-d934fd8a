@@ -79,17 +79,31 @@ const Event = () => {
     toast.success("Copied to clipboard");
   }, []);
 
-  const downloadImage = useCallback(async (ref: React.RefObject<HTMLDivElement>, name: string) => {
+  const saveImage = useCallback(async (ref: React.RefObject<HTMLDivElement>, name: string) => {
     if (!ref.current) return;
     try {
       const dataUrl = await toPng(ref.current, { backgroundColor: "#ffffff", pixelRatio: 3 });
+      // Convert to blob for share/save API
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], `skyrise-${name}.png`, { type: "image/png" });
+
+      // Try native share (mobile: Save to Photos / Gallery)
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Skyrise ${name}` });
+        toast.success("Image shared");
+        return;
+      }
+
+      // Fallback: download
       const link = document.createElement("a");
       link.download = `skyrise-${name}.png`;
       link.href = dataUrl;
       link.click();
       toast.success("Image saved");
-    } catch {
-      toast.error("Failed to generate image");
+    } catch (err: any) {
+      if (err?.name === "AbortError") return; // user cancelled share
+      toast.error("Failed to save image");
     }
   }, []);
 
