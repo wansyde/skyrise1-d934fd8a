@@ -306,7 +306,7 @@ const Starting = () => {
         {/* Start Promoting Header with task count */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold font-[Montserrat] tracking-tight text-foreground">Start Promoting</h2>
-          <span className="text-base font-bold font-[Montserrat] tabular-nums text-success">
+          <span className="text-base font-bold font-[Montserrat] tabular-nums text-primary">
             {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet}
           </span>
         </div>
@@ -413,8 +413,8 @@ const Starting = () => {
               onClick={handleMatchAd}
               disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT}
               whileTap={{ scale: 0.97 }}
-              className="w-full py-4 rounded-2xl font-bold text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-200 bg-success text-success-foreground disabled:opacity-50 disabled:cursor-not-allowed font-[Montserrat]"
-              style={{ boxShadow: "0 6px 24px hsl(var(--success) / 0.35)" }}
+              className="w-full py-4 rounded-2xl font-bold text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-200 bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed font-[Montserrat]"
+              style={{ boxShadow: "0 6px 24px hsl(var(--primary) / 0.4), 0 0 40px hsl(var(--primary) / 0.15)" }}
             >
               Ad Match ({setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet})
             </motion.button>

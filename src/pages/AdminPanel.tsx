@@ -454,8 +454,28 @@ const AdminPanel = () => {
               <div className="text-sm mt-1">{(selectedUser as any).country || "—"}</div>
             </div>
             <div className="vault-card p-4">
-              <span className="text-xs text-muted-foreground">Region</span>
-              <div className="text-sm mt-1">{(selectedUser as any).region || "—"}</div>
+              <span className="text-xs text-muted-foreground">Region / City</span>
+              <div className="text-sm mt-1">{[(selectedUser as any).region, (selectedUser as any).city].filter(Boolean).join(", ") || "—"}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">ISP</span>
+              <div className="text-sm mt-1">{(selectedUser as any).isp || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">Connection Type</span>
+              <div className="text-sm mt-1">{(selectedUser as any).connection_type || "—"}</div>
+            </div>
+            <div className="vault-card p-4">
+              <span className="text-xs text-muted-foreground">VPN Status</span>
+              <div className="mt-1">
+                {(selectedUser as any).is_vpn ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-destructive/15 text-destructive">⚠️ VPN/Proxy Detected</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-green-500/15 text-green-400">✅ Normal</span>
+                )}
+              </div>
             </div>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
@@ -518,6 +538,7 @@ const AdminPanel = () => {
                     <th className="px-5 py-3 font-medium">IP Address</th>
                     <th className="px-5 py-3 font-medium">Country</th>
                     <th className="px-5 py-3 font-medium">Region</th>
+                    <th className="px-5 py-3 font-medium">VPN</th>
                     <th className="px-5 py-3 font-medium">Referral Code</th>
                     <th className="px-5 py-3 font-medium">Referred By</th>
                     <th className="px-5 py-3 font-medium">Referrals</th>
@@ -541,6 +562,13 @@ const AdminPanel = () => {
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.ip_address || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">{u.country || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">{u.region || "—"}</td>
+                      <td className="px-5 py-3">
+                        {u.is_vpn ? (
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">⚠️ VPN</span>
+                        ) : (
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">✅</span>
+                        )}
+                      </td>
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">
                         {u.referred_by ? (() => { const r = (profiles || []).find((p: any) => p.user_id === u.referred_by); return r ? r.username || r.email : u.referred_by; })() : "—"}

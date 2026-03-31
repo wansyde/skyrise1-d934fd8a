@@ -131,6 +131,7 @@ export type Database = {
           avatar_url: string | null
           balance: number
           city: string | null
+          connection_type: string | null
           country: string | null
           created_at: string
           credit_score: number
@@ -139,6 +140,8 @@ export type Database = {
           gender: string | null
           id: string
           ip_address: string | null
+          is_vpn: boolean | null
+          isp: string | null
           kyc_back_url: string | null
           kyc_front_url: string | null
           kyc_id_number: string | null
@@ -173,6 +176,7 @@ export type Database = {
           avatar_url?: string | null
           balance?: number
           city?: string | null
+          connection_type?: string | null
           country?: string | null
           created_at?: string
           credit_score?: number
@@ -181,6 +185,8 @@ export type Database = {
           gender?: string | null
           id?: string
           ip_address?: string | null
+          is_vpn?: boolean | null
+          isp?: string | null
           kyc_back_url?: string | null
           kyc_front_url?: string | null
           kyc_id_number?: string | null
@@ -215,6 +221,7 @@ export type Database = {
           avatar_url?: string | null
           balance?: number
           city?: string | null
+          connection_type?: string | null
           country?: string | null
           created_at?: string
           credit_score?: number
@@ -223,6 +230,8 @@ export type Database = {
           gender?: string | null
           id?: string
           ip_address?: string | null
+          is_vpn?: boolean | null
+          isp?: string | null
           kyc_back_url?: string | null
           kyc_front_url?: string | null
           kyc_id_number?: string | null
