@@ -306,7 +306,7 @@ const Starting = () => {
         {/* Start Promoting Header with task count */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold font-[Montserrat] tracking-tight text-foreground">Start Promoting</h2>
-          <span className="text-base font-bold font-[Montserrat] tabular-nums text-success">
+          <span className="text-base font-bold font-[Montserrat] tabular-nums text-primary">
             {setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet}
           </span>
         </div>
