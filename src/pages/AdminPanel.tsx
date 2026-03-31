@@ -538,6 +538,7 @@ const AdminPanel = () => {
                     <th className="px-5 py-3 font-medium">IP Address</th>
                     <th className="px-5 py-3 font-medium">Country</th>
                     <th className="px-5 py-3 font-medium">Region</th>
+                    <th className="px-5 py-3 font-medium">VPN</th>
                     <th className="px-5 py-3 font-medium">Referral Code</th>
                     <th className="px-5 py-3 font-medium">Referred By</th>
                     <th className="px-5 py-3 font-medium">Referrals</th>
