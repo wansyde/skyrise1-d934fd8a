@@ -23,7 +23,6 @@ Deno.serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Validate token using getClaims
     const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -39,27 +38,40 @@ Deno.serve(async (req: Request) => {
 
     const userId = claimsData.claims.sub;
 
-    // Get IP from headers
     const clientIp =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("cf-connecting-ip") ||
       req.headers.get("x-real-ip") ||
       "unknown";
 
-    // Geolocate
     let country = null;
     let region = null;
     let city = null;
+    let isp = null;
+    let is_vpn = false;
+    let connection_type = "unknown";
 
     if (clientIp && clientIp !== "unknown" && clientIp !== "127.0.0.1") {
       try {
-        const geoRes = await fetch(`http://ip-api.com/json/${clientIp}?fields=status,country,regionName,city`);
+        const geoRes = await fetch(
+          `http://ip-api.com/json/${clientIp}?fields=status,country,regionName,city,isp,proxy,hosting,mobile`
+        );
         if (geoRes.ok) {
           const geo = await geoRes.json();
           if (geo.status === "success") {
             country = geo.country;
             region = geo.regionName;
             city = geo.city;
+            isp = geo.isp || null;
+
+            if (geo.proxy || geo.hosting) {
+              is_vpn = true;
+              connection_type = geo.hosting ? "Hosting/Datacenter" : "VPN/Proxy";
+            } else if (geo.mobile) {
+              connection_type = "Mobile";
+            } else {
+              connection_type = "Residential";
+            }
           }
         }
       } catch (e) {
@@ -67,7 +79,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Update profile with service role
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
@@ -78,6 +89,9 @@ Deno.serve(async (req: Request) => {
         ...(country && { country }),
         ...(region && { region }),
         ...(city && { city }),
+        isp,
+        is_vpn,
+        connection_type,
       })
       .eq("user_id", userId);
 
@@ -89,7 +103,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, ip: clientIp, country, region, city }), {
+    return new Response(JSON.stringify({ success: true, ip: clientIp, country, region, city, isp, is_vpn, connection_type }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
