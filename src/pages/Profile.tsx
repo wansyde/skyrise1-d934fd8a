@@ -15,7 +15,6 @@ import { supabase } from "@/integrations/supabase/client";
 const financialItems = [
   { label: "Deposit", icon: ArrowDownToLine, href: "/app/wallet/deposit" },
   { label: "Withdraw", icon: ArrowUpFromLine, href: "/app/wallet/withdraw" },
-  { label: "Transaction", icon: ArrowLeftRight, href: "/app/records" },
 ];
 
 const detailItems = [
