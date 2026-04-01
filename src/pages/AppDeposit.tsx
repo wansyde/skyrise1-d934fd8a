@@ -115,11 +115,11 @@ const AppDeposit = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-medium tabular-nums text-success">
+                      <span className="text-sm font-medium tabular-nums text-primary">
                         +${Number(d.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
-                      <span className={`text-[10px] block mt-0.5 capitalize ${d.status === "pending" ? "text-warning" : d.status === "approved" ? "text-success" : "text-destructive"}`}>
-                        {d.status}
+                      <span className={`text-[10px] block mt-0.5 capitalize ${d.status === "pending" ? "text-warning" : d.status === "approved" ? "text-primary" : "text-destructive"}`}>
+                        {d.status === "approved" ? "completed" : d.status}
                       </span>
                     </div>
                   </motion.div>
