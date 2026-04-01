@@ -7,6 +7,7 @@ import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pe
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { VIP_LEVELS } from "@/lib/vip-config";
+import AdminSupportTab from "@/components/admin/AdminSupportTab";
 import {
   AlertDialog,
   AlertDialogAction,
