@@ -363,7 +363,7 @@ const AppWithdraw = () => {
                         <span className="text-sm font-medium tabular-nums">
                           -${Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </span>
-                        <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "completed" ? "text-success" : w.status === "approved" ? "text-success" : "text-destructive"}`}>
+                        <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "completed" ? "text-primary" : w.status === "approved" ? "text-primary" : "text-destructive"}`}>
                           {w.status === "approved" ? "completed" : w.status}
                         </span>
                       </div>
