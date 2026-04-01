@@ -73,10 +73,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               style={{ background: "var(--gradient-hero)" }}
             >
               {/* Menu header */}
-              <div className="flex h-14 items-center justify-between px-5">
-                <Link to="/app" className="flex items-center" onClick={() => setMenuOpen(false)}>
-                  <SkyriseLogo className="h-10 w-auto" />
-                </Link>
+              <div className="flex h-14 items-center justify-end px-5">
                 <button
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground transition-colors"

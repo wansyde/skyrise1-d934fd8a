@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   User, CreditCard, MessageSquare, Bell, LogOut,
   ChevronRight, Shield, ArrowDownToLine, ArrowUpFromLine,
-  ArrowLeftRight, IdCard, UserCircle, Wallet, BadgeCheck
+  IdCard, UserCircle, Wallet, BadgeCheck, DollarSign
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,48 @@ import heroCarBanner from "@/assets/hero-car-banner.jpg";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const ProfitsHistory = ({ userId }: { userId?: string }) => {
+  const { data: records } = useQuery({
+    queryKey: ["profits-history", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("task_records")
+        .select("created_at, advertising_salary")
+        .eq("user_id", userId!)
+        .eq("status", "completed")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      return data || [];
+    },
+  });
+
+  if (!records || records.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
+        No profits earned yet.
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-border bg-card">
+      {records.map((r, i) => (
+        <div key={i} className={`flex items-center justify-between px-4 py-3.5 ${i > 0 ? "border-t border-border" : ""}`}>
+          <div className="flex items-center gap-3">
+            <DollarSign className="h-[18px] w-[18px] text-primary" strokeWidth={1.5} />
+            <span className="text-sm text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
+          </div>
+          <span className="text-sm font-medium tabular-nums text-primary">+${Number(r.advertising_salary).toFixed(2)}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const financialItems = [
   { label: "Deposit", icon: ArrowDownToLine, href: "/app/wallet/deposit" },
   { label: "Withdraw", icon: ArrowUpFromLine, href: "/app/wallet/withdraw" },
-  { label: "Transaction", icon: ArrowLeftRight, href: "/app/records" },
 ];
 
 const detailItems = [
@@ -167,6 +205,13 @@ const Profile = () => {
         {/* Menu sections */}
         <MenuGroup title="My Financial" items={financialItems} />
         <MenuGroup title="My Detail" items={detailItems} />
+
+        {/* Profits History */}
+        <div className="mb-5">
+          <h3 className="text-sm font-semibold mb-2 px-1">Profits History</h3>
+          <ProfitsHistory userId={user?.id} />
+        </div>
+
         <MenuGroup title="Other" items={otherItems} />
 
         {/* Logout */}

@@ -136,7 +136,7 @@ const AppWithdraw = () => {
       <div className="flex flex-col min-h-[calc(100vh-5rem)]">
         {/* Header */}
         <div className="flex items-center h-14 px-4 border-b border-border">
-          <Link to="/app/wallet" className="mr-3 text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/app/profile" className="mr-3 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
           </Link>
           <h1 className="flex-1 text-center text-base font-semibold tracking-tight pr-8">Withdraw</h1>
@@ -363,7 +363,7 @@ const AppWithdraw = () => {
                         <span className="text-sm font-medium tabular-nums">
                           -${Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </span>
-                        <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "completed" ? "text-success" : w.status === "approved" ? "text-success" : "text-destructive"}`}>
+                        <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "completed" ? "text-primary" : w.status === "approved" ? "text-primary" : "text-destructive"}`}>
                           {w.status === "approved" ? "completed" : w.status}
                         </span>
                       </div>

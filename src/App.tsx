@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Public pages
 import Index from "./pages/Index";
@@ -48,6 +49,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <Routes>
             {/* Public */}
             <Route path="/" element={<Index />} />
@@ -74,7 +76,7 @@ const App = () => (
             <Route path="/app/aml" element={<ProtectedRoute><AML /></ProtectedRoute>} />
             <Route path="/app/settings" element={<ProtectedRoute><PersonalInfo /></ProtectedRoute>} />
             <Route path="/app/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
-            <Route path="/app/wallet" element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
+            {/* Wallet page removed — deposit/withdraw accessed directly */}
             <Route path="/app/wallet/payment-methods" element={<ProtectedRoute><PaymentMethods /></ProtectedRoute>} />
             <Route path="/app/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 

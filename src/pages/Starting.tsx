@@ -275,29 +275,29 @@ const Starting = () => {
         {/* Balance Cards - full width stacked like reference */}
         <div className="space-y-2.5 mb-4">
           <div className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4" style={{ boxShadow: "0 2px 12px hsl(var(--foreground) / 0.04)" }}>
-            <div className="h-10 w-10 rounded-xl bg-success/15 flex items-center justify-center flex-shrink-0">
-              <Wallet className="h-5 w-5 text-success" strokeWidth={1.5} />
+            <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+              <Wallet className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold font-[Montserrat]">Wallet Balance</p>
               <p className="text-[11px] text-muted-foreground leading-snug">The total balance reflects both the deposited amount and profits earned</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-success">{Number(profile?.balance ?? 0).toFixed(2)}</p>
+              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-primary">{Number(profile?.balance ?? 0).toFixed(2)}</p>
               <p className="text-[10px] text-muted-foreground font-medium">AC</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4" style={{ boxShadow: "0 2px 12px hsl(var(--foreground) / 0.04)" }}>
-            <div className="h-10 w-10 rounded-xl bg-success/15 flex items-center justify-center flex-shrink-0">
-              <DollarSign className="h-5 w-5 text-success" strokeWidth={1.5} />
+            <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold font-[Montserrat]">Advertising Salary</p>
               <p className="text-[11px] text-muted-foreground leading-snug">Advertising salary</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-success">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
+              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-primary">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
               <p className="text-[10px] text-muted-foreground font-medium">AC</p>
             </div>
           </div>

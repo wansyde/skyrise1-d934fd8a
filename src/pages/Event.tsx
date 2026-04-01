@@ -186,8 +186,8 @@ const Event = () => {
         >
           <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-success/10">
-                <CalendarCheck className="h-4.5 w-4.5 text-success" strokeWidth={1.5} />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                <CalendarCheck className="h-4.5 w-4.5 text-primary" strokeWidth={1.5} />
               </div>
               <div>
                 <h2 className="text-lg font-bold tracking-tight">Base Salary</h2>

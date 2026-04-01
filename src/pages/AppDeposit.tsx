@@ -33,7 +33,7 @@ const AppDeposit = () => {
       <div className="flex flex-col min-h-[calc(100vh-5rem)]">
         {/* Header */}
         <div className="flex items-center h-14 px-4 border-b border-border">
-          <Link to="/app/wallet" className="mr-3 text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/app/profile" className="mr-3 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
           </Link>
           <h1 className="flex-1 text-center text-base font-semibold tracking-tight pr-8">Deposit</h1>
@@ -115,11 +115,11 @@ const AppDeposit = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-medium tabular-nums text-success">
+                      <span className="text-sm font-medium tabular-nums text-primary">
                         +${Number(d.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
-                      <span className={`text-[10px] block mt-0.5 capitalize ${d.status === "pending" ? "text-warning" : d.status === "approved" ? "text-success" : "text-destructive"}`}>
-                        {d.status}
+                      <span className={`text-[10px] block mt-0.5 capitalize ${d.status === "pending" ? "text-warning" : d.status === "approved" ? "text-primary" : "text-destructive"}`}>
+                        {d.status === "approved" ? "completed" : d.status}
                       </span>
                     </div>
                   </motion.div>
