@@ -33,7 +33,7 @@ const AppDeposit = () => {
       <div className="flex flex-col min-h-[calc(100vh-5rem)]">
         {/* Header */}
         <div className="flex items-center h-14 px-4 border-b border-border">
-          <Link to="/app/wallet" className="mr-3 text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/app/profile" className="mr-3 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
           </Link>
           <h1 className="flex-1 text-center text-base font-semibold tracking-tight pr-8">Deposit</h1>
