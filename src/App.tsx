@@ -39,6 +39,7 @@ import PaymentMethods from "./pages/PaymentMethods";
 import Notifications from "./pages/Notifications";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
+import SupportChat from "./pages/SupportChat";
 
 const queryClient = new QueryClient();
 
