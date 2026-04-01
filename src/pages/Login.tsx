@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import SkyriseLogo from "@/components/SkyriseLogo";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 import heroCar1 from "@/assets/hero-car-1.jpg";
 import heroCar2 from "@/assets/hero-car-2.jpg";
@@ -201,7 +202,8 @@ const Login = () => {
   if (session) return null;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen relative">
+      <WhatsAppButton />
       {/* Left — Image slider (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white">
         <div className="absolute inset-0 flex flex-col items-center justify-center px-12 z-10">

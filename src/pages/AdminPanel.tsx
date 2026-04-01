@@ -3,10 +3,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw, ScrollText, UserCog, ShieldCheck, Eye, Link2 } from "lucide-react";
+import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw, ScrollText, UserCog, ShieldCheck, Eye, Link2, MessageSquare } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { VIP_LEVELS } from "@/lib/vip-config";
+import AdminSupportTab from "@/components/admin/AdminSupportTab";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -508,7 +509,7 @@ const AdminPanel = () => {
       )}
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="deposits">Deposits</TabsTrigger>
           <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
@@ -516,6 +517,7 @@ const AdminPanel = () => {
           <TabsTrigger value="kyc" className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" />KYC</TabsTrigger>
           <TabsTrigger value="admins" className="flex items-center gap-1.5"><UserCog className="h-3.5 w-3.5" />Admins</TabsTrigger>
           <TabsTrigger value="logs" className="flex items-center gap-1.5"><ScrollText className="h-3.5 w-3.5" />Logs</TabsTrigger>
+          <TabsTrigger value="support" className="flex items-center gap-1.5"><MessageSquare className="h-3.5 w-3.5" />Support</TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
@@ -1114,6 +1116,11 @@ const AdminPanel = () => {
               </table>
             </div>
           </div>
+        </TabsContent>
+
+        {/* Support Tab */}
+        <TabsContent value="support">
+          <AdminSupportTab />
         </TabsContent>
       </Tabs>
     </DashboardLayout>
