@@ -1116,6 +1116,11 @@ const AdminPanel = () => {
             </div>
           </div>
         </TabsContent>
+
+        {/* Support Tab */}
+        <TabsContent value="support">
+          <AdminSupportTab />
+        </TabsContent>
       </Tabs>
     </DashboardLayout>
   );
