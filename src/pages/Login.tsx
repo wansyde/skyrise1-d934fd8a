@@ -203,7 +203,7 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen relative">
-      <WhatsAppButton />
+      
       {/* Left — Image slider (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white">
         <div className="absolute inset-0 flex flex-col items-center justify-center px-12 z-10">
