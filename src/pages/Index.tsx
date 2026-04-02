@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PublicLayout from "@/components/layout/PublicLayout";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { useState, useEffect, useCallback } from "react";
 
 import heroCar1 from "@/assets/hero-car-1.jpg";
