@@ -1,59 +1,65 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import AppLayout from "@/components/layout/AppLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { DollarSign, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const transactions = [
-  { id: "TXN-0041", type: "Deposit", amount: "+$5,000.00", status: "Approved", date: "Mar 12, 2026", method: "USDT (TRC-20)" },
-  { id: "TXN-0040", type: "ROI", amount: "+$120.00", status: "Approved", date: "Mar 11, 2026", method: "System" },
-  { id: "TXN-0039", type: "Withdrawal", amount: "-$1,000.00", status: "Pending", date: "Mar 10, 2026", method: "Bitcoin" },
-  { id: "TXN-0038", type: "Deposit", amount: "+$3,500.00", status: "Approved", date: "Mar 8, 2026", method: "Bank Transfer" },
-  { id: "TXN-0037", type: "ROI", amount: "+$95.00", status: "Approved", date: "Mar 7, 2026", method: "System" },
-  { id: "TXN-0036", type: "Deposit", amount: "+$10,000.00", status: "Approved", date: "Mar 1, 2026", method: "USDT (ERC-20)" },
-  { id: "TXN-0035", type: "Withdrawal", amount: "-$2,300.00", status: "Approved", date: "Feb 25, 2026", method: "Bank Transfer" },
-];
+const Transactions = () => {
+  const { user } = useAuth();
 
-const Transactions = () => (
-  <DashboardLayout>
-    <div className="mb-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Transaction History</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Complete record of all account activity.</p>
-    </div>
+  const { data: records, isLoading } = useQuery({
+    queryKey: ["profits-history-full", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("task_records")
+        .select("created_at, advertising_salary")
+        .eq("user_id", user!.id)
+        .eq("status", "completed")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      return data || [];
+    },
+  });
 
-    <div className="glass-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left text-xs text-muted-foreground border-b border-border">
-              <th className="px-5 py-3 font-medium">ID</th>
-              <th className="px-5 py-3 font-medium">Type</th>
-              <th className="px-5 py-3 font-medium">Method</th>
-              <th className="px-5 py-3 font-medium">Amount</th>
-              <th className="px-5 py-3 font-medium">Status</th>
-              <th className="px-5 py-3 font-medium">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((tx) => (
-              <tr key={tx.id} className="border-t border-border transition-colors hover:bg-[rgba(255,255,255,0.02)]">
-                <td className="px-5 py-3 text-xs font-mono text-muted-foreground">{tx.id}</td>
-                <td className="px-5 py-3 text-sm">{tx.type}</td>
-                <td className="px-5 py-3 text-xs text-muted-foreground">{tx.method}</td>
-                <td className={`px-5 py-3 text-sm tabular-nums ${tx.amount.startsWith("+") ? "text-success" : "text-foreground"}`}>
-                  {tx.amount}
-                </td>
-                <td className="px-5 py-3">
-                  <span className={`inline-flex items-center gap-1.5 text-xs ${tx.status === "Pending" ? "status-pending" : tx.status === "Approved" ? "status-approved" : "status-rejected"}`}>
-                    {tx.status === "Pending" && <span className="h-1.5 w-1.5 rounded-full bg-warning animate-pulse" />}
-                    {tx.status === "Approved" && <span className="h-1.5 w-1.5 rounded-full bg-success" />}
-                    {tx.status}
-                  </span>
-                </td>
-                <td className="px-5 py-3 text-xs text-muted-foreground">{tx.date}</td>
-              </tr>
+  return (
+    <AppLayout>
+      <div className="px-4 py-5">
+        <div className="flex items-center gap-3 mb-5">
+          <Link to="/app/profile" className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
+          </Link>
+          <h1 className="text-lg font-semibold">Transactions</h1>
+        </div>
+
+        {isLoading ? (
+          <div className="text-center text-sm text-muted-foreground py-12">Loading...</div>
+        ) : !records || records.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+            No profits earned yet.
+          </div>
+        ) : (
+          <div className="rounded-2xl overflow-hidden border border-border bg-card">
+            {records.map((r, i) => (
+              <div key={i} className={`flex items-center justify-between px-4 py-3.5 ${i > 0 ? "border-t border-border" : ""}`}>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10">
+                    <DollarSign className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Advertising Profit</p>
+                    <p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold tabular-nums text-primary">+${Number(r.advertising_salary).toFixed(2)}</span>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
-    </div>
-  </DashboardLayout>
-);
+    </AppLayout>
+  );
+};
 
 export default Transactions;

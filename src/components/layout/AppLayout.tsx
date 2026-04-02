@@ -117,6 +117,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         )}
       </AnimatePresence>
 
+      {/* Floating support button */}
+      <FloatingSupportButton />
+
       {/* Main content - scrollable area above bottom nav */}
       <main className="flex-1 overflow-y-auto pb-20">
         <motion.div
