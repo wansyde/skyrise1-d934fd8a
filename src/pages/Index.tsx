@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PublicLayout from "@/components/layout/PublicLayout";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { useState, useEffect, useCallback } from "react";
 
 import heroCar1 from "@/assets/hero-car-1.jpg";
@@ -93,6 +94,7 @@ const Index = () => {
 
   return (
     <PublicLayout>
+      <WhatsAppButton />
       {/* Hero with image slider */}
       <section className="relative h-[90vh] min-h-[600px] overflow-hidden">
         {heroSlides.map((slide, i) => (
