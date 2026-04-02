@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import SkyriseLogo from "@/components/SkyriseLogo";
+import FloatingSupportButton from "@/components/FloatingSupportButton";
 
 const bottomTabs = [
   { href: "/app", label: "Home", icon: Home },

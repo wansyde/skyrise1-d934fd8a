@@ -52,6 +52,7 @@ const ProfitsHistory = ({ userId }: { userId?: string }) => {
 };
 
 const financialItems = [
+  { label: "Transactions", icon: DollarSign, href: "/app/transactions" },
   { label: "Deposit", icon: ArrowDownToLine, href: "/app/wallet/deposit" },
   { label: "Withdraw", icon: ArrowUpFromLine, href: "/app/wallet/withdraw" },
 ];
