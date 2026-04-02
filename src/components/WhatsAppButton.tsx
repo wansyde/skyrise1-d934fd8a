@@ -26,10 +26,11 @@ const WhatsAppButton = () => {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-[#25D366] text-white shadow-xl hover:scale-110 transition-transform duration-200"
+      className="fixed top-20 right-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366] text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm font-medium"
       aria-label="WhatsApp Support"
     >
-      <MessageCircle className="h-5 w-5" />
+      <MessageCircle className="h-4 w-4" />
+      <span className="hidden sm:inline">WhatsApp</span>
     </a>
   );
 };
