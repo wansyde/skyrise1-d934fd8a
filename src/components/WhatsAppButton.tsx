@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle } from "lucide-react";
+import { Headphones } from "lucide-react";
 
 const WhatsAppButton = () => {
   const [number, setNumber] = useState("");
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchNumber = async () => {
       const { data } = await supabase
         .from("support_settings")
         .select("value")
@@ -14,7 +14,7 @@ const WhatsAppButton = () => {
         .single();
       if (data?.value) setNumber(data.value);
     };
-    fetch();
+    fetchNumber();
   }, []);
 
   if (!number) return null;
@@ -26,11 +26,10 @@ const WhatsAppButton = () => {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed top-20 right-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366] text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm font-medium"
+      className="fixed top-20 right-6 z-50 flex items-center justify-center w-11 h-11 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
       aria-label="WhatsApp Support"
     >
-      <MessageCircle className="h-4 w-4" />
-      <span className="hidden sm:inline">WhatsApp</span>
+      <Headphones className="h-5 w-5" />
     </a>
   );
 };

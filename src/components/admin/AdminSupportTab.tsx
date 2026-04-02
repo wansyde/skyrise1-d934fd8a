@@ -125,11 +125,14 @@ const AdminSupportTab = () => {
 
   const saveWhatsapp = async () => {
     setSavingSettings(true);
+    // Clean number - strip non-digits
+    const cleanNumber = whatsappNumber.trim().replace(/[^0-9+]/g, "").replace("+", "");
+    // Upsert to handle both insert and update
     const { error } = await supabase
       .from("support_settings")
-      .update({ value: whatsappNumber.trim(), updated_at: new Date().toISOString() })
-      .eq("key", "whatsapp_number");
-    if (error) { toast.error("Failed to save"); setSavingSettings(false); return; }
+      .upsert({ key: "whatsapp_number", value: cleanNumber, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    if (error) { toast.error("Failed to save: " + error.message); setSavingSettings(false); return; }
+    setWhatsappNumber(cleanNumber);
     toast.success("WhatsApp number updated");
     setSavingSettings(false);
   };
