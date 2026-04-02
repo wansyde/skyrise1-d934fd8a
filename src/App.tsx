@@ -81,6 +81,7 @@ const App = () => (
             <Route path="/app/wallet/payment-methods" element={<ProtectedRoute><PaymentMethods /></ProtectedRoute>} />
             <Route path="/app/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/app/support" element={<ProtectedRoute><SupportChat /></ProtectedRoute>} />
+            <Route path="/app/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path="/admin-sky-987" element={<AdminLogin />} />
