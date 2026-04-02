@@ -23,7 +23,7 @@ import Home from "./pages/Home";
 import Starting from "./pages/Starting";
 import Team from "./pages/Team";
 import Records from "./pages/Records";
-
+import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import AppDeposit from "./pages/AppDeposit";
 import AppWithdraw from "./pages/AppWithdraw";
