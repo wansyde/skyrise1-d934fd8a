@@ -84,10 +84,10 @@ const SupportChat = () => {
       .from("profiles")
       .update({ phone: whatsapp.trim() })
       .eq("user_id", user!.id);
-    if (error) { toast.error("Failed to save"); return; }
+    if (error) { toast.error("Save failed"); return; }
     await refreshProfile();
     setWhatsappSaved(true);
-    toast.success("WhatsApp number saved");
+    toast.success("Saved");
   };
 
   const sendMessage = async () => {
