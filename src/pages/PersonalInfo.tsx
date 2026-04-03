@@ -178,7 +178,7 @@ const PersonalInfo = () => {
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Passwords don't match");
       return;
     }
     setUpdatingPassword(true);
