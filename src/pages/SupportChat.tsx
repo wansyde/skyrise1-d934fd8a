@@ -79,7 +79,7 @@ const SupportChat = () => {
   }, [messages, scrollToBottom]);
 
   const saveWhatsapp = async () => {
-    if (!whatsapp.trim()) { toast.error("Please enter your WhatsApp number"); return; }
+    if (!whatsapp.trim()) { toast.error("Enter number"); return; }
     const { error } = await supabase
       .from("profiles")
       .update({ phone: whatsapp.trim() })
