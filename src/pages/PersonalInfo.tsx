@@ -125,7 +125,7 @@ const PersonalInfo = () => {
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be under 5MB.");
+      toast.error("Max 5MB allowed");
       return;
     }
     setUploadingAvatar(true);
