@@ -115,12 +115,12 @@ const Login = () => {
             .eq("role", "admin")
             .maybeSingle();
           if (adminRole) {
-            toast.success("Logged in", { duration: 2000, position: "top-center" });
+            toast.success("Welcome back");
             navigate("/admin-sky-987/dashboard");
             return;
           }
         }
-        toast.success("Logged in", { duration: 2000, position: "top-center" });
+        toast.success("Welcome back");
         navigate("/app");
       }
     } catch {
