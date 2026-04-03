@@ -255,7 +255,7 @@ const KYC = () => {
 
   const handleSubmit = async () => {
     if (!name.trim() || !idNumber.trim()) {
-      toast.error("Please fill in your name and ID number");
+      toast.error("Fill in name and ID");
       return;
     }
     if (!frontFile || !backFile || !selfieFile) {
