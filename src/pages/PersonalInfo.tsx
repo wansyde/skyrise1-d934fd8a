@@ -147,7 +147,7 @@ const PersonalInfo = () => {
       .eq("user_id", user.id);
     setUploadingAvatar(false);
     if (updateError) {
-      toast.error("Failed to save avatar.");
+      toast.error("Save failed");
     } else {
       toast.success("Avatar updated!");
       await refreshProfile();
