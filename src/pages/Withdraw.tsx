@@ -23,7 +23,7 @@ const Withdraw = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast.success("Withdrawal request submitted. Awaiting ledger confirmation.");
+      toast.success("Submitted");
       setAmount("");
       setAddress("");
     }, 1500);

@@ -70,9 +70,9 @@ const PaymentMethods = () => {
 
       if (error) throw error;
       await refreshProfile();
-      toast.success("Payment method saved successfully.");
+      toast.success("Saved");
     } catch (e: any) {
-      toast.error(e.message || "Failed to save payment method.");
+      toast.error("Save failed");
     } finally {
       setSaving(false);
     }

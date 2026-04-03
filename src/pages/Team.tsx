@@ -16,7 +16,7 @@ const teamMembers = [
 const Team = () => {
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard.");
+    toast.success("Copied");
   };
 
   return (

@@ -114,7 +114,7 @@ const SupportChat = () => {
     });
 
     if (error) {
-      toast.error("Failed to send message");
+      toast.error("Send failed");
       // Remove optimistic message on failure
       setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
     }

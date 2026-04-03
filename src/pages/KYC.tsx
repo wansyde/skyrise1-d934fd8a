@@ -285,7 +285,7 @@ const KYC = () => {
       toast.success("Submitted");
       navigate("/app/profile");
     } catch (err: any) {
-      toast.error(err.message || "Failed to submit KYC");
+      toast.error("Submission failed");
     } finally {
       setLoading(false);
     }
