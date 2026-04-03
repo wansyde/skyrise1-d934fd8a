@@ -32,7 +32,7 @@ const AppWithdraw = () => {
 
   const checkPaymentMethod = () => {
     if (!hasSavedWallet) {
-      toast.error("Please set up your payment method first.", {
+      toast.error("Set up payment method first", {
         action: {
           label: "Set Up",
           onClick: () => window.location.href = "/app/wallet/payment-methods",
