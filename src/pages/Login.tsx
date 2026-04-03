@@ -190,7 +190,7 @@ const Login = () => {
         navigate("/app");
       }
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong");
     } finally {
       setRegLoading(false);
     }
