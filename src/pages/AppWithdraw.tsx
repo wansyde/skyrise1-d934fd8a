@@ -125,7 +125,7 @@ const AppWithdraw = () => {
       queryClient.invalidateQueries({ queryKey: ["withdrawal-history"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     } catch (e: any) {
-      toast.error(e.message || "Failed to submit withdrawal.");
+      toast.error("Submission failed");
     } finally {
       setLoading(false);
     }
