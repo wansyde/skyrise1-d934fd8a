@@ -17,7 +17,7 @@ const Withdraw = () => {
     e.preventDefault();
     const num = Number(amount);
     if (num <= 0 || num > balance) {
-      toast.error("Invalid amount. Check your available balance.");
+      toast.error("Invalid amount");
       return;
     }
     setLoading(true);
