@@ -174,7 +174,7 @@ const PersonalInfo = () => {
 
   const handleUpdatePassword = async () => {
     if (newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters.");
+      toast.error("Min 8 characters");
       return;
     }
     if (newPassword !== confirmPassword) {
