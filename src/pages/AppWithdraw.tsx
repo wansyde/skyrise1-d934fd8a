@@ -65,7 +65,7 @@ const AppWithdraw = () => {
     if (!user) return;
     const num = Number(amount);
     if (num <= 0 || num > balance) {
-      toast.error("Invalid amount. Cannot exceed your balance.");
+      toast.error("Invalid amount");
       return;
     }
     if (!password) {
