@@ -211,7 +211,7 @@ const PersonalInfo = () => {
       return;
     }
     if (newTxPassword !== confirmTxPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Passwords don't match");
       return;
     }
     if (profile?.withdraw_password && profile.withdraw_password !== oldTxPassword) {
