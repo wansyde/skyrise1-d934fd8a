@@ -188,7 +188,7 @@ const PersonalInfo = () => {
     });
     if (signInError) {
       setUpdatingPassword(false);
-      toast.error("Old password is incorrect.");
+      toast.error("Old password incorrect");
       return;
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
