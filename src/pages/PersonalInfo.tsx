@@ -207,7 +207,7 @@ const PersonalInfo = () => {
   const handleUpdateTxPassword = async () => {
     if (!user) return;
     if (newTxPassword.length < 6) {
-      toast.error("Transaction password must be at least 6 characters.");
+      toast.error("Min 6 characters");
       return;
     }
     if (newTxPassword !== confirmTxPassword) {
