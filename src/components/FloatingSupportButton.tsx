@@ -4,8 +4,9 @@ import { MessageCircle } from "lucide-react";
 const FloatingSupportButton = () => {
   const location = useLocation();
   
-  // Hide on Starting page
+  // Hide on Starting page and Support Chat page
   if (location.pathname === "/app/starting") return null;
+  if (location.pathname === "/app/support") return null;
 
   return (
     <Link
