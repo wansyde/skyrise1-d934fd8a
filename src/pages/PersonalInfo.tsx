@@ -136,7 +136,7 @@ const PersonalInfo = () => {
       .upload(filePath, file, { upsert: true });
     if (uploadError) {
       setUploadingAvatar(false);
-      toast.error("Failed to upload avatar.");
+      toast.error("Upload failed");
       return;
     }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
