@@ -83,7 +83,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginAccount.trim() || !loginPassword.trim()) {
-      toast.error("Please fill all required fields");
+      toast.error("Fill all fields");
       return;
     }
     setLoginLoading(true);
@@ -93,7 +93,7 @@ const Login = () => {
         .rpc("get_email_by_username", { _username: loginAccount.trim() });
 
       if (lookupError || !userEmail) {
-        toast.error("User ID not found. Please check and try again.");
+        toast.error("User not found");
         setLoginLoading(false);
         return;
       }
@@ -103,9 +103,7 @@ const Login = () => {
         password: loginPassword,
       });
       if (error) {
-        toast.error(error.message === "Invalid login credentials"
-          ? "Invalid credentials. Please check your User ID and password."
-          : error.message);
+        toast.error("Invalid credentials");
       } else {
         // Check if user has admin role
         const { data: { user } } = await supabase.auth.getUser();
@@ -117,16 +115,16 @@ const Login = () => {
             .eq("role", "admin")
             .maybeSingle();
           if (adminRole) {
-            toast.success("Logged in", { duration: 2000, position: "top-center" });
+            toast.success("Welcome back");
             navigate("/admin-sky-987/dashboard");
             return;
           }
         }
-        toast.success("Logged in", { duration: 2000, position: "top-center" });
+        toast.success("Welcome back");
         navigate("/app");
       }
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong");
     } finally {
       setLoginLoading(false);
     }
@@ -160,8 +158,8 @@ const Login = () => {
         .rpc("validate_referral_code", { _code: referralCode.trim() });
 
       if (refError || !isValid) {
-        setRegErrors({ referralCode: "Invalid referral code. Please enter a valid invite code." });
-        toast.error("Invalid referral code. Please enter a valid invite code.");
+        setRegErrors({ referralCode: "Invalid referral code" });
+        toast.error("Invalid referral code");
         setRegLoading(false);
         return;
       }
@@ -185,15 +183,14 @@ const Login = () => {
       if (error) {
         toast.error(error.message);
       } else if (data.user && !data.session) {
-        // Email confirmation required
-        toast.success("Account created! Please check your email to verify.");
+        toast.success("Check your email to verify");
         setTab("login");
       } else {
-        toast.success("Account created successfully!");
+        toast.success("Account created");
         navigate("/app");
       }
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong");
     } finally {
       setRegLoading(false);
     }

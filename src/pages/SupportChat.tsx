@@ -79,15 +79,15 @@ const SupportChat = () => {
   }, [messages, scrollToBottom]);
 
   const saveWhatsapp = async () => {
-    if (!whatsapp.trim()) { toast.error("Please enter your WhatsApp number"); return; }
+    if (!whatsapp.trim()) { toast.error("Enter number"); return; }
     const { error } = await supabase
       .from("profiles")
       .update({ phone: whatsapp.trim() })
       .eq("user_id", user!.id);
-    if (error) { toast.error("Failed to save"); return; }
+    if (error) { toast.error("Save failed"); return; }
     await refreshProfile();
     setWhatsappSaved(true);
-    toast.success("WhatsApp number saved");
+    toast.success("Saved");
   };
 
   const sendMessage = async () => {
@@ -114,7 +114,7 @@ const SupportChat = () => {
     });
 
     if (error) {
-      toast.error("Failed to send message");
+      toast.error("Send failed");
       // Remove optimistic message on failure
       setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
     }

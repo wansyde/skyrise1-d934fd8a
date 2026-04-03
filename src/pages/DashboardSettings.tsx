@@ -6,7 +6,7 @@ import { toast } from "sonner";
 const DashboardSettings = () => {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Settings updated.");
+    toast.success("Updated");
   };
 
   return (

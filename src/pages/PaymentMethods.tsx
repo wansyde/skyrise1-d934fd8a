@@ -36,11 +36,11 @@ const PaymentMethods = () => {
 
   const handleAuthenticate = () => {
     if (!password) {
-      toast.error("Please enter your transaction password.");
+      toast.error("Enter password");
       return;
     }
     if (profile?.withdraw_password && password !== profile.withdraw_password) {
-      toast.error("Incorrect transaction password.");
+      toast.error("Incorrect password");
       return;
     }
     setAuthenticated(true);
@@ -48,11 +48,11 @@ const PaymentMethods = () => {
   };
 
   const handleSave = async () => {
-    if (!walletName.trim()) { toast.error("Wallet name is required."); return; }
-    if (!walletAddress.trim()) { toast.error("Wallet address is required."); return; }
-    if (!walletUsername.trim()) { toast.error("Wallet username is required."); return; }
-    if (!network.trim()) { toast.error("Network is required."); return; }
-    if (!email.trim()) { toast.error("Email is required."); return; }
+    if (!walletName.trim()) { toast.error("Wallet name required"); return; }
+    if (!walletAddress.trim()) { toast.error("Address required"); return; }
+    if (!walletUsername.trim()) { toast.error("Username required"); return; }
+    if (!network.trim()) { toast.error("Network required"); return; }
+    if (!email.trim()) { toast.error("Email required"); return; }
 
     setSaving(true);
     try {
@@ -70,9 +70,9 @@ const PaymentMethods = () => {
 
       if (error) throw error;
       await refreshProfile();
-      toast.success("Payment method saved successfully.");
+      toast.success("Saved");
     } catch (e: any) {
-      toast.error(e.message || "Failed to save payment method.");
+      toast.error("Save failed");
     } finally {
       setSaving(false);
     }

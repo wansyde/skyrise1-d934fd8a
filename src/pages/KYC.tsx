@@ -255,11 +255,11 @@ const KYC = () => {
 
   const handleSubmit = async () => {
     if (!name.trim() || !idNumber.trim()) {
-      toast.error("Please fill in your name and ID number");
+      toast.error("Fill in name and ID");
       return;
     }
     if (!frontFile || !backFile || !selfieFile) {
-      toast.error("Please upload all three documents");
+      toast.error("Upload all documents");
       return;
     }
     if (!user) return;
@@ -282,10 +282,10 @@ const KYC = () => {
       });
 
       if (error) throw error;
-      toast.success("KYC documents submitted successfully");
+      toast.success("Submitted");
       navigate("/app/profile");
     } catch (err: any) {
-      toast.error(err.message || "Failed to submit KYC");
+      toast.error("Submission failed");
     } finally {
       setLoading(false);
     }

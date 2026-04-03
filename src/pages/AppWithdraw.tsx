@@ -32,7 +32,7 @@ const AppWithdraw = () => {
 
   const checkPaymentMethod = () => {
     if (!hasSavedWallet) {
-      toast.error("Please set up your payment method first.", {
+      toast.error("Set up payment method first", {
         action: {
           label: "Set Up",
           onClick: () => window.location.href = "/app/wallet/payment-methods",
@@ -65,15 +65,15 @@ const AppWithdraw = () => {
     if (!user) return;
     const num = Number(amount);
     if (num <= 0 || num > balance) {
-      toast.error("Invalid amount. Cannot exceed your balance.");
+      toast.error("Invalid amount");
       return;
     }
     if (!password) {
-      toast.error("Please enter your transaction password.");
+      toast.error("Enter password");
       return;
     }
     if (profile?.withdraw_password && password !== profile.withdraw_password) {
-      toast.error("Incorrect transaction password.");
+      toast.error("Incorrect password");
       return;
     }
 
@@ -125,7 +125,7 @@ const AppWithdraw = () => {
       queryClient.invalidateQueries({ queryKey: ["withdrawal-history"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     } catch (e: any) {
-      toast.error(e.message || "Failed to submit withdrawal.");
+      toast.error("Submission failed");
     } finally {
       setLoading(false);
     }

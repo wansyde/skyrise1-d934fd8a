@@ -15,7 +15,7 @@ const Contact = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast.success("Message sent successfully. We'll respond within 24 hours.");
+      toast.success("Sent");
       (e.target as HTMLFormElement).reset();
     }, 1000);
   };

@@ -195,11 +195,11 @@ const Starting = () => {
   const isCycleCompleted = (profile as any)?.task_cycle_completed === true;
 
   const handleMatchAd = () => {
-    if (isRestricted) { toast.error("Your account is currently restricted. Please contact support."); return; }
-    if (isCycleCompleted) { toast.error("Your task sets are completed. Please contact customer service to renew or upgrade your plan."); return; }
+    if (isRestricted) { toast.error("Account restricted"); return; }
+    if (isCycleCompleted) { toast.error("Task cycle completed"); return; }
     const currentBalance = Number(profile?.balance ?? 0);
-    if (currentBalance < MIN_BALANCE) { toast.error("Minimum balance of $100 required to start tasks."); return; }
-    if (completedCount >= DAILY_LIMIT) { toast.error("Daily task limit reached."); return; }
+    if (currentBalance < MIN_BALANCE) { toast.error("Minimum $100 required"); return; }
+    if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
 
     const affordable = carCampaigns.filter(c => c.totalAmount <= currentBalance);
     const pool = affordable.length > 0 ? affordable : carCampaigns;
@@ -226,8 +226,8 @@ const Starting = () => {
 
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting) return;
-    if (isRestricted) { toast.error("Your account is currently restricted."); setMatchState("idle"); setMatchedCar(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum balance of $100 required."); setMatchState("idle"); setMatchedCar(null); return; }
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); return; }
 
     setSubmitting(true);
     try {
@@ -242,7 +242,7 @@ const Starting = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) {
-        if (result.status === "pending") toast.error("Insufficient balance. Record saved as pending.");
+        if (result.status === "pending") toast.error("Insufficient balance");
         else toast.error(result.error);
         setMatchState("idle"); setMatchedCar(null); return;
       }
@@ -250,7 +250,7 @@ const Starting = () => {
       setMatchState("submitted");
       setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
     } catch (e: any) {
-      toast.error("Failed to submit: " + e.message);
+      toast.error("Submission failed");
     } finally {
       setSubmitting(false);
     }

@@ -17,13 +17,13 @@ const Withdraw = () => {
     e.preventDefault();
     const num = Number(amount);
     if (num <= 0 || num > balance) {
-      toast.error("Invalid amount. Check your available balance.");
+      toast.error("Invalid amount");
       return;
     }
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast.success("Withdrawal request submitted. Awaiting ledger confirmation.");
+      toast.success("Submitted");
       setAmount("");
       setAddress("");
     }, 1500);

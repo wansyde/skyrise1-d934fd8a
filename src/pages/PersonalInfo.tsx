@@ -121,11 +121,11 @@ const PersonalInfo = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file.");
+      toast.error("Select an image");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be under 5MB.");
+      toast.error("Max 5MB allowed");
       return;
     }
     setUploadingAvatar(true);
@@ -136,7 +136,7 @@ const PersonalInfo = () => {
       .upload(filePath, file, { upsert: true });
     if (uploadError) {
       setUploadingAvatar(false);
-      toast.error("Failed to upload avatar.");
+      toast.error("Upload failed");
       return;
     }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
@@ -147,9 +147,9 @@ const PersonalInfo = () => {
       .eq("user_id", user.id);
     setUploadingAvatar(false);
     if (updateError) {
-      toast.error("Failed to save avatar.");
+      toast.error("Save failed");
     } else {
-      toast.success("Avatar updated!");
+      toast.success("Avatar updated");
       await refreshProfile();
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -164,9 +164,9 @@ const PersonalInfo = () => {
       .eq("user_id", user.id);
     setSaving(false);
     if (error) {
-      toast.error("Failed to update profile.");
+      toast.error("Update failed");
     } else {
-      toast.success("Profile updated successfully.");
+      toast.success("Updated");
       await refreshProfile();
       setView("main");
     }
@@ -174,11 +174,11 @@ const PersonalInfo = () => {
 
   const handleUpdatePassword = async () => {
     if (newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters.");
+      toast.error("Min 8 characters");
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Passwords don't match");
       return;
     }
     setUpdatingPassword(true);
@@ -188,15 +188,15 @@ const PersonalInfo = () => {
     });
     if (signInError) {
       setUpdatingPassword(false);
-      toast.error("Old password is incorrect.");
+      toast.error("Old password incorrect");
       return;
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setUpdatingPassword(false);
     if (error) {
-      toast.error("Failed to update password.");
+      toast.error("Update failed");
     } else {
-      toast.success("Password updated successfully.");
+      toast.success("Password updated");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -207,15 +207,15 @@ const PersonalInfo = () => {
   const handleUpdateTxPassword = async () => {
     if (!user) return;
     if (newTxPassword.length < 6) {
-      toast.error("Transaction password must be at least 6 characters.");
+      toast.error("Min 6 characters");
       return;
     }
     if (newTxPassword !== confirmTxPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Passwords don't match");
       return;
     }
     if (profile?.withdraw_password && profile.withdraw_password !== oldTxPassword) {
-      toast.error("Old transaction password is incorrect.");
+      toast.error("Old password incorrect");
       return;
     }
     setUpdatingTxPassword(true);
@@ -225,9 +225,9 @@ const PersonalInfo = () => {
       .eq("user_id", user.id);
     setUpdatingTxPassword(false);
     if (error) {
-      toast.error("Failed to update transaction password.");
+      toast.error("Update failed");
     } else {
-      toast.success("Transaction password updated successfully.");
+      toast.success("Updated");
       await refreshProfile();
       setOldTxPassword("");
       setNewTxPassword("");
