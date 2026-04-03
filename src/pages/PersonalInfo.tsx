@@ -149,7 +149,7 @@ const PersonalInfo = () => {
     if (updateError) {
       toast.error("Save failed");
     } else {
-      toast.success("Avatar updated!");
+      toast.success("Avatar updated");
       await refreshProfile();
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
