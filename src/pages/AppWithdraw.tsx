@@ -73,7 +73,7 @@ const AppWithdraw = () => {
       return;
     }
     if (profile?.withdraw_password && password !== profile.withdraw_password) {
-      toast.error("Incorrect transaction password.");
+      toast.error("Incorrect password");
       return;
     }
 
