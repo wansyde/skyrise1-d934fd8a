@@ -207,11 +207,6 @@ const Profile = () => {
         <MenuGroup title="My Financial" items={financialItems} />
         <MenuGroup title="My Detail" items={detailItems} />
 
-        {/* Profits History */}
-        <div className="mb-5">
-          <h3 className="text-sm font-semibold mb-2 px-1">Profits History</h3>
-          <ProfitsHistory userId={user?.id} />
-        </div>
 
         <MenuGroup title="Other" items={otherItems} />
 
