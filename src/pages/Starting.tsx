@@ -226,8 +226,8 @@ const Starting = () => {
 
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting) return;
-    if (isRestricted) { toast.error("Your account is currently restricted."); setMatchState("idle"); setMatchedCar(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum balance of $100 required."); setMatchState("idle"); setMatchedCar(null); return; }
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); return; }
 
     setSubmitting(true);
     try {
