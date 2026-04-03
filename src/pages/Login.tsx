@@ -93,7 +93,7 @@ const Login = () => {
         .rpc("get_email_by_username", { _username: loginAccount.trim() });
 
       if (lookupError || !userEmail) {
-        toast.error("User ID not found. Please check and try again.");
+        toast.error("User not found");
         setLoginLoading(false);
         return;
       }
