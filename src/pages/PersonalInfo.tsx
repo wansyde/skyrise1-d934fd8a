@@ -121,7 +121,7 @@ const PersonalInfo = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file.");
+      toast.error("Select an image");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
