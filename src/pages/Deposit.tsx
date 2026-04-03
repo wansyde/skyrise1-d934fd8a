@@ -25,7 +25,7 @@ const Deposit = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast.success("Deposit request submitted. Awaiting ledger confirmation.");
+      toast.success("Submitted");
       setStep(1);
       setAmount("");
     }, 1500);

@@ -250,7 +250,7 @@ const Starting = () => {
       setMatchState("submitted");
       setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
     } catch (e: any) {
-      toast.error("Failed to submit: " + e.message);
+      toast.error("Submission failed");
     } finally {
       setSubmitting(false);
     }

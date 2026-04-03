@@ -225,9 +225,9 @@ const PersonalInfo = () => {
       .eq("user_id", user.id);
     setUpdatingTxPassword(false);
     if (error) {
-      toast.error("Failed to update transaction password.");
+      toast.error("Update failed");
     } else {
-      toast.success("Transaction password updated successfully.");
+      toast.success("Updated");
       await refreshProfile();
       setOldTxPassword("");
       setNewTxPassword("");

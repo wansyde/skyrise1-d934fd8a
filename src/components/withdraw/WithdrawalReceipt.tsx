@@ -69,7 +69,7 @@ const WithdrawalReceipt = ({
       toast.success("Saved");
     } catch (err) {
       console.error("Failed to save receipt:", err);
-      toast.error("Failed to save receipt. Please take a screenshot instead.");
+      toast.error("Save failed");
     } finally {
       setSaving(false);
     }

@@ -83,7 +83,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginAccount.trim() || !loginPassword.trim()) {
-      toast.error("Please fill all required fields");
+      toast.error("Fill all fields");
       return;
     }
     setLoginLoading(true);
