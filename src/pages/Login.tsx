@@ -103,9 +103,7 @@ const Login = () => {
         password: loginPassword,
       });
       if (error) {
-        toast.error(error.message === "Invalid login credentials"
-          ? "Invalid credentials. Please check your User ID and password."
-          : error.message);
+        toast.error("Invalid credentials");
       } else {
         // Check if user has admin role
         const { data: { user } } = await supabase.auth.getUser();
