@@ -158,8 +158,8 @@ const Login = () => {
         .rpc("validate_referral_code", { _code: referralCode.trim() });
 
       if (refError || !isValid) {
-        setRegErrors({ referralCode: "Invalid referral code. Please enter a valid invite code." });
-        toast.error("Invalid referral code. Please enter a valid invite code.");
+        setRegErrors({ referralCode: "Invalid referral code" });
+        toast.error("Invalid referral code");
         setRegLoading(false);
         return;
       }
