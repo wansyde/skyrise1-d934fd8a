@@ -18,7 +18,7 @@ const Deposit = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(walletAddress);
-    toast.success("Address copied to clipboard.");
+    toast.success("Copied");
   };
 
   const handleSubmit = () => {
