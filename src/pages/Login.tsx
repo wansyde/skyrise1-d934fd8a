@@ -183,11 +183,10 @@ const Login = () => {
       if (error) {
         toast.error(error.message);
       } else if (data.user && !data.session) {
-        // Email confirmation required
-        toast.success("Account created! Please check your email to verify.");
+        toast.success("Check your email to verify");
         setTab("login");
       } else {
-        toast.success("Account created successfully!");
+        toast.success("Account created");
         navigate("/app");
       }
     } catch {
