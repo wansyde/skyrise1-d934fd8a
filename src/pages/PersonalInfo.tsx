@@ -164,9 +164,9 @@ const PersonalInfo = () => {
       .eq("user_id", user.id);
     setSaving(false);
     if (error) {
-      toast.error("Failed to update profile.");
+      toast.error("Update failed");
     } else {
-      toast.success("Profile updated successfully.");
+      toast.success("Updated");
       await refreshProfile();
       setView("main");
     }
