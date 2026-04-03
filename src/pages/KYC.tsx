@@ -259,7 +259,7 @@ const KYC = () => {
       return;
     }
     if (!frontFile || !backFile || !selfieFile) {
-      toast.error("Please upload all three documents");
+      toast.error("Upload all documents");
       return;
     }
     if (!user) return;
