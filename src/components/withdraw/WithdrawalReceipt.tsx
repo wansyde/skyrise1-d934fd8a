@@ -66,7 +66,7 @@ const WithdrawalReceipt = ({
       link.download = `skyrise-receipt-${transactionId.slice(0, 8).toUpperCase()}.png`;
       link.href = dataUrl;
       link.click();
-      toast.success("Receipt saved to your device");
+      toast.success("Saved");
     } catch (err) {
       console.error("Failed to save receipt:", err);
       toast.error("Failed to save receipt. Please take a screenshot instead.");
