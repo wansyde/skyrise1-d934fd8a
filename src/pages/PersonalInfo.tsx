@@ -215,7 +215,7 @@ const PersonalInfo = () => {
       return;
     }
     if (profile?.withdraw_password && profile.withdraw_password !== oldTxPassword) {
-      toast.error("Old transaction password is incorrect.");
+      toast.error("Old password incorrect");
       return;
     }
     setUpdatingTxPassword(true);
