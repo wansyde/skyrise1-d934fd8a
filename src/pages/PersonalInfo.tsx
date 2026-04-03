@@ -194,9 +194,9 @@ const PersonalInfo = () => {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setUpdatingPassword(false);
     if (error) {
-      toast.error("Failed to update password.");
+      toast.error("Update failed");
     } else {
-      toast.success("Password updated successfully.");
+      toast.success("Password updated");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
