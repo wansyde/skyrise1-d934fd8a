@@ -242,7 +242,7 @@ const Starting = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) {
-        if (result.status === "pending") toast.error("Insufficient balance. Record saved as pending.");
+        if (result.status === "pending") toast.error("Insufficient balance");
         else toast.error(result.error);
         setMatchState("idle"); setMatchedCar(null); return;
       }
