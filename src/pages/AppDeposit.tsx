@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
 
 const AppDeposit = () => {
   const [tab, setTab] = useState<"deposit" | "history">("deposit");
