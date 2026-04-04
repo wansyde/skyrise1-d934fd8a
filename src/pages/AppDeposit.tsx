@@ -8,11 +8,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
 
 const AppDeposit = () => {
   const [tab, setTab] = useState<"deposit" | "history">("deposit");
   const { user, profile } = useAuth();
   const balance = profile?.balance ?? 0;
+  const { url: whatsappUrl, available: whatsappAvailable } = useWhatsAppNumber();
 
   const { data: history } = useQuery({
     queryKey: ["deposit-history", user?.id],
@@ -81,10 +83,19 @@ const AppDeposit = () => {
                 </div>
 
                 {/* Contact button */}
-                <Button className="btn-press h-12 w-full gap-2 text-sm">
-                  <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
-                  Contact Customer Service
-                </Button>
+                {whatsappAvailable ? (
+                  <a href={whatsappUrl!} target="_blank" rel="noopener noreferrer" className="block">
+                    <Button className="btn-press h-12 w-full gap-2 text-sm">
+                      <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+                      Contact Customer Service
+                    </Button>
+                  </a>
+                ) : (
+                  <Button className="btn-press h-12 w-full gap-2 text-sm" disabled>
+                    <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+                    Support Unavailable
+                  </Button>
+                )}
               </motion.div>
             ) : (
               <motion.div

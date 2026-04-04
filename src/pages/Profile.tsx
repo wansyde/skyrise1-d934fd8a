@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import heroCarBanner from "@/assets/hero-car-banner.jpg";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
 
 const financialItems = [
   { label: "Deposit", icon: ArrowDownToLine, href: "/app/wallet/deposit" },
@@ -51,26 +52,42 @@ const Profile = () => {
     navigate("/login");
   };
 
+  const { url: whatsappUrl } = useWhatsAppNumber();
+
   const MenuGroup = ({ title, items }: { title: string; items: typeof financialItems }) => (
     <div className="mb-5">
       <h3 className="text-sm font-semibold mb-2 px-1">{title}</h3>
       <div className="rounded-2xl overflow-hidden border border-border bg-card">
-        {items.map((item, i) => (
-          <Link
-            key={item.label}
-            to={item.href}
-            className={`flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-muted/30 ${i > 0 ? "border-t border-border" : ""}`}
-          >
-            <item.icon className="h-[18px] w-[18px] text-muted-foreground" strokeWidth={1.5} />
-            <span className="flex-1 text-sm">{item.label}</span>
-            {item.label === "Notifications" && pendingCount && pendingCount > 0 ? (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1.5">
-                {pendingCount}
-              </span>
-            ) : null}
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
-          </Link>
-        ))}
+        {items.map((item, i) => {
+          const isContact = item.label === "Contact Us";
+          const cls = `flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-muted/30 ${i > 0 ? "border-t border-border" : ""}`;
+          const content = (
+            <>
+              <item.icon className="h-[18px] w-[18px] text-muted-foreground" strokeWidth={1.5} />
+              <span className="flex-1 text-sm">{item.label}</span>
+              {item.label === "Notifications" && pendingCount && pendingCount > 0 ? (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1.5">
+                  {pendingCount}
+                </span>
+              ) : null}
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+            </>
+          );
+
+          if (isContact && whatsappUrl) {
+            return (
+              <a key={item.label} href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={cls}>
+                {content}
+              </a>
+            );
+          }
+
+          return (
+            <Link key={item.label} to={item.href} className={cls}>
+              {content}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
