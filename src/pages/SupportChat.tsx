@@ -134,7 +134,7 @@ const SupportChat = () => {
     setCreating(true);
     const { data: ticketData, error: ticketError } = await supabase
       .from("support_tickets")
-      .insert({ user_id: user!.id, subject: newSubject })
+      .insert([{ user_id: user!.id, subject: newSubject, ticket_number: "TEMP" }])
       .select()
       .single();
 
