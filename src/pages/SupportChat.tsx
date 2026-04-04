@@ -4,102 +4,169 @@ import { supabase } from "@/integrations/supabase/client";
 import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, Check } from "lucide-react";
+import { Send, ArrowLeft, Check, Plus, MessageSquare, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface Message {
+interface Ticket {
   id: string;
+  ticket_number: string;
   user_id: string;
+  subject: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface TicketMessage {
+  id: string;
+  ticket_id: string;
   sender_type: string;
   message: string;
   created_at: string;
   _optimistic?: boolean;
 }
 
+const statusConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+  open: { label: "Open", icon: <AlertCircle className="h-3.5 w-3.5" />, color: "text-amber-500 bg-amber-500/10" },
+  in_progress: { label: "In Progress", icon: <Clock className="h-3.5 w-3.5" />, color: "text-blue-500 bg-blue-500/10" },
+  closed: { label: "Closed", icon: <CheckCircle2 className="h-3.5 w-3.5" />, color: "text-emerald-500 bg-emerald-500/10" },
+};
+
+const SUBJECTS = ["Withdrawal Issue", "Task Issue", "Account Issue", "Other"];
+
 const SupportChat = () => {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [view, setView] = useState<"list" | "chat" | "new">("list");
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [whatsapp, setWhatsapp] = useState(profile?.phone || "");
-  const [whatsappSaved, setWhatsappSaved] = useState(!!profile?.phone);
   const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [newSubject, setNewSubject] = useState("Other");
+  const [newInitialMessage, setNewInitialMessage] = useState("");
+  const [creating, setCreating] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load messages
+  // Load tickets
   useEffect(() => {
     if (!user) return;
     const load = async () => {
+      setLoading(true);
       const { data } = await supabase
-        .from("support_messages")
+        .from("support_tickets")
         .select("*")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
-      if (data) setMessages(data as Message[]);
+        .order("updated_at", { ascending: false });
+      if (data) setTickets(data as Ticket[]);
+      setLoading(false);
     };
     load();
 
-    // Realtime subscription
     const channel = supabase
-      .channel("support-chat")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "support_messages", filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          setMessages((prev) => {
-            // Replace optimistic message if it matches, otherwise append
-            const optimisticIdx = prev.findIndex(
-              (m) => m._optimistic && m.message === newMsg.message && m.sender_type === newMsg.sender_type
-            );
-            if (optimisticIdx !== -1) {
-              const updated = [...prev];
-              updated[optimisticIdx] = newMsg;
-              return updated;
-            }
-            // Don't add duplicates
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-            return [...prev, newMsg];
-          });
-        }
-      )
+      .channel("user-tickets")
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets", filter: `user_id=eq.${user.id}` }, () => {
+        load();
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Load messages for selected ticket
+  useEffect(() => {
+    if (!selectedTicket) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("ticket_messages")
+        .select("*")
+        .eq("ticket_id", selectedTicket.id)
+        .order("created_at", { ascending: true });
+      if (data) setMessages(data as TicketMessage[]);
+    };
+    load();
+
+    const channel = supabase
+      .channel(`ticket-msgs-${selectedTicket.id}`)
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "ticket_messages",
+        filter: `ticket_id=eq.${selectedTicket.id}`
+      }, (payload) => {
+        const newMsg = payload.new as TicketMessage;
+        setMessages((prev) => {
+          const optIdx = prev.findIndex(m => m._optimistic && m.message === newMsg.message && m.sender_type === newMsg.sender_type);
+          if (optIdx !== -1) { const u = [...prev]; u[optIdx] = newMsg; return u; }
+          if (prev.some(m => m.id === newMsg.id)) return prev;
+          return [...prev, newMsg];
+        });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedTicket]);
+
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
-  const saveWhatsapp = async () => {
-    if (!whatsapp.trim()) { toast.error("Enter number"); return; }
-    const { error } = await supabase
-      .from("profiles")
-      .update({ phone: whatsapp.trim() })
-      .eq("user_id", user!.id);
-    if (error) { toast.error("Save failed"); return; }
-    await refreshProfile();
-    setWhatsappSaved(true);
-    toast.success("Saved");
+  // Refresh selected ticket status from tickets list
+  useEffect(() => {
+    if (selectedTicket) {
+      const updated = tickets.find(t => t.id === selectedTicket.id);
+      if (updated) setSelectedTicket(updated);
+    }
+  }, [tickets]);
+
+  const createTicket = async () => {
+    if (!newInitialMessage.trim() || creating) return;
+    setCreating(true);
+    const { data: ticketData, error: ticketError } = await supabase
+      .from("support_tickets")
+      .insert({ user_id: user!.id, subject: newSubject })
+      .select()
+      .single();
+
+    if (ticketError || !ticketData) {
+      toast.error("Failed to create ticket");
+      setCreating(false);
+      return;
+    }
+
+    await supabase.from("ticket_messages").insert({
+      ticket_id: ticketData.id,
+      sender_type: "user",
+      message: newInitialMessage.trim(),
+    });
+
+    setSelectedTicket(ticketData as Ticket);
+    setNewInitialMessage("");
+    setNewSubject("Other");
+    setView("chat");
+    setCreating(false);
+    toast.success("Ticket created");
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || sending) return;
+    if (!newMessage.trim() || sending || !selectedTicket || selectedTicket.status === "closed") return;
     const text = newMessage.trim();
     setNewMessage("");
     setSending(true);
 
-    // Optimistic: show message immediately
-    const optimisticMsg: Message = {
+    const optimisticMsg: TicketMessage = {
       id: `opt-${Date.now()}`,
-      user_id: user!.id,
+      ticket_id: selectedTicket.id,
       sender_type: "user",
       message: text,
       created_at: new Date().toISOString(),
@@ -107,18 +174,16 @@ const SupportChat = () => {
     };
     setMessages((prev) => [...prev, optimisticMsg]);
 
-    const { error } = await supabase.from("support_messages").insert({
-      user_id: user!.id,
+    const { error } = await supabase.from("ticket_messages").insert({
+      ticket_id: selectedTicket.id,
       sender_type: "user",
       message: text,
     });
 
     if (error) {
       toast.error("Send failed");
-      // Remove optimistic message on failure
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+      setMessages((prev) => prev.filter(m => m.id !== optimisticMsg.id));
     }
-
     setSending(false);
   };
 
@@ -126,93 +191,214 @@ const SupportChat = () => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  return (
-    <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-80px)] max-w-lg mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40 shrink-0">
-          <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-base font-semibold">Customer Support</h1>
-            <p className="text-xs text-muted-foreground">Support will respond shortly</p>
+  // Get last message preview for ticket list
+  const [lastMessages, setLastMessages] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (tickets.length === 0) return;
+    const loadPreviews = async () => {
+      const previews: Record<string, string> = {};
+      for (const t of tickets) {
+        const { data } = await supabase
+          .from("ticket_messages")
+          .select("message, sender_type")
+          .eq("ticket_id", t.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (data?.[0]) {
+          previews[t.id] = (data[0].sender_type === "admin" ? "Support: " : "") + data[0].message;
+        }
+      }
+      setLastMessages(previews);
+    };
+    loadPreviews();
+  }, [tickets]);
+
+  // NEW TICKET VIEW
+  if (view === "new") {
+    return (
+      <AppLayout>
+        <div className="flex flex-col h-[calc(100vh-80px)] max-w-lg mx-auto">
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40 shrink-0">
+            <button onClick={() => setView("list")} className="text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <h1 className="text-base font-semibold">New Support Ticket</h1>
+          </div>
+          <div className="flex-1 px-4 py-6 space-y-5">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Subject</label>
+              <Select value={newSubject} onValueChange={setNewSubject}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {SUBJECTS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Describe your issue</label>
+              <textarea
+                value={newInitialMessage}
+                onChange={(e) => setNewInitialMessage(e.target.value)}
+                placeholder="Please describe what you need help with..."
+                className="w-full min-h-[120px] rounded-xl border border-border/40 bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              />
+            </div>
+            <Button onClick={createTicket} disabled={!newInitialMessage.trim() || creating} className="w-full">
+              {creating ? "Creating..." : "Submit Ticket"}
+            </Button>
           </div>
         </div>
+      </AppLayout>
+    );
+  }
 
-        {/* WhatsApp prompt */}
-        {!whatsappSaved && (
-          <div className="p-4 bg-muted/30 border-b border-border/30 shrink-0">
-            <p className="text-sm text-muted-foreground mb-2">Enter your WhatsApp number to continue:</p>
-            <div className="flex gap-2">
-              <Input
-                value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="+1234567890"
-                className="text-base"
-              />
-              <Button onClick={saveWhatsapp} size="sm">Save</Button>
+  // CHAT VIEW
+  if (view === "chat" && selectedTicket) {
+    const isClosed = selectedTicket.status === "closed";
+    const sc = statusConfig[selectedTicket.status] || statusConfig.open;
+
+    return (
+      <AppLayout>
+        <div className="flex flex-col h-[calc(100vh-80px)] max-w-lg mx-auto">
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40 shrink-0">
+            <button onClick={() => { setView("list"); setSelectedTicket(null); }} className="text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-semibold truncate">{selectedTicket.ticket_number}</h1>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${sc.color}`}>
+                  {sc.icon} {sc.label}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground truncate">{selectedTicket.subject}</p>
             </div>
           </div>
-        )}
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-          {messages.length === 0 && (
-            <div className="text-center text-muted-foreground text-sm py-12">
-              Start a conversation with our support team.
+          {isClosed && (
+            <div className="px-4 py-2.5 bg-emerald-500/5 border-b border-emerald-500/10 shrink-0">
+              <p className="text-xs text-emerald-600 font-medium text-center">This ticket has been closed</p>
             </div>
           )}
-          <AnimatePresence initial={false}>
-            {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.15 }}
-                className={`flex ${msg.sender_type === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
+
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+            {messages.length === 0 && (
+              <div className="text-center text-muted-foreground text-sm py-12">Loading messages...</div>
+            )}
+            <AnimatePresence initial={false}>
+              {messages.map((msg) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className={`flex ${msg.sender_type === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
                     msg.sender_type === "user"
                       ? "bg-primary text-primary-foreground rounded-br-md"
                       : "bg-muted text-foreground rounded-bl-md"
-                  }`}
-                >
-                  <p className="break-words">{msg.message}</p>
-                  <div className={`flex items-center gap-1 mt-1 ${msg.sender_type === "user" ? "justify-end" : ""}`}>
-                    <span className={`text-[10px] ${msg.sender_type === "user" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                      {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                    {msg.sender_type === "user" && (
-                      <Check className={`h-3 w-3 ${msg._optimistic ? "text-primary-foreground/30" : "text-primary-foreground/60"}`} />
-                    )}
+                  }`}>
+                    <p className="break-words">{msg.message}</p>
+                    <div className={`flex items-center gap-1 mt-1 ${msg.sender_type === "user" ? "justify-end" : ""}`}>
+                      <span className={`text-[10px] ${msg.sender_type === "user" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                        {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      {msg.sender_type === "user" && (
+                        <Check className={`h-3 w-3 ${msg._optimistic ? "text-primary-foreground/30" : "text-primary-foreground/60"}`} />
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          <div ref={bottomRef} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            <div ref={bottomRef} />
+          </div>
+
+          {isClosed ? (
+            <div className="px-4 py-4 border-t border-border/40 bg-muted/20 shrink-0">
+              <p className="text-xs text-muted-foreground text-center">Ticket closed — create a new ticket for further assistance</p>
+            </div>
+          ) : (
+            <div className="px-4 py-3 pb-6 border-t border-border/40 bg-background shrink-0">
+              <div className="flex gap-2">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type a message..."
+                  className="text-base flex-1"
+                  disabled={sending}
+                />
+                <Button onClick={sendMessage} size="icon" disabled={!newMessage.trim() || sending} className="shrink-0">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // TICKET LIST VIEW
+  return (
+    <AppLayout>
+      <div className="flex flex-col h-[calc(100vh-80px)] max-w-lg mx-auto">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 shrink-0">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <h1 className="text-base font-semibold">Support Tickets</h1>
+          </div>
+          <Button onClick={() => setView("new")} size="sm" className="gap-1.5 text-xs">
+            <Plus className="h-3.5 w-3.5" /> New Ticket
+          </Button>
         </div>
 
-        {/* Input - with safe bottom spacing to avoid any overlay */}
-        {whatsappSaved && (
-          <div className="px-4 py-3 pb-6 border-t border-border/40 bg-background shrink-0">
-            <div className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
-                className="text-base flex-1"
-                disabled={sending}
-              />
-              <Button onClick={sendMessage} size="icon" disabled={!newMessage.trim() || sending} className="shrink-0">
-                <Send className="h-4 w-4" />
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <div className="text-center text-muted-foreground text-sm py-12">Loading...</div>
+          ) : tickets.length === 0 ? (
+            <div className="text-center py-16 px-4">
+              <MessageSquare className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground mb-4">No support tickets yet</p>
+              <Button onClick={() => setView("new")} size="sm" className="gap-1.5">
+                <Plus className="h-3.5 w-3.5" /> Create Your First Ticket
               </Button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="divide-y divide-border/30">
+              {tickets.map((ticket) => {
+                const sc = statusConfig[ticket.status] || statusConfig.open;
+                return (
+                  <button
+                    key={ticket.id}
+                    onClick={() => { setSelectedTicket(ticket); setView("chat"); }}
+                    className="w-full flex items-start gap-3 px-4 py-3.5 hover:bg-muted/30 transition-colors text-left"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-mono text-muted-foreground">{ticket.ticket_number}</span>
+                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${sc.color}`}>
+                          {sc.icon} {sc.label}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium truncate">{ticket.subject}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {lastMessages[ticket.id] || "..."}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-1">
+                      {new Date(ticket.updated_at).toLocaleDateString()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </AppLayout>
   );
