@@ -14,6 +14,7 @@ const AppDeposit = () => {
   const [tab, setTab] = useState<"deposit" | "history">("deposit");
   const { user, profile } = useAuth();
   const balance = profile?.balance ?? 0;
+  const { url: whatsappUrl, available: whatsappAvailable } = useWhatsAppNumber();
 
   const { data: history } = useQuery({
     queryKey: ["deposit-history", user?.id],
