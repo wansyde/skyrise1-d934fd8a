@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, EyeOff, Wallet, CheckCircle, Lock, Globe, Mail, User } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -196,11 +197,17 @@ const PaymentMethods = () => {
                       <Globe className="h-3.5 w-3.5" strokeWidth={1.5} />
                       Network
                     </label>
-                    <Input
-                      value={network}
-                      onChange={(e) => setNetwork(e.target.value)}
-                      className="bg-transparent border-0 border-b border-border rounded-none h-11 text-sm focus-visible:border-primary/50"
-                    />
+                    <Select value={network} onValueChange={setNetwork}>
+                      <SelectTrigger className="bg-transparent border-0 border-b border-border rounded-none h-11 text-sm focus-visible:border-primary/50 shadow-none">
+                        <SelectValue placeholder="Select Network" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl shadow-lg border border-border/50">
+                        <SelectItem value="Cash">Cash</SelectItem>
+                        <SelectItem value="BTC">BTC</SelectItem>
+                        <SelectItem value="TRC20">TRC20</SelectItem>
+                        <SelectItem value="ERC20">ERC20</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Email */}
