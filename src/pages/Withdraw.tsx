@@ -1,14 +1,17 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { toast } from "sonner";
 
 const methods = ["USDT (TRC-20)", "USDT (ERC-20)", "Bitcoin", "Bank Transfer"];
+const networks = ["Cash", "BTC", "TRC20", "ERC20"];
 const balance = 15200;
 
 const Withdraw = () => {
   const [method, setMethod] = useState(methods[0]);
+  const [network, setNetwork] = useState("");
   const [amount, setAmount] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,6 +21,10 @@ const Withdraw = () => {
     const num = Number(amount);
     if (num <= 0 || num > balance) {
       toast.error("Invalid amount");
+      return;
+    }
+    if (!network) {
+      toast.error("Please select a network");
       return;
     }
     setLoading(true);
@@ -70,6 +77,19 @@ const Withdraw = () => {
               max={balance}
               required
             />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Network</label>
+            <Select value={network} onValueChange={setNetwork}>
+              <SelectTrigger className="mt-2 bg-background">
+                <SelectValue placeholder="Select Network" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl shadow-lg border border-border/50">
+                {networks.map((n) => (
+                  <SelectItem key={n} value={n}>{n}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="text-sm font-medium">
