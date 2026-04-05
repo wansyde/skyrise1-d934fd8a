@@ -31,6 +31,7 @@ import Certificate from "./pages/Certificate";
 import TermsConditions from "./pages/TermsConditions";
 import Event from "./pages/Event";
 import AML from "./pages/AML";
+import NDA from "./pages/NDA";
 import PersonalInfo from "./pages/PersonalInfo";
 import KYC from "./pages/KYC";
 import WalletPage from "./pages/WalletPage";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/nda" element={<NDA />} />
 
             {/* App (authenticated) */}
             <Route path="/app" element={<ProtectedRoute><Home /></ProtectedRoute>} />

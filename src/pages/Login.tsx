@@ -485,13 +485,13 @@ const Login = () => {
                       />
                       <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
                         I agree to the{" "}
-                        <Link to="/app/terms" className="text-primary hover:underline">
+                        <Link to="/app/terms" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
                           Terms & Conditions
                         </Link>{" "}
                         and{" "}
-                        <span className="text-primary hover:underline cursor-pointer">
-                          Privacy Policy
-                        </span>
+                        <Link to="/nda" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                          Non-Disclosure Agreement
+                        </Link>
                       </label>
                     </div>
                     {regErrors.agreed && (
