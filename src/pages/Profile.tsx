@@ -1,11 +1,12 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   User, CreditCard, MessageSquare, Bell, LogOut,
   ChevronRight, Shield, ArrowDownToLine, ArrowUpFromLine,
   IdCard, UserCircle, Wallet, BadgeCheck, DollarSign
 } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import heroCarBanner from "@/assets/hero-car-banner.jpg";
@@ -34,6 +35,7 @@ const Profile = () => {
   const { profile, signOut, isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const balance = profile?.balance ?? 0;
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const { data: pendingCount } = useQuery({
     queryKey: ["notif-badge", user?.id],
@@ -192,11 +194,55 @@ const Profile = () => {
         <Button
           variant="destructive"
           className="w-full h-12 mt-2 mb-4"
-          onClick={handleSignOut}
+          onClick={() => setShowLogoutConfirm(true)}
         >
           <LogOut className="h-4 w-4 mr-2" strokeWidth={1.5} />
           Logout
         </Button>
+
+        {/* Logout Confirmation */}
+        <AnimatePresence>
+          {showLogoutConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="bg-card rounded-2xl p-6 w-full max-w-xs text-center shadow-2xl border border-border"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                  <LogOut className="h-6 w-6 text-destructive" />
+                </div>
+                <h3 className="text-base font-semibold mb-1">Are you sure you want to log out?</h3>
+                <p className="text-xs text-muted-foreground mb-5">You'll need to sign in again to access your account.</p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1 h-11"
+                    onClick={() => setShowLogoutConfirm(false)}
+                  >
+                    Stay
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="flex-1 h-11"
+                    onClick={handleSignOut}
+                  >
+                    Log Out
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <p className="text-center text-xs text-muted-foreground pb-4">©1999–2026 Skyrise</p>
       </div>
