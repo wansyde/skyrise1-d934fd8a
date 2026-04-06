@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Search, ArrowLeft, Settings, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { Send, Search, ArrowLeft, Settings, AlertCircle, Clock, CheckCircle2, Paperclip, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   Select,
@@ -28,6 +28,7 @@ interface TicketMessage {
   ticket_id: string;
   sender_type: string;
   message: string;
+  image_url?: string | null;
   created_at: string;
 }
 
@@ -54,10 +55,13 @@ const AdminSupportTab = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [attachPreview, setAttachPreview] = useState<string | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  // Load WhatsApp number
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase.from("support_settings").select("value").eq("key", "whatsapp_number").single();
@@ -66,20 +70,15 @@ const AdminSupportTab = () => {
     load();
   }, []);
 
-  // Get all tickets
   const { data: tickets } = useQuery({
     queryKey: ["admin-support-tickets"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("support_tickets")
-        .select("*")
-        .order("updated_at", { ascending: false });
+      const { data } = await supabase.from("support_tickets").select("*").order("updated_at", { ascending: false });
       return (data || []) as Ticket[];
     },
     refetchInterval: 5000,
   });
 
-  // Get profiles
   const { data: profiles } = useQuery({
     queryKey: ["admin-profiles-support"],
     queryFn: async () => {
@@ -90,19 +89,13 @@ const AdminSupportTab = () => {
 
   const getProfile = (userId: string) => profiles?.find((p) => p.user_id === userId);
 
-  // Load chat for selected ticket
   useEffect(() => {
     if (!selectedTicket) return;
     const load = async () => {
-      const { data } = await supabase
-        .from("ticket_messages")
-        .select("*")
-        .eq("ticket_id", selectedTicket.id)
-        .order("created_at", { ascending: true });
+      const { data } = await supabase.from("ticket_messages").select("*").eq("ticket_id", selectedTicket.id).order("created_at", { ascending: true });
       if (data) setChatMessages(data as TicketMessage[]);
     };
     load();
-
     const channel = supabase
       .channel(`admin-ticket-${selectedTicket.id}`)
       .on("postgres_changes", {
@@ -115,15 +108,11 @@ const AdminSupportTab = () => {
         });
       })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [selectedTicket]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
 
-  // Refresh selected ticket from list
   useEffect(() => {
     if (selectedTicket && tickets) {
       const updated = tickets.find(t => t.id === selectedTicket.id);
@@ -131,23 +120,59 @@ const AdminSupportTab = () => {
     }
   }, [tickets]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("File too large. Max 5MB"); return; }
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf") { toast.error("Only images and PDFs"); return; }
+    setAttachedFile(file);
+    setAttachPreview(file.type.startsWith("image/") ? URL.createObjectURL(file) : null);
+  };
+
+  const clearAttachment = () => {
+    setAttachedFile(null);
+    if (attachPreview) URL.revokeObjectURL(attachPreview);
+    setAttachPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop();
+    const path = `admin/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("support-attachments").upload(path, file);
+    if (error) { toast.error("Upload failed"); return null; }
+    const { data: { publicUrl } } = supabase.storage.from("support-attachments").getPublicUrl(path);
+    return publicUrl;
+  };
+
   const sendReply = async () => {
-    if (!newMessage.trim() || !selectedTicket || sending) return;
+    if ((!newMessage.trim() && !attachedFile) || !selectedTicket || sending) return;
+    const text = newMessage.trim();
+    const file = attachedFile;
+    setNewMessage("");
+    clearAttachment();
     setSending(true);
-    const { error } = await supabase.from("ticket_messages").insert({
+
+    let imageUrl: string | null = null;
+    if (file) {
+      imageUrl = await uploadFile(file);
+      if (!imageUrl && !text) { setSending(false); return; }
+    }
+
+    const insertData: any = {
       ticket_id: selectedTicket.id,
       sender_type: "admin",
-      message: newMessage.trim(),
-    });
+      message: text || "(attachment)",
+    };
+    if (imageUrl) insertData.image_url = imageUrl;
+
+    const { error } = await supabase.from("ticket_messages").insert(insertData);
     if (error) { toast.error("Failed"); setSending(false); return; }
 
-    // Auto-set to in_progress if open
     if (selectedTicket.status === "open") {
       await supabase.from("support_tickets").update({ status: "in_progress" }).eq("id", selectedTicket.id);
       queryClient.invalidateQueries({ queryKey: ["admin-support-tickets"] });
     }
-
-    setNewMessage("");
     setSending(false);
   };
 
@@ -157,6 +182,11 @@ const AdminSupportTab = () => {
     if (error) { toast.error("Failed"); return; }
     queryClient.invalidateQueries({ queryKey: ["admin-support-tickets"] });
     toast.success("Updated");
+  };
+
+  const closeTicket = async () => {
+    if (!selectedTicket) return;
+    await changeStatus("closed");
   };
 
   const saveWhatsapp = async () => {
@@ -199,8 +229,16 @@ const AdminSupportTab = () => {
 
     return (
       <div className="flex flex-col h-[600px]">
+        {/* Fullscreen image */}
+        {fullscreenImage && (
+          <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setFullscreenImage(null)}>
+            <button className="absolute top-4 right-4 text-white" onClick={() => setFullscreenImage(null)}><X className="h-6 w-6" /></button>
+            <img src={fullscreenImage} alt="Attachment" className="max-w-full max-h-full object-contain rounded-lg" />
+          </div>
+        )}
+
         <div className="flex items-center gap-3 pb-3 border-b border-border/40">
-          <button onClick={() => { setView("list"); setSelectedTicket(null); }} className="text-muted-foreground hover:text-foreground">
+          <button onClick={() => { setView("list"); setSelectedTicket(null); clearAttachment(); }} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="flex-1 min-w-0">
@@ -214,16 +252,23 @@ const AdminSupportTab = () => {
               {userProfile?.username || userProfile?.email || selectedTicket.user_id.slice(0, 8)} · {selectedTicket.subject}
             </p>
           </div>
-          <Select value={selectedTicket.status} onValueChange={changeStatus}>
-            <SelectTrigger className="w-[130px] h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            {!isClosed && (
+              <Button variant="destructive" size="sm" className="text-xs h-8" onClick={closeTicket}>
+                Close Ticket
+              </Button>
+            )}
+            <Select value={selectedTicket.status} onValueChange={changeStatus}>
+              <SelectTrigger className="w-[130px] h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto py-3 space-y-2">
@@ -234,7 +279,12 @@ const AdminSupportTab = () => {
                   ? "bg-primary text-primary-foreground rounded-br-md"
                   : "bg-muted text-foreground rounded-bl-md"
               }`}>
-                <p className="break-words">{msg.message}</p>
+                {msg.image_url && (
+                  <button onClick={() => setFullscreenImage(msg.image_url!)} className="block mb-1.5 rounded-lg overflow-hidden">
+                    <img src={msg.image_url} alt="Attachment" className="max-w-[200px] max-h-[200px] object-cover rounded-lg" loading="lazy" />
+                  </button>
+                )}
+                {msg.message && msg.message !== "(attachment)" && <p className="break-words">{msg.message}</p>}
                 <p className={`text-[10px] mt-1 ${msg.sender_type === "admin" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                   {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
@@ -249,17 +299,34 @@ const AdminSupportTab = () => {
             <p className="text-xs text-muted-foreground">Ticket closed. Change status to reply.</p>
           </div>
         ) : (
-          <div className="pt-3 border-t border-border/40 flex gap-2">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
-              placeholder="Type a reply..."
-              disabled={sending}
-            />
-            <Button onClick={sendReply} size="icon" disabled={!newMessage.trim() || sending}>
-              <Send className="h-4 w-4" />
-            </Button>
+          <div className="pt-3 border-t border-border/40">
+            {attachedFile && (
+              <div className="flex items-center gap-2 mb-2 p-2 bg-muted/50 rounded-lg">
+                {attachPreview ? (
+                  <img src={attachPreview} alt="Preview" className="h-12 w-12 object-cover rounded" />
+                ) : (
+                  <div className="h-12 w-12 bg-muted rounded flex items-center justify-center"><ImageIcon className="h-5 w-5 text-muted-foreground" /></div>
+                )}
+                <span className="text-xs text-muted-foreground flex-1 truncate">{attachedFile.name}</span>
+                <button onClick={clearAttachment} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input type="file" ref={fileInputRef} accept="image/*,.pdf" className="hidden" onChange={handleFileSelect} />
+              <Button variant="ghost" size="icon" className="shrink-0" onClick={() => fileInputRef.current?.click()} disabled={sending}>
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
+                placeholder="Type a reply..."
+                disabled={sending}
+              />
+              <Button onClick={sendReply} size="icon" disabled={(!newMessage.trim() && !attachedFile) || sending}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -284,9 +351,7 @@ const AdminSupportTab = () => {
         </div>
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[120px] h-9 text-xs">
-              <SelectValue />
-            </SelectTrigger>
+            <SelectTrigger className="w-[120px] h-9 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
               <SelectItem value="open">Open</SelectItem>

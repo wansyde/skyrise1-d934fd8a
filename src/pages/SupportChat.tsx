@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, Check, Plus, MessageSquare, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Send, ArrowLeft, Check, Plus, MessageSquare, Clock, CheckCircle2, AlertCircle, Paperclip, X, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,7 @@ interface TicketMessage {
   ticket_id: string;
   sender_type: string;
   message: string;
+  image_url?: string | null;
   created_at: string;
   _optimistic?: boolean;
 }
@@ -42,6 +43,7 @@ const statusConfig: Record<string, { label: string; icon: React.ReactNode; color
 };
 
 const SUBJECTS = ["Withdrawal Issue", "Task Issue", "Account Issue", "Other"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const SupportChat = () => {
   const { user } = useAuth();
@@ -56,9 +58,12 @@ const SupportChat = () => {
   const [newSubject, setNewSubject] = useState("Other");
   const [newInitialMessage, setNewInitialMessage] = useState("");
   const [creating, setCreating] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [attachPreview, setAttachPreview] = useState<string | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load tickets
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -72,18 +77,13 @@ const SupportChat = () => {
       setLoading(false);
     };
     load();
-
     const channel = supabase
       .channel("user-tickets")
-      .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets", filter: `user_id=eq.${user.id}` }, () => {
-        load();
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets", filter: `user_id=eq.${user.id}` }, () => { load(); })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  // Load messages for selected ticket
   useEffect(() => {
     if (!selectedTicket) return;
     const load = async () => {
@@ -95,7 +95,6 @@ const SupportChat = () => {
       if (data) setMessages(data as TicketMessage[]);
     };
     load();
-
     const channel = supabase
       .channel(`ticket-msgs-${selectedTicket.id}`)
       .on("postgres_changes", {
@@ -111,23 +110,55 @@ const SupportChat = () => {
         });
       })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [selectedTicket]);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
-
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
-  // Refresh selected ticket status from tickets list
   useEffect(() => {
     if (selectedTicket) {
       const updated = tickets.find(t => t.id === selectedTicket.id);
       if (updated) setSelectedTicket(updated);
     }
   }, [tickets]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File too large. Maximum size is 5MB");
+      return;
+    }
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+      toast.error("Only images and PDFs are supported");
+      return;
+    }
+    setAttachedFile(file);
+    if (file.type.startsWith("image/")) {
+      setAttachPreview(URL.createObjectURL(file));
+    } else {
+      setAttachPreview(null);
+    }
+  };
+
+  const clearAttachment = () => {
+    setAttachedFile(null);
+    if (attachPreview) URL.revokeObjectURL(attachPreview);
+    setAttachPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop();
+    const path = `${user!.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("support-attachments").upload(path, file);
+    if (error) { toast.error("Upload failed"); return null; }
+    const { data: { publicUrl } } = supabase.storage.from("support-attachments").getPublicUrl(path);
+    return publicUrl;
+  };
 
   const createTicket = async () => {
     if (!newInitialMessage.trim() || creating) return;
@@ -137,19 +168,16 @@ const SupportChat = () => {
       .insert([{ user_id: user!.id, subject: newSubject, ticket_number: "TEMP" }])
       .select()
       .single();
-
     if (ticketError || !ticketData) {
       toast.error("Failed to create ticket");
       setCreating(false);
       return;
     }
-
     await supabase.from("ticket_messages").insert({
       ticket_id: ticketData.id,
       sender_type: "user",
       message: newInitialMessage.trim(),
     });
-
     setSelectedTicket(ticketData as Ticket);
     setNewInitialMessage("");
     setNewSubject("Other");
@@ -159,27 +187,38 @@ const SupportChat = () => {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || sending || !selectedTicket || selectedTicket.status === "closed") return;
+    if ((!newMessage.trim() && !attachedFile) || sending || !selectedTicket || selectedTicket.status === "closed") return;
     const text = newMessage.trim();
+    const file = attachedFile;
     setNewMessage("");
+    clearAttachment();
     setSending(true);
+
+    let imageUrl: string | null = null;
+    if (file) {
+      imageUrl = await uploadFile(file);
+      if (!imageUrl && !text) { setSending(false); return; }
+    }
 
     const optimisticMsg: TicketMessage = {
       id: `opt-${Date.now()}`,
       ticket_id: selectedTicket.id,
       sender_type: "user",
       message: text,
+      image_url: imageUrl,
       created_at: new Date().toISOString(),
       _optimistic: true,
     };
     setMessages((prev) => [...prev, optimisticMsg]);
 
-    const { error } = await supabase.from("ticket_messages").insert({
+    const insertData: any = {
       ticket_id: selectedTicket.id,
       sender_type: "user",
-      message: text,
-    });
+      message: text || "(attachment)",
+    };
+    if (imageUrl) insertData.image_url = imageUrl;
 
+    const { error } = await supabase.from("ticket_messages").insert(insertData);
     if (error) {
       toast.error("Send failed");
       setMessages((prev) => prev.filter(m => m.id !== optimisticMsg.id));
@@ -191,7 +230,6 @@ const SupportChat = () => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  // Get last message preview for ticket list
   const [lastMessages, setLastMessages] = useState<Record<string, string>>({});
   useEffect(() => {
     if (tickets.length === 0) return;
@@ -212,6 +250,50 @@ const SupportChat = () => {
     };
     loadPreviews();
   }, [tickets]);
+
+  // Fullscreen image overlay
+  const ImageOverlay = () => fullscreenImage ? (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+      onClick={() => setFullscreenImage(null)}
+    >
+      <button className="absolute top-4 right-4 text-white" onClick={() => setFullscreenImage(null)}>
+        <X className="h-6 w-6" />
+      </button>
+      <img src={fullscreenImage} alt="Attachment" className="max-w-full max-h-full object-contain rounded-lg" />
+    </motion.div>
+  ) : null;
+
+  const MessageBubble = ({ msg }: { msg: TicketMessage }) => {
+    const isUser = msg.sender_type === "user";
+    return (
+      <motion.div
+        key={msg.id}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.15 }}
+        className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+      >
+        <div className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
+          isUser ? "bg-primary text-primary-foreground rounded-br-md" : "bg-muted text-foreground rounded-bl-md"
+        }`}>
+          {msg.image_url && (
+            <button onClick={() => setFullscreenImage(msg.image_url!)} className="block mb-1.5 rounded-lg overflow-hidden">
+              <img src={msg.image_url} alt="Attachment" className="max-w-[200px] max-h-[200px] object-cover rounded-lg" loading="lazy" />
+            </button>
+          )}
+          {msg.message && msg.message !== "(attachment)" && <p className="break-words">{msg.message}</p>}
+          <div className={`flex items-center gap-1 mt-1 ${isUser ? "justify-end" : ""}`}>
+            <span className={`text-[10px] ${isUser ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+              {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+            {isUser && <Check className={`h-3 w-3 ${msg._optimistic ? "text-primary-foreground/30" : "text-primary-foreground/60"}`} />}
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
 
   // NEW TICKET VIEW
   if (view === "new") {
@@ -259,9 +341,10 @@ const SupportChat = () => {
 
     return (
       <AppLayout>
+        <AnimatePresence>{fullscreenImage && <ImageOverlay />}</AnimatePresence>
         <div className="flex flex-col h-[calc(100vh-80px)] max-w-lg mx-auto">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40 shrink-0">
-            <button onClick={() => { setView("list"); setSelectedTicket(null); }} className="text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => { setView("list"); setSelectedTicket(null); clearAttachment(); }} className="text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex-1 min-w-0">
@@ -286,31 +369,7 @@ const SupportChat = () => {
               <div className="text-center text-muted-foreground text-sm py-12">Loading messages...</div>
             )}
             <AnimatePresence initial={false}>
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className={`flex ${msg.sender_type === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
-                    msg.sender_type === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-muted text-foreground rounded-bl-md"
-                  }`}>
-                    <p className="break-words">{msg.message}</p>
-                    <div className={`flex items-center gap-1 mt-1 ${msg.sender_type === "user" ? "justify-end" : ""}`}>
-                      <span className={`text-[10px] ${msg.sender_type === "user" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                      {msg.sender_type === "user" && (
-                        <Check className={`h-3 w-3 ${msg._optimistic ? "text-primary-foreground/30" : "text-primary-foreground/60"}`} />
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+              {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
             </AnimatePresence>
             <div ref={bottomRef} />
           </div>
@@ -321,7 +380,38 @@ const SupportChat = () => {
             </div>
           ) : (
             <div className="px-4 py-3 pb-6 border-t border-border/40 bg-background shrink-0">
+              {attachedFile && (
+                <div className="flex items-center gap-2 mb-2 p-2 bg-muted/50 rounded-lg">
+                  {attachPreview ? (
+                    <img src={attachPreview} alt="Preview" className="h-12 w-12 object-cover rounded" />
+                  ) : (
+                    <div className="h-12 w-12 bg-muted rounded flex items-center justify-center">
+                      <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <span className="text-xs text-muted-foreground flex-1 truncate">{attachedFile.name}</span>
+                  <button onClick={clearAttachment} className="text-muted-foreground hover:text-foreground">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <div className="flex gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending}
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -330,7 +420,7 @@ const SupportChat = () => {
                   className="text-base flex-1"
                   disabled={sending}
                 />
-                <Button onClick={sendMessage} size="icon" disabled={!newMessage.trim() || sending} className="shrink-0">
+                <Button onClick={sendMessage} size="icon" disabled={(!newMessage.trim() && !attachedFile) || sending} className="shrink-0">
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
