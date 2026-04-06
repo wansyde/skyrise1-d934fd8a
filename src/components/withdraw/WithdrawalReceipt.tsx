@@ -99,7 +99,7 @@ const WithdrawalReceipt = ({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", damping: 15 }}
-              className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/15"
+              className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-violet-100"
             >
               <CheckCircle className="h-8 w-8 text-violet-600" strokeWidth={1.5} />
             </motion.div>
