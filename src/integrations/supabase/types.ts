@@ -153,8 +153,6 @@ export type Database = {
           last_login_at: string | null
           last_login_ip: string | null
           last_task_reset: string
-          pending_popup_message: string | null
-          pending_popup_type: string | null
           phone: string | null
           referral_code: string | null
           referred_by: string | null
@@ -200,8 +198,6 @@ export type Database = {
           last_login_at?: string | null
           last_login_ip?: string | null
           last_task_reset?: string
-          pending_popup_message?: string | null
-          pending_popup_type?: string | null
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
@@ -247,8 +243,6 @@ export type Database = {
           last_login_at?: string | null
           last_login_ip?: string | null
           last_task_reset?: string
-          pending_popup_message?: string | null
-          pending_popup_type?: string | null
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null

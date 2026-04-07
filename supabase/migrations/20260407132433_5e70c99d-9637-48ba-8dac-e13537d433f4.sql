@@ -1,1 +1,0 @@
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS pending_popup_type text DEFAULT NULL, ADD COLUMN IF NOT EXISTS pending_popup_message text DEFAULT NULL;
