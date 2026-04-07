@@ -206,23 +206,23 @@ const Event = () => {
                 initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.35 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="flex items-center gap-3 rounded-xl bg-secondary/60 p-4 ring-1 ring-white/[0.04]"
+                className="flex items-center gap-2.5 sm:gap-3 rounded-xl bg-secondary/60 p-3 sm:p-4 ring-1 ring-white/[0.04]"
               >
-                <div className="flex-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Consecutive Check-ins
                   </span>
-                  <p className="text-xl font-extrabold tabular-nums text-foreground">{tier.days} Days</p>
+                  <p className="text-lg sm:text-xl font-extrabold tabular-nums text-foreground">{tier.days} Days</p>
                 </div>
 
                 <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" strokeWidth={1.5} />
 
-                <div className="flex-1 text-right">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <div className="flex-1 text-right min-w-0">
+                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Receive
                   </span>
-                  <p className="text-xl font-extrabold tabular-nums text-foreground">
-                    {tier.reward.toLocaleString()} <span className="text-sm font-semibold text-muted-foreground">USD</span>
+                  <p className="text-lg sm:text-xl font-extrabold tabular-nums text-foreground">
+                    {tier.reward.toLocaleString()} <span className="text-xs sm:text-sm font-semibold text-muted-foreground">USD</span>
                   </p>
                 </div>
               </motion.div>
