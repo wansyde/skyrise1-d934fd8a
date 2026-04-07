@@ -121,7 +121,7 @@ const AppDeposit = () => {
                       <div>
                         <span className="text-sm font-medium">Deposit</span>
                         <span className="text-xs text-muted-foreground block mt-0.5">
-                          {new Date(d.created_at).toLocaleDateString()} · {d.method}
+                          {new Date(d.created_at).toLocaleDateString()} · {d.method === "admin" ? "System" : d.method}
                         </span>
                       </div>
                     </div>

@@ -43,16 +43,18 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Minimal top bar - no logo, just menu trigger */}
-      <header className="sticky top-0 z-30 flex h-10 items-center justify-between px-4 bg-background">
-        <button
-          onClick={() => setMenuOpen(true)}
-          className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Menu className="h-5 w-5" strokeWidth={1.5} />
-        </button>
-        <div className="w-8" />
-      </header>
+      {/* Minimal top bar - only show menu trigger on homepage */}
+      {location.pathname === "/app" && (
+        <header className="sticky top-0 z-30 flex h-10 items-center justify-between px-4 bg-background">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Menu className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+          <div className="w-8" />
+        </header>
+      )}
 
       {/* Slide-out menu */}
       <AnimatePresence>

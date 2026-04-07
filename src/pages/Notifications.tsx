@@ -147,7 +147,7 @@ const Notifications = () => {
                       <div className="flex items-center gap-1.5 mt-1">
                         <StatusIcon className={`h-3 w-3 ${sc.color}`} strokeWidth={2} />
                         <span className={`text-[11px] font-medium ${sc.color}`}>{sc.label}</span>
-                        <span className="text-[10px] text-muted-foreground ml-auto">{n.method === "admin" ? "Bank Transfer" : n.method || "System"}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto">{n.method === "admin" ? "System" : n.method || "System"}</span>
                       </div>
 
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">

@@ -145,9 +145,9 @@ const Event = () => {
 
           <div ref={memberRef} className="flex flex-col gap-3 p-1">
             {/* Header row */}
-            <div className="grid grid-cols-4 gap-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 px-2 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <span>VIP Level</span>
-              <span className="text-center">Ads Salary</span>
+              <span className="text-center">Salary</span>
               <span className="text-center">Tasks</span>
               <span className="text-right">Condition</span>
             </div>
@@ -160,17 +160,17 @@ const Event = () => {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className={`grid grid-cols-4 items-center gap-2 rounded-xl bg-gradient-to-r ${tier.color} p-4 ring-1 ring-white/[0.04]`}
+                  className={`grid grid-cols-4 items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-r ${tier.color} p-3 sm:p-4 ring-1 ring-white/[0.04]`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="h-5 w-5 shrink-0" style={{ color: tier.accent }} strokeWidth={1.5} />
-                    <span className={`text-sm font-bold ${tier.textColor}`}>{tier.name}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" style={{ color: tier.accent }} strokeWidth={1.5} />
+                    <span className={`text-xs sm:text-sm font-bold ${tier.textColor} truncate`}>{tier.name}</span>
                   </div>
-                  <span className={`text-center text-base font-extrabold tabular-nums ${tier.textColor}`}>{tier.salary}</span>
-                  <span className={`text-center text-sm font-medium ${tier.subColor}`}>{tier.tasks}</span>
-                  <div className="text-right">
-                    <span className={`text-[11px] ${tier.subColor} block leading-tight font-medium`}>Reset Deposit</span>
-                    <span className={`text-sm font-bold ${tier.textColor}`}>{tier.deposit}</span>
+                  <span className={`text-center text-sm sm:text-base font-extrabold tabular-nums ${tier.textColor}`}>{tier.salary}</span>
+                  <span className={`text-center text-[11px] sm:text-sm font-medium ${tier.subColor} leading-tight`}>{tier.tasks}</span>
+                  <div className="text-right min-w-0">
+                    <span className={`text-[9px] sm:text-[11px] ${tier.subColor} block leading-tight font-medium`}>Reset Deposit</span>
+                    <span className={`text-[11px] sm:text-sm font-bold ${tier.textColor} leading-tight`}>{tier.deposit}</span>
                   </div>
                 </motion.div>
               );
