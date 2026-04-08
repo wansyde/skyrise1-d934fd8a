@@ -10,6 +10,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import SkyriseLogo from "@/components/SkyriseLogo";
 import FloatingSupportButton from "@/components/FloatingSupportButton";
+import PendingPopup from "@/components/PendingPopup";
 
 const bottomTabs = [
   { href: "/app", label: "Home", icon: Home },
@@ -121,6 +122,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Floating support button */}
       <FloatingSupportButton />
+
+      {/* Pending popup (upgrade/reset/deposit notification) */}
+      <PendingPopup />
 
       {/* Main content - scrollable area above bottom nav */}
       <main className="flex-1 overflow-y-auto pb-20">
