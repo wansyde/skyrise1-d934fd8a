@@ -335,7 +335,7 @@ const AdminPanel = () => {
   };
 
   const totalUsers = profiles?.length ?? 0;
-  const totalAUM = profiles?.reduce((s, p: any) => s + Number(p.balance), 0) ?? 0;
+  
 
   const filteredProfiles = (profiles || [])
     .filter((p: any) => {
