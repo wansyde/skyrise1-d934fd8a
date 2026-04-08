@@ -211,9 +211,37 @@ const AdminPanel = () => {
     if (!VIP_LEVELS.includes(editVipLevel)) { toast.error("Invalid VIP level."); return; }
 
     const oldUser = (profiles || []).find((p: any) => p.user_id === userId);
+
+    // Determine popup message based on what changed
+    let popupMessage: string | null = null;
+    let popupType: string | null = null;
+
+    if (oldUser) {
+      const vipChanged = oldUser.vip_level !== editVipLevel;
+      const tasksReset = newTasks < (oldUser.tasks_completed_today ?? 0);
+      const balanceIncreased = newBalance > Number(oldUser.balance);
+
+      if (vipChanged) {
+        popupMessage = `Congratulations! You have been upgraded to ${editVipLevel} Promoter. You now have access to enhanced rewards and exclusive promotional campaigns.`;
+        popupType = "upgrade";
+      } else if (tasksReset) {
+        popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from $1 to $1,000.`;
+        popupType = "reset";
+      } else if (balanceIncreased) {
+        popupMessage = `Your wallet has been credited with $${(newBalance - Number(oldUser.balance)).toFixed(2)}. Your new balance is $${newBalance.toFixed(2)}.`;
+        popupType = "deposit";
+      }
+    }
+
+    const updatePayload: any = { balance: newBalance, advertising_salary: newSalary, vip_level: editVipLevel, tasks_completed_today: newTasks, credit_score: newCreditScore };
+    if (popupMessage) {
+      updatePayload.pending_popup_message = popupMessage;
+      updatePayload.pending_popup_type = popupType;
+    }
+
     const { error } = await supabase
       .from("profiles")
-      .update({ balance: newBalance, advertising_salary: newSalary, vip_level: editVipLevel, tasks_completed_today: newTasks, credit_score: newCreditScore } as any)
+      .update(updatePayload)
       .eq("user_id", userId);
     if (error) { toast.error("Failed to update user."); return; }
 

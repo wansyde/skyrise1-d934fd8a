@@ -27,6 +27,8 @@ interface Profile {
   saved_wallet_username: string | null;
   saved_wallet_network: string | null;
   saved_wallet_email: string | null;
+  pending_popup_message: string | null;
+  pending_popup_type: string | null;
 }
 
 interface AuthContextType {
