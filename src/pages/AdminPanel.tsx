@@ -1,10 +1,9 @@
-import { useState as useStateImport } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogOut } from "lucide-react";
 import SkyriseLogo from "@/components/SkyriseLogo";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
