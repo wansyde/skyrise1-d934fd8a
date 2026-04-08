@@ -54,7 +54,7 @@ Deno.serve(async (req: Request) => {
     if (clientIp && clientIp !== "unknown" && clientIp !== "127.0.0.1") {
       try {
         const geoRes = await fetch(
-          `http://ip-api.com/json/${clientIp}?fields=status,country,regionName,city,isp,proxy,hosting,mobile`
+          `http://ip-api.com/json/${clientIp}?fields=status,country,regionName,city,isp,proxy,mobile`
         );
         if (geoRes.ok) {
           const geo = await geoRes.json();
@@ -64,9 +64,12 @@ Deno.serve(async (req: Request) => {
             city = geo.city;
             isp = geo.isp || null;
 
-            if (geo.proxy || geo.hosting) {
+            // Only flag VPN when proxy field is explicitly true
+            // The 'hosting' field from ip-api is too aggressive and causes false positives
+            // with mobile carriers, CDNs, and shared IPs — so we no longer use it
+            if (geo.proxy === true) {
               is_vpn = true;
-              connection_type = geo.hosting ? "Hosting/Datacenter" : "VPN/Proxy";
+              connection_type = "VPN/Proxy";
             } else if (geo.mobile) {
               connection_type = "Mobile";
             } else {
