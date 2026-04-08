@@ -15,6 +15,7 @@ import FAQ from "./pages/FAQ";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import PublicTerms from "./pages/PublicTerms";
 
 // App pages (mobile-first dashboard)
 import Home from "./pages/Home";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/nda" element={<NDA />} />
+            <Route path="/terms" element={<PublicTerms />} />
 
             {/* App (authenticated) */}
             <Route path="/app" element={<ProtectedRoute><Home /></ProtectedRoute>} />

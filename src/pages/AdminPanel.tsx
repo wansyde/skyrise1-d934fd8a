@@ -1,9 +1,13 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { LogOut } from "lucide-react";
+import SkyriseLogo from "@/components/SkyriseLogo";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, ArrowDownToLine, ArrowUpFromLine, DollarSign, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw, ScrollText, UserCog, ShieldCheck, Eye, Link2, MessageSquare } from "lucide-react";
+import { Users, ArrowDownToLine, ArrowUpFromLine, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw, ScrollText, UserCog, ShieldCheck, Eye, Link2, MessageSquare } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { VIP_LEVELS } from "@/lib/vip-config";
@@ -37,6 +41,14 @@ const logAdminAction = async (actionType: string, targetUserId?: string | null, 
 };
 
 const AdminPanel = () => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleAdminLogout = async () => {
+    await signOut();
+    navigate("/admin-sky-987");
+  };
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingUser, setEditingUser] = useState<string | null>(null);
@@ -323,7 +335,7 @@ const AdminPanel = () => {
   };
 
   const totalUsers = profiles?.length ?? 0;
-  const totalAUM = profiles?.reduce((s, p: any) => s + Number(p.balance), 0) ?? 0;
+  
 
   const filteredProfiles = (profiles || [])
     .filter((p: any) => {
@@ -394,7 +406,6 @@ const AdminPanel = () => {
     { label: "Total Users", value: totalUsers.toLocaleString(), icon: Users },
     { label: "Total Deposits", value: String(allDeposits?.length ?? 0), icon: ArrowDownToLine },
     { label: "Total Withdrawals", value: String(allWithdrawals?.length ?? 0), icon: ArrowUpFromLine },
-    { label: "Total AUM", value: `$${(totalAUM / 1000).toFixed(1)}K`, icon: DollarSign },
   ];
 
   const SortHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
@@ -425,7 +436,67 @@ const AdminPanel = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div className="min-h-screen bg-background">
+      {/* Admin Header */}
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/80 backdrop-blur-md px-6">
+        <Link to="/" className="flex items-center">
+          <SkyriseLogo className="h-10 w-auto" />
+        </Link>
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="flex items-center gap-2 text-sm text-destructive hover:text-destructive/80 transition-colors"
+        >
+          <LogOut className="h-4 w-4" strokeWidth={1.5} />
+          Sign Out
+        </button>
+      </header>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowLogoutModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              onClick={(e) => e.target === e.currentTarget && setShowLogoutModal(false)}
+            >
+              <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                  <LogOut className="h-5 w-5 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">Are you sure you want to log out?</h3>
+                <p className="text-sm text-muted-foreground mb-6">You will be redirected to the admin login page.</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowLogoutModal(false)}
+                    className="flex-1 rounded-xl border border-border bg-muted/50 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+                  >
+                    Stay
+                  </button>
+                  <button
+                    onClick={handleAdminLogout}
+                    className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <main className="p-6 lg:p-8">
       <div className="mb-8 flex items-center gap-3">
         <Shield className="h-5 w-5 text-primary" strokeWidth={1.5} />
         <div>
@@ -434,7 +505,7 @@ const AdminPanel = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+      <div className="grid gap-4 sm:grid-cols-3 mb-8">
         {stats.map((stat) => (
           <div key={stat.label} className="vault-card p-5">
             <div className="flex items-center justify-between">
@@ -1151,7 +1222,8 @@ const AdminPanel = () => {
           <AdminSupportTab />
         </TabsContent>
       </Tabs>
-    </DashboardLayout>
+      </main>
+    </div>
   );
 };
 
