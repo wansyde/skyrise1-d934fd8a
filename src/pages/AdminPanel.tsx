@@ -43,7 +43,7 @@ const logAdminAction = async (actionType: string, targetUserId?: string | null, 
 const AdminPanel = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [showLogoutModal, setShowLogoutModal] = useStateImport(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleAdminLogout = async () => {
     await signOut();
