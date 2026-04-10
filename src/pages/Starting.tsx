@@ -430,7 +430,7 @@ const Starting = () => {
           ) : (
             <motion.button
               onClick={handleMatchAd}
-              disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT}
+              disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT || matchState !== "idle"}
               whileTap={{ scale: 0.97 }}
               className="w-full py-4 rounded-2xl font-bold text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-200 bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed font-[Montserrat]"
               style={{ boxShadow: "0 6px 24px hsl(var(--primary) / 0.4), 0 0 40px hsl(var(--primary) / 0.15)" }}
