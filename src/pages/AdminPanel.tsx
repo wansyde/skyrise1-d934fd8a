@@ -1039,7 +1039,38 @@ const AdminPanel = () => {
                               <Check className="h-3 w-3" /> Verify
                             </Button>
                           ) : p.kyc_status === "verified" ? (
-                            <span className="text-xs text-green-400">✓ Verified</span>
+                            <Button
+                              size="sm" variant="outline"
+                              className="h-7 text-xs gap-1.5 text-amber-400 border-amber-400/30 hover:bg-amber-500/10"
+                              disabled={processingId === p.user_id}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                setProcessingId(p.user_id);
+                                try {
+                                  const { error } = await supabase.from("profiles").update({
+                                    kyc_status: "pending",
+                                    kyc_name: null,
+                                    kyc_id_number: null,
+                                    kyc_id_type: null,
+                                    kyc_front_url: null,
+                                    kyc_back_url: null,
+                                    kyc_selfie_url: null,
+                                    kyc_submitted_at: null,
+                                  } as any).eq("user_id", p.user_id);
+                                  if (error) throw error;
+                                  await logAdminAction("kyc_reset", p.user_id, `Reset KYC for ${p.username || p.email}`);
+                                  toast.success(`KYC reset for ${p.username || p.email}. They can now resubmit.`);
+                                  queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+                                  queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+                                } catch (err: any) {
+                                  toast.error(err.message || "Failed to reset KYC.");
+                                } finally {
+                                  setProcessingId(null);
+                                }
+                              }}
+                            >
+                              <RotateCcw className="h-3 w-3" /> Reset KYC
+                            </Button>
                           ) : (
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
