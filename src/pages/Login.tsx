@@ -485,7 +485,7 @@ const Login = () => {
                       />
                       <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
                         I agree to the{" "}
-                        <Link to="/app/terms" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                        <Link to="/terms" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
                           Terms & Conditions
                         </Link>{" "}
                         and{" "}
