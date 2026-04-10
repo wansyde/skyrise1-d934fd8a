@@ -99,6 +99,7 @@ const Starting = () => {
   const [matchedAt, setMatchedAt] = useState<Date | null>(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const isProcessingRef = useRef(false); // Prevent double-click
   const carouselRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
