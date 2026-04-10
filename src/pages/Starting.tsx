@@ -99,6 +99,7 @@ const Starting = () => {
   const [matchedAt, setMatchedAt] = useState<Date | null>(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const isProcessingRef = useRef(false); // Prevent double-click
   const carouselRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -201,13 +202,16 @@ const Starting = () => {
     return hour >= 10 && hour < 22;
   };
 
-  const handleMatchAd = () => {
+  const handleMatchAd = useCallback(() => {
+    if (isProcessingRef.current || matchState !== "idle") return;
     if (!isWithinWorkingHours()) { toast.error("Promotions are only available between 10:00 AM and 10:00 PM (ET)"); return; }
     if (isRestricted) { toast.error("Account restricted"); return; }
     if (isCycleCompleted) { toast.error("Task cycle completed"); return; }
     const currentBalance = Number(profile?.balance ?? 0);
     if (currentBalance < MIN_BALANCE) { toast.error("Minimum $100 required"); return; }
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
+
+    isProcessingRef.current = true;
 
     const affordable = carCampaigns.filter(c => c.totalAmount <= currentBalance);
     const pool = affordable.length > 0 ? affordable : carCampaigns;
@@ -220,26 +224,28 @@ const Starting = () => {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 15 + 5;
+      progress += Math.random() * 25 + 10;
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);
         setMatchProgress(100);
-        setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 400);
+        setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); isProcessingRef.current = false; }, 200);
       } else {
         setMatchProgress(progress);
       }
-    }, 200);
-  };
+    }, 100);
+  }, [matchState, profile, isRestricted, isCycleCompleted, completedCount, DAILY_LIMIT]);
 
-  const handlePromote = async () => {
+  const handlePromote = useCallback(async () => {
     if (!user || !matchedCar || !profile || submitting) return;
-    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); return; }
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); isProcessingRef.current = false; return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); isProcessingRef.current = false; return; }
 
     setSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
       const { data, error } = await supabase.rpc("complete_task", {
         _car_brand: matchedCar.brand,
         _car_name: matchedCar.name,
@@ -254,15 +260,20 @@ const Starting = () => {
         else toast.error(result.error);
         setMatchState("idle"); setMatchedCar(null); return;
       }
-      await refreshProfile();
+      // Optimistic update before refresh
+      if (result?.tasks_completed) setCompletedCount(result.tasks_completed);
       setMatchState("submitted");
-      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
+      // Refresh profile in background, don't block UI
+      refreshProfile();
+      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1200);
     } catch (e: any) {
       toast.error("Submission failed");
+      setMatchState("idle"); setMatchedCar(null);
     } finally {
       setSubmitting(false);
+      isProcessingRef.current = false;
     }
-  };
+  }, [user, matchedCar, profile, submitting, isRestricted, assignmentCode, refreshProfile]);
 
   return (
     <AppLayout>
@@ -419,7 +430,7 @@ const Starting = () => {
           ) : (
             <motion.button
               onClick={handleMatchAd}
-              disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT}
+              disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT || matchState !== "idle"}
               whileTap={{ scale: 0.97 }}
               className="w-full py-4 rounded-2xl font-bold text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-200 bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed font-[Montserrat]"
               style={{ boxShadow: "0 6px 24px hsl(var(--primary) / 0.4), 0 0 40px hsl(var(--primary) / 0.15)" }}
