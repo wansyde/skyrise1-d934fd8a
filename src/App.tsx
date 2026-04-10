@@ -29,7 +29,6 @@ import AppDeposit from "./pages/AppDeposit";
 import AppWithdraw from "./pages/AppWithdraw";
 import WFP from "./pages/WFP";
 import Certificate from "./pages/Certificate";
-import TermsConditions from "./pages/TermsConditions";
 import Event from "./pages/Event";
 import AML from "./pages/AML";
 import NDA from "./pages/NDA";
@@ -74,7 +73,7 @@ const App = () => (
             <Route path="/app/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/app/wfp" element={<ProtectedRoute><WFP /></ProtectedRoute>} />
             <Route path="/app/certificate" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
-            <Route path="/app/terms" element={<ProtectedRoute><TermsConditions /></ProtectedRoute>} />
+            <Route path="/app/terms" element={<PublicTerms />} />
             <Route path="/app/event" element={<ProtectedRoute><Event /></ProtectedRoute>} />
             <Route path="/app/aml" element={<ProtectedRoute><AML /></ProtectedRoute>} />
             <Route path="/app/settings" element={<ProtectedRoute><PersonalInfo /></ProtectedRoute>} />

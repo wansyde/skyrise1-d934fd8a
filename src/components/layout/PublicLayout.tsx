@@ -15,7 +15,7 @@ const navLinks = [
 const slideMenuItems = [
   { href: "https://www.wfp.org", label: "WFP", icon: FileText, external: true },
   { href: "/app/certificate", label: "Certificate", icon: Award },
-  { href: "/app/terms", label: "T & C", icon: Scale },
+  { href: "/terms", label: "T & C", icon: Scale },
   { href: "/app/event", label: "Event", icon: Calendar },
   { href: "/faq", label: "FAQs", icon: HelpCircle },
   { href: "/about", label: "About", icon: Info },
