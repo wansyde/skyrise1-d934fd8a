@@ -135,6 +135,7 @@ export type Database = {
           country: string | null
           created_at: string
           credit_score: number
+          current_unlocked_set: number
           email: string
           full_name: string
           gender: string | null
@@ -182,6 +183,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           credit_score?: number
+          current_unlocked_set?: number
           email?: string
           full_name?: string
           gender?: string | null
@@ -229,6 +231,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           credit_score?: number
+          current_unlocked_set?: number
           email?: string
           full_name?: string
           gender?: string | null
