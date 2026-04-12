@@ -425,8 +425,9 @@ const Starting = () => {
               <p className="text-sm font-semibold text-foreground">Task sets completed</p>
               <p className="text-xs text-muted-foreground">Contact support to renew or upgrade.</p>
               <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
+                href={whatsappUrl || "#"}
+                target={whatsappUrl ? "_blank" : undefined}
+                rel={whatsappUrl ? "noopener noreferrer" : undefined}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 <Headphones className="h-3.5 w-3.5" />
