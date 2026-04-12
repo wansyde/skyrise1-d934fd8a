@@ -118,6 +118,14 @@ const Starting = () => {
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
   const DAILY_LIMIT = vipTier.totalTasks;
   const setProgress = useMemo(() => getSetProgress(completedCount, vipTier), [completedCount, vipTier]);
+  const currentUnlockedSet = (profile as any)?.current_unlocked_set ?? 1;
+  const maxAllowedTasks = currentUnlockedSet * vipTier.tasksPerSet;
+  const isSetLocked = completedCount >= maxAllowedTasks && completedCount < DAILY_LIMIT;
+
+  const userBalance = Number(profile?.balance ?? 0);
+  const dynamicPercent = useMemo(() => getDynamicPercent(userBalance, vipTier), [userBalance, vipTier]);
+  const taskValue = useMemo(() => getTaskValue(userBalance, vipTier), [userBalance, vipTier]);
+  const estimatedProfit = useMemo(() => Math.round(taskValue * dynamicPercent * 100) / 100, [taskValue, dynamicPercent]);
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
