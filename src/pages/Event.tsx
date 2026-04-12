@@ -1,10 +1,10 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
-import { Diamond, ChevronRight, Crown, Award, Star, Gem, CalendarCheck, Copy, Download, ArrowLeft } from "lucide-react";
+import { Diamond, ChevronRight, Crown, Award, Star, Gem, CalendarCheck, Copy, Download, ArrowLeft, Share2, Clipboard } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useRef, useCallback } from "react";
-import { toPng } from "html-to-image";
+import { toPng, toBlob } from "html-to-image";
 
 const tiers = [
   {
@@ -83,27 +83,38 @@ const Event = () => {
     if (!ref.current) return;
     try {
       const dataUrl = await toPng(ref.current, { backgroundColor: "#ffffff", pixelRatio: 3 });
-      // Convert to blob for share/save API
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       const file = new File([blob], `skyrise-${name}.png`, { type: "image/png" });
 
-      // Try native share (mobile: Save to Photos / Gallery)
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: `Skyrise ${name}` });
         toast.success("Image shared");
         return;
       }
 
-      // Fallback: download
       const link = document.createElement("a");
       link.download = `skyrise-${name}.png`;
       link.href = dataUrl;
       link.click();
       toast.success("Image saved");
     } catch (err: any) {
-      if (err?.name === "AbortError") return; // user cancelled share
+      if (err?.name === "AbortError") return;
       toast.error("Failed to save image");
+    }
+  }, []);
+
+  const copyImage = useCallback(async (ref: React.RefObject<HTMLDivElement>) => {
+    if (!ref.current) return;
+    try {
+      const blob = await toBlob(ref.current, { backgroundColor: "#ffffff", pixelRatio: 3 });
+      if (!blob) throw new Error("Failed to generate image");
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": blob }),
+      ]);
+      toast.success("Image copied to clipboard — paste it anywhere!");
+    } catch (err: any) {
+      toast.error("Copy not supported on this device. Use Save instead.");
     }
   }, []);
 
@@ -138,12 +149,25 @@ const Event = () => {
                 <p className="text-sm text-muted-foreground">Unlock tiers by increasing your deposit</p>
               </div>
             </div>
-            <button onClick={() => saveImage(memberRef, "membership")} className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-              <Download className="h-4 w-4 text-muted-foreground" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => copyImage(memberRef)} title="Copy as image" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <Clipboard className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <button onClick={() => saveImage(memberRef, "membership")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <Share2 className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
           </div>
 
-          <div ref={memberRef} className="flex flex-col gap-3 p-1">
+          <div ref={memberRef} className="flex flex-col gap-3 p-4 rounded-2xl border border-border/40">
+            {/* Branding header for image export */}
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <Diamond className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <span className="text-sm font-bold tracking-tight text-foreground">Skyrise</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">Membership Levels</span>
+            </div>
             {/* Header row */}
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2 px-2 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <span>VIP Level</span>
@@ -175,6 +199,7 @@ const Event = () => {
                 </motion.div>
               );
             })}
+            <p className="text-[9px] text-muted-foreground/50 text-center mt-2">Share this with friends</p>
           </div>
         </motion.div>
 
@@ -194,12 +219,25 @@ const Event = () => {
                 <p className="text-sm text-muted-foreground">Earn rewards for consecutive daily check-ins</p>
               </div>
             </div>
-            <button onClick={() => saveImage(salaryRef, "salary")} className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-              <Download className="h-4 w-4 text-muted-foreground" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => copyImage(salaryRef)} title="Copy as image" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <Clipboard className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <button onClick={() => saveImage(salaryRef, "salary")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <Share2 className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
           </div>
 
-          <div ref={salaryRef} className="flex flex-col gap-2.5 p-1">
+          <div ref={salaryRef} className="flex flex-col gap-2.5 p-4 rounded-2xl border border-border/40">
+            {/* Branding header for image export */}
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <CalendarCheck className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <span className="text-sm font-bold tracking-tight text-foreground">Skyrise</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">Base Salary Rewards</span>
+            </div>
             {salaryTiers.map((tier, i) => (
               <motion.div
                 key={tier.days}
@@ -222,11 +260,12 @@ const Event = () => {
                     Receive
                   </span>
                   <p className="text-lg sm:text-xl font-extrabold tabular-nums text-foreground">
-                    {tier.reward.toLocaleString()} <span className="text-xs sm:text-sm font-semibold text-muted-foreground">USD</span>
+                    {tier.reward.toLocaleString()} <span className="text-xs sm:text-sm font-semibold text-muted-foreground">USDC</span>
                   </p>
                 </div>
               </motion.div>
             ))}
+            <p className="text-[9px] text-muted-foreground/50 text-center mt-2">Share this with friends</p>
           </div>
 
           <p className="mt-5 text-center text-[11px] text-muted-foreground/60">
