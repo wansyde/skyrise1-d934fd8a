@@ -124,7 +124,8 @@ const Starting = () => {
 
   const userBalance = Number(profile?.balance ?? 0);
   const dynamicPercent = useMemo(() => getDynamicPercent(userBalance, vipTier), [userBalance, vipTier]);
-  const taskValue = useMemo(() => getTaskValue(userBalance, vipTier), [userBalance, vipTier]);
+  const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
+  const taskValue = matchedTaskValue ?? getTaskValue(userBalance, vipTier);
   const estimatedProfit = useMemo(() => Math.round(taskValue * dynamicPercent * 100) / 100, [taskValue, dynamicPercent]);
 
   const userName = profile?.full_name || profile?.username || "User";
