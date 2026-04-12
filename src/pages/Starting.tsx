@@ -257,19 +257,19 @@ const Starting = () => {
         _car_brand: matchedCar.brand,
         _car_name: matchedCar.name,
         _car_image_url: matchedCar.featured,
-        _total_amount: matchedCar.totalAmount,
+        _total_amount: taskValue,
         _assignment_code: assignmentCode,
       });
       if (error) throw error;
       const result = data as any;
       if (result?.error) {
         toast.error(result.error);
-        setMatchState("idle"); setMatchedCar(null); return;
+        setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
       }
       setCompletedCount(prev => prev + 1);
       refreshProfile();
       setMatchState("submitted");
-      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
+      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
     } catch (e: any) {
       console.error("Task submission error:", e);
       toast.error(e?.message || "Submission failed. Please try again.");
