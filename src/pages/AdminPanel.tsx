@@ -318,10 +318,25 @@ const AdminPanel = () => {
   const handleResetCycle = async (userId: string) => {
     setProcessingId(userId);
     try {
-      const { error } = await supabase.from("profiles").update({ task_cycle_completed: false, tasks_completed_today: 0 } as any).eq("user_id", userId);
+      const { error } = await supabase.from("profiles").update({ task_cycle_completed: false, tasks_completed_today: 0, current_unlocked_set: 1 } as any).eq("user_id", userId);
       if (error) { toast.error("Failed to reset task cycle: " + error.message); return; }
-      await logAdminAction("task_cycle_reset", userId, "Reset task cycle");
+      await logAdminAction("task_cycle_reset", userId, "Reset task cycle (all sets)");
       toast.success("Task cycle reset successfully.");
+      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleUnlockNextSet = async (userId: string, currentSet: number) => {
+    setProcessingId(userId);
+    try {
+      const nextSet = Math.min(currentSet + 1, 3);
+      const { error } = await supabase.from("profiles").update({ current_unlocked_set: nextSet } as any).eq("user_id", userId);
+      if (error) { toast.error("Failed to unlock set: " + error.message); return; }
+      await logAdminAction("set_unlock", userId, `Unlocked set ${nextSet}`);
+      toast.success(`Set ${nextSet} unlocked successfully.`);
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } finally {
