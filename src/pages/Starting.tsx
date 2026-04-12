@@ -241,14 +241,16 @@ const Starting = () => {
     }, 200);
   };
 
+  const isProcessingRef = useRef(false);
+
   const handlePromote = async () => {
-    if (!user || !matchedCar || !profile || submitting) return;
+    if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
     if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); return; }
     if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); return; }
 
+    isProcessingRef.current = true;
     setSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
       const { data, error } = await supabase.rpc("complete_task", {
         _car_brand: matchedCar.brand,
         _car_name: matchedCar.name,
@@ -259,17 +261,19 @@ const Starting = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) {
-        if (result.status === "pending") toast.error("Insufficient balance");
-        else toast.error(result.error);
+        toast.error(result.error);
         setMatchState("idle"); setMatchedCar(null); return;
       }
-      await refreshProfile();
+      setCompletedCount(prev => prev + 1);
+      refreshProfile();
       setMatchState("submitted");
       setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
     } catch (e: any) {
-      toast.error("Submission failed");
+      console.error("Task submission error:", e);
+      toast.error(e?.message || "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
+      isProcessingRef.current = false;
     }
   };
 
