@@ -20,9 +20,9 @@ export const getVipTier = (level: string): VipTier => {
 
 export const VIP_LEVELS = Object.keys(VIP_TIERS);
 
-/** Fixed profit per task = balance × tier percentage */
-export const getTaskProfit = (balance: number, tier: VipTier): number => {
-  return Math.round(balance * tier.rewardPercent * 100) / 100;
+/** Profit per task = taskValue × tier percentage */
+export const getTaskProfit = (taskValue: number, tier: VipTier): number => {
+  return Math.round(taskValue * tier.rewardPercent * 100) / 100;
 };
 
 /** Generate a controlled-random task value within [balance*0.55, balance*0.75] (display only) */

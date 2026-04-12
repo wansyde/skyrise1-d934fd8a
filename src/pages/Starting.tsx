@@ -128,7 +128,7 @@ const Starting = () => {
   const tierPercent = vipTier.rewardPercent;
   const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
   const taskValue = matchedTaskValue ?? generateRandomTaskValue(userBalance);
-  const estimatedProfit = useMemo(() => getTaskProfit(userBalance, vipTier), [userBalance, vipTier]);
+  const estimatedProfit = useMemo(() => getTaskProfit(taskValue, vipTier), [taskValue, vipTier]);
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
