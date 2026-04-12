@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getVipTier, getSetProgress, getDynamicPercent, getTaskValue, generateRandomTaskValue } from "@/lib/vip-config";
+import { getVipTier, getSetProgress, getTaskProfit, generateRandomTaskValue } from "@/lib/vip-config";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
@@ -123,10 +123,10 @@ const Starting = () => {
   const isSetLocked = completedCount >= maxAllowedTasks && completedCount < DAILY_LIMIT;
 
   const userBalance = Number(profile?.balance ?? 0);
-  const dynamicPercent = useMemo(() => getDynamicPercent(userBalance, vipTier), [userBalance, vipTier]);
+  const tierPercent = vipTier.rewardPercent;
   const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
-  const taskValue = matchedTaskValue ?? getTaskValue(userBalance, vipTier);
-  const estimatedProfit = useMemo(() => Math.round(taskValue * dynamicPercent * 100) / 100, [taskValue, dynamicPercent]);
+  const taskValue = matchedTaskValue ?? generateRandomTaskValue(userBalance);
+  const estimatedProfit = useMemo(() => getTaskProfit(userBalance, vipTier), [userBalance, vipTier]);
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
