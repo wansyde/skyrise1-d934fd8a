@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getVipTier, getSetProgress, getDynamicPercent, getTaskValue } from "@/lib/vip-config";
+import { getVipTier, getSetProgress, getDynamicPercent, getTaskValue, generateRandomTaskValue } from "@/lib/vip-config";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
@@ -124,7 +124,8 @@ const Starting = () => {
 
   const userBalance = Number(profile?.balance ?? 0);
   const dynamicPercent = useMemo(() => getDynamicPercent(userBalance, vipTier), [userBalance, vipTier]);
-  const taskValue = useMemo(() => getTaskValue(userBalance, vipTier), [userBalance, vipTier]);
+  const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
+  const taskValue = matchedTaskValue ?? getTaskValue(userBalance, vipTier);
   const estimatedProfit = useMemo(() => Math.round(taskValue * dynamicPercent * 100) / 100, [taskValue, dynamicPercent]);
 
   const userName = profile?.full_name || profile?.username || "User";
@@ -223,6 +224,7 @@ const Starting = () => {
     const car = pool[Math.floor(Math.random() * pool.length)];
 
     setMatchedCar(car);
+    setMatchedTaskValue(generateRandomTaskValue(currentBalance));
     setAssignmentCode(generateAssignmentCode());
     setMatchProgress(0);
     setMatchState("matching");
@@ -245,8 +247,8 @@ const Starting = () => {
 
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
-    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); return; }
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
 
     isProcessingRef.current = true;
     setSubmitting(true);
@@ -255,19 +257,19 @@ const Starting = () => {
         _car_brand: matchedCar.brand,
         _car_name: matchedCar.name,
         _car_image_url: matchedCar.featured,
-        _total_amount: matchedCar.totalAmount,
+        _total_amount: taskValue,
         _assignment_code: assignmentCode,
       });
       if (error) throw error;
       const result = data as any;
       if (result?.error) {
         toast.error(result.error);
-        setMatchState("idle"); setMatchedCar(null); return;
+        setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
       }
       setCompletedCount(prev => prev + 1);
       refreshProfile();
       setMatchState("submitted");
-      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
+      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
     } catch (e: any) {
       console.error("Task submission error:", e);
       toast.error(e?.message || "Submission failed. Please try again.");
