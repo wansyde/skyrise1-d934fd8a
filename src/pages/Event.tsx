@@ -73,7 +73,7 @@ const Event = () => {
     });
     lines.push("\n=== BASE SALARY REWARDS ===\n");
     salaryTiers.forEach((s) => {
-      lines.push(`${s.days} Days → $${s.reward.toLocaleString()} USD`);
+      lines.push(`${s.days} Days → ${s.reward.toLocaleString()} USDC`);
     });
     navigator.clipboard.writeText(lines.join("\n"));
     toast.success("Copied to clipboard");
