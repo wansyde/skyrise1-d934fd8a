@@ -146,13 +146,13 @@ const Records = () => {
                       <div>
                         <p className="text-[10px] text-muted-foreground mb-0.5">Total Amount</p>
                         <p className="text-sm font-bold text-primary">
-                          {Number(record.total_amount)} <span className="text-[10px] font-normal text-muted-foreground">AC</span>
+                          {Number(record.total_amount)} <span className="text-[10px] font-normal text-muted-foreground">USDC</span>
                         </p>
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground mb-0.5">Advertising salary</p>
                         <p className="text-sm font-bold text-primary">
-                          {Number(record.advertising_salary).toFixed(2)} <span className="text-[10px] font-normal text-muted-foreground">AC</span>
+                          {Number(record.advertising_salary).toFixed(2)} <span className="text-[10px] font-normal text-muted-foreground">USDC</span>
                         </p>
                       </div>
                     </div>

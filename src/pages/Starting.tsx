@@ -309,7 +309,7 @@ const Starting = () => {
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-lg font-bold font-[Montserrat] tabular-nums text-primary">{Number(profile?.balance ?? 0).toFixed(2)}</p>
-              <p className="text-[10px] text-muted-foreground font-medium">AC</p>
+              <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
             </div>
           </div>
 
@@ -323,7 +323,7 @@ const Starting = () => {
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-lg font-bold font-[Montserrat] tabular-nums text-primary">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
-              <p className="text-[10px] text-muted-foreground font-medium">AC</p>
+              <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
             </div>
           </div>
         </div>
@@ -527,11 +527,11 @@ const Starting = () => {
               <div className="grid grid-cols-2 gap-4 mb-5 border-t border-border/30 pt-4">
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {taskValue.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">{taskValue.toFixed(2)} USDC</p>
                 </div>
                 <div className="text-center border-l border-border/30">
                   <p className="text-xs text-muted-foreground mb-1">Advertising salary</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {estimatedProfit.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">{estimatedProfit.toFixed(2)} USDC</p>
                 </div>
               </div>
 

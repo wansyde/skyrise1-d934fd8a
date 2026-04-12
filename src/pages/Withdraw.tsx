@@ -50,7 +50,7 @@ const Withdraw = () => {
       <div className="mx-auto max-w-lg">
         <div className="vault-card mb-6 p-5">
           <span className="text-xs text-muted-foreground">Available Balance</span>
-          <div className="mt-1 text-2xl font-semibold tabular-nums">${balance.toLocaleString()}.00</div>
+          <div className="mt-1 text-2xl font-semibold tabular-nums">{balance.toLocaleString()}.00 USDC</div>
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-5 p-8">
