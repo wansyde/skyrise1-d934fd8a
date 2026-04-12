@@ -29,6 +29,7 @@ interface Profile {
   saved_wallet_email: string | null;
   pending_popup_message: string | null;
   pending_popup_type: string | null;
+  current_unlocked_set: number;
 }
 
 interface AuthContextType {
