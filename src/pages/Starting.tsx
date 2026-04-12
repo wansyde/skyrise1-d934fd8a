@@ -91,6 +91,7 @@ type MatchState = "idle" | "matching" | "matched" | "submitted";
 
 const Starting = () => {
   const { profile, user, refreshProfile } = useAuth();
+  const { url: whatsappUrl } = useWhatsAppNumber();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [matchState, setMatchState] = useState<MatchState>("idle");
