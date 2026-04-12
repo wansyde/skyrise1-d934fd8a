@@ -160,7 +160,7 @@ const AdminPanel = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Deposited $${amt.toLocaleString()} successfully.`);
+      toast.success(`Deposited ${amt.toLocaleString()} USDC successfully.`);
       setDepAmount(""); setDepNote(""); setDepUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-deposits"] });
@@ -185,7 +185,7 @@ const AdminPanel = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Withdrew $${amt.toLocaleString()} successfully.`);
+      toast.success(`Withdrew ${amt.toLocaleString()} USDC successfully.`);
       setWdAmount(""); setWdNote(""); setWdUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
@@ -433,7 +433,7 @@ const AdminPanel = () => {
     <select value={value} onChange={(e) => onChange(e.target.value)} className="h-9 w-full rounded border border-border bg-background px-3 text-sm">
       <option value="">Select a user...</option>
       {(profiles || []).sort((a: any, b: any) => (a.username || "").localeCompare(b.username || "")).map((p: any) => (
-        <option key={p.user_id} value={p.user_id}>{p.username || p.email} — ${Number(p.balance).toLocaleString()}</option>
+        <option key={p.user_id} value={p.user_id}>{p.username || p.email} — {Number(p.balance).toLocaleString()} USDC</option>
       ))}
     </select>
   );
@@ -544,15 +544,15 @@ const AdminPanel = () => {
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Total Deposits</span>
-              <div className="text-lg font-semibold text-green-400 tabular-nums">${userTotalDeposits.toLocaleString()}</div>
+              <div className="text-lg font-semibold text-green-400 tabular-nums">{userTotalDeposits.toLocaleString()} USDC</div>
             </div>
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Total Withdrawals</span>
-              <div className="text-lg font-semibold text-red-400 tabular-nums">${userTotalWithdrawals.toLocaleString()}</div>
+              <div className="text-lg font-semibold text-red-400 tabular-nums">{userTotalWithdrawals.toLocaleString()} USDC</div>
             </div>
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Current Balance</span>
-              <div className="text-lg font-semibold tabular-nums">${Number((selectedUser as any).balance).toLocaleString()}</div>
+              <div className="text-lg font-semibold tabular-nums">{Number((selectedUser as any).balance).toLocaleString()} USDC</div>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -599,7 +599,7 @@ const AdminPanel = () => {
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {userDeposits.slice(0, 10).map((d: any) => (
                   <div key={d.id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                    <span className="tabular-nums text-green-400">+${Number(d.amount).toLocaleString()}</span>
+                    <span className="tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} USDC</span>
                     <span className="text-muted-foreground">{formatUSTime(d.created_at)}</span>
                   </div>
                 ))}
@@ -611,7 +611,7 @@ const AdminPanel = () => {
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {userWithdrawals.slice(0, 10).map((w: any) => (
                   <div key={w.id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                    <span className="tabular-nums text-red-400">-${Number(w.amount).toLocaleString()}</span>
+                    <span className="tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} USDC</span>
                     <span className="text-muted-foreground">{formatUSTime(w.created_at)}</span>
                   </div>
                 ))}
@@ -694,14 +694,14 @@ const AdminPanel = () => {
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editBalance} onChange={(e) => setEditBalance(e.target.value)} className="h-7 w-28 text-xs" min={0} />
                         ) : (
-                          <span className="text-sm tabular-nums">${Number(u.balance).toLocaleString()}</span>
+                          <span className="text-sm tabular-nums">{Number(u.balance).toLocaleString()} USDC</span>
                         )}
                       </td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editSalary} onChange={(e) => setEditSalary(e.target.value)} className="h-7 w-28 text-xs" min={0} />
                         ) : (
-                          <span className="text-sm tabular-nums">${Number(u.advertising_salary ?? 0).toLocaleString()}</span>
+                          <span className="text-sm tabular-nums">{Number(u.advertising_salary ?? 0).toLocaleString()} USDC</span>
                         )}
                       </td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
@@ -837,7 +837,7 @@ const AdminPanel = () => {
                     {filteredDeposits.map((d: any) => (
                       <tr key={d.id} className="border-t border-border">
                         <td className="px-5 py-3 text-sm font-medium">{getUserName(d.user_id)}</td>
-                        <td className="px-5 py-3 text-sm tabular-nums text-green-400">+${Number(d.amount).toLocaleString()}</td>
+                        <td className="px-5 py-3 text-sm tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} USDC</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{d.admin_note || "—"}</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{formatUSTime(d.created_at)}</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{getAdminName(d.wallet_address)}</td>
@@ -894,7 +894,7 @@ const AdminPanel = () => {
                       {filteredWithdrawals.map((w: any) => (
                         <tr key={w.id} className="border-t border-border">
                           <td className="px-5 py-3 text-sm font-medium">{getUserName(w.user_id)}</td>
-                          <td className="px-5 py-3 text-sm tabular-nums text-red-400">-${Number(w.amount).toLocaleString()}</td>
+                          <td className="px-5 py-3 text-sm tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} USDC</td>
                           <td className="px-5 py-3 text-xs text-muted-foreground font-mono max-w-[180px] truncate" title={w.wallet_address || ""}>
                             {w.wallet_address && !w.wallet_address.match(/^[0-9a-f]{8}-/) ? w.wallet_address : "—"}
                           </td>
