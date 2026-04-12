@@ -217,7 +217,7 @@ const Starting = () => {
     if (isRestricted) { toast.error("Account restricted"); return; }
     if (isCycleCompleted) { toast.error("Task cycle completed"); return; }
     const currentBalance = Number(profile?.balance ?? 0);
-    if (currentBalance < MIN_BALANCE) { toast.error("Minimum $100 required"); return; }
+    if (currentBalance < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); return; }
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
     if (isSetLocked) { toast.error("Set completed. Contact support to unlock next set."); return; }
 
@@ -250,7 +250,7 @@ const Starting = () => {
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
     if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
 
     isProcessingRef.current = true;
     setSubmitting(true);

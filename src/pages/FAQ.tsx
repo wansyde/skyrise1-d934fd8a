@@ -80,7 +80,7 @@ const faqs: FaqEntry[] = [
           <li>Maintain account activity: Stay active and avoid long periods of inactivity to ensure stable promotion</li>
           <li>Follow platform rules: No violations like fraud, assignment interruption, or misconduct</li>
         </ul>
-        <p className="mt-2">After meeting these conditions, a base salary of $900 will be settled every 5 days based on assignment completion.</p>
+        <p className="mt-2">After meeting these conditions, a base salary of 900 USDC will be settled every 5 days based on assignment completion.</p>
       </>
     ),
   },

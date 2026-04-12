@@ -237,7 +237,7 @@ const AdminPanel = () => {
         popupMessage = `Congratulations! You have been upgraded to ${editVipLevel} Promoter. You now have access to enhanced rewards and exclusive promotional campaigns.`;
         popupType = "upgrade";
       } else if (tasksReset) {
-        popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from $1 to $1,000.`;
+        popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from 1 to 1,000 USDC.`;
         popupType = "reset";
       } else if (balanceIncreased) {
         popupMessage = `Your wallet has been credited with $${(newBalance - Number(oldUser.balance)).toFixed(2)}. Your new balance is $${newBalance.toFixed(2)}.`;
