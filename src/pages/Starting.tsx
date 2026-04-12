@@ -123,10 +123,10 @@ const Starting = () => {
   const isSetLocked = completedCount >= maxAllowedTasks && completedCount < DAILY_LIMIT;
 
   const userBalance = Number(profile?.balance ?? 0);
-  const dynamicPercent = useMemo(() => getDynamicPercent(userBalance, vipTier), [userBalance, vipTier]);
+  const tierPercent = vipTier.rewardPercent;
   const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
-  const taskValue = matchedTaskValue ?? getTaskValue(userBalance, vipTier);
-  const estimatedProfit = useMemo(() => Math.round(taskValue * dynamicPercent * 100) / 100, [taskValue, dynamicPercent]);
+  const taskValue = matchedTaskValue ?? generateRandomTaskValue(userBalance);
+  const estimatedProfit = useMemo(() => getTaskProfit(userBalance, vipTier), [userBalance, vipTier]);
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
