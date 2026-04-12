@@ -4,13 +4,15 @@ export interface VipTier {
   totalSets: number;
   totalTasks: number;
   rewardPercent: number;
+  minBalance: number;
+  incrementRate: number;
 }
 
 export const VIP_TIERS: Record<string, VipTier> = {
-  Junior:       { level: "Junior",       tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.004 },
-  Professional: { level: "Professional", tasksPerSet: 45, totalSets: 3, totalTasks: 135, rewardPercent: 0.006 },
-  Expert:       { level: "Expert",       tasksPerSet: 50, totalSets: 3, totalTasks: 150, rewardPercent: 0.008 },
-  Elite:        { level: "Elite",        tasksPerSet: 55, totalSets: 3, totalTasks: 165, rewardPercent: 0.010 },
+  Junior:       { level: "Junior",       tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.004, minBalance: 100,  incrementRate: 0.0005 },
+  Professional: { level: "Professional", tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.006, minBalance: 500,  incrementRate: 0.0004 },
+  Expert:       { level: "Expert",       tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.008, minBalance: 1500, incrementRate: 0.0003 },
+  Elite:        { level: "Elite",        tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.010, minBalance: 5000, incrementRate: 0.0002 },
 };
 
 export const getVipTier = (level: string): VipTier => {
@@ -18,6 +20,21 @@ export const getVipTier = (level: string): VipTier => {
 };
 
 export const VIP_LEVELS = Object.keys(VIP_TIERS);
+
+/** Calculate dynamic earning percentage based on balance */
+export const getDynamicPercent = (balance: number, tier: VipTier): number => {
+  const growthFactor = Math.max((balance - tier.minBalance) / tier.minBalance, 0);
+  const dynamicPercent = tier.rewardPercent + (growthFactor * tier.incrementRate);
+  const maxPercent = tier.rewardPercent * 1.5; // Cap at +50%
+  return Math.max(Math.min(dynamicPercent, maxPercent), tier.rewardPercent);
+};
+
+/** Calculate task value based on balance */
+export const getTaskValue = (balance: number, tier: VipTier): number => {
+  const growthFactor = Math.max((balance - tier.minBalance) / tier.minBalance, 0);
+  const taskRatio = 0.6 + (Math.min(growthFactor, 5) / 5.0) * 0.2;
+  return Math.round(balance * taskRatio * 100) / 100;
+};
 
 /** Given tasks completed today, return current set (1-based) and tasks done in current set */
 export const getSetProgress = (tasksCompleted: number, tier: VipTier) => {

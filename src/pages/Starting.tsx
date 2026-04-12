@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getVipTier, getSetProgress } from "@/lib/vip-config";
+import { getVipTier, getSetProgress, getDynamicPercent, getTaskValue } from "@/lib/vip-config";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
@@ -99,7 +99,6 @@ const Starting = () => {
   const [matchedAt, setMatchedAt] = useState<Date | null>(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const isProcessingRef = useRef(false); // Prevent double-click
   const carouselRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -119,6 +118,14 @@ const Starting = () => {
   const vipTier = useMemo(() => getVipTier(profile?.vip_level || "Junior"), [profile?.vip_level]);
   const DAILY_LIMIT = vipTier.totalTasks;
   const setProgress = useMemo(() => getSetProgress(completedCount, vipTier), [completedCount, vipTier]);
+  const currentUnlockedSet = (profile as any)?.current_unlocked_set ?? 1;
+  const maxAllowedTasks = currentUnlockedSet * vipTier.tasksPerSet;
+  const isSetLocked = completedCount >= maxAllowedTasks && completedCount < DAILY_LIMIT;
+
+  const userBalance = Number(profile?.balance ?? 0);
+  const dynamicPercent = useMemo(() => getDynamicPercent(userBalance, vipTier), [userBalance, vipTier]);
+  const taskValue = useMemo(() => getTaskValue(userBalance, vipTier), [userBalance, vipTier]);
+  const estimatedProfit = useMemo(() => Math.round(taskValue * dynamicPercent * 100) / 100, [taskValue, dynamicPercent]);
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
@@ -202,16 +209,14 @@ const Starting = () => {
     return hour >= 10 && hour < 22;
   };
 
-  const handleMatchAd = useCallback(() => {
-    if (isProcessingRef.current || matchState !== "idle") return;
+  const handleMatchAd = () => {
     if (!isWithinWorkingHours()) { toast.error("Promotions are only available between 10:00 AM and 10:00 PM (ET)"); return; }
     if (isRestricted) { toast.error("Account restricted"); return; }
     if (isCycleCompleted) { toast.error("Task cycle completed"); return; }
     const currentBalance = Number(profile?.balance ?? 0);
     if (currentBalance < MIN_BALANCE) { toast.error("Minimum $100 required"); return; }
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
-
-    isProcessingRef.current = true;
+    if (isSetLocked) { toast.error("Set completed. Contact support to unlock next set."); return; }
 
     const affordable = carCampaigns.filter(c => c.totalAmount <= currentBalance);
     const pool = affordable.length > 0 ? affordable : carCampaigns;
@@ -224,28 +229,26 @@ const Starting = () => {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 25 + 10;
+      progress += Math.random() * 15 + 5;
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);
         setMatchProgress(100);
-        setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); isProcessingRef.current = false; }, 200);
+        setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 400);
       } else {
         setMatchProgress(progress);
       }
-    }, 100);
-  }, [matchState, profile, isRestricted, isCycleCompleted, completedCount, DAILY_LIMIT]);
+    }, 200);
+  };
 
-  const handlePromote = useCallback(async () => {
+  const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting) return;
-    if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
-
-    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); isProcessingRef.current = false; return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); isProcessingRef.current = false; return; }
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); return; }
 
     setSubmitting(true);
     try {
+      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
       const { data, error } = await supabase.rpc("complete_task", {
         _car_brand: matchedCar.brand,
         _car_name: matchedCar.name,
@@ -260,20 +263,15 @@ const Starting = () => {
         else toast.error(result.error);
         setMatchState("idle"); setMatchedCar(null); return;
       }
-      // Optimistic update before refresh
-      if (result?.tasks_completed) setCompletedCount(result.tasks_completed);
+      await refreshProfile();
       setMatchState("submitted");
-      // Refresh profile in background, don't block UI
-      refreshProfile();
-      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1200);
+      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); }, 1500);
     } catch (e: any) {
       toast.error("Submission failed");
-      setMatchState("idle"); setMatchedCar(null);
     } finally {
       setSubmitting(false);
-      isProcessingRef.current = false;
     }
-  }, [user, matchedCar, profile, submitting, isRestricted, assignmentCode, refreshProfile]);
+  };
 
   return (
     <AppLayout>
@@ -412,11 +410,27 @@ const Starting = () => {
           </div>
         </div>
 
+        {/* Dynamic Earnings Info */}
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="rounded-xl bg-card border border-border p-3 text-center" style={{ boxShadow: "0 2px 8px hsl(var(--foreground) / 0.03)" }}>
+            <p className="text-[10px] text-muted-foreground mb-0.5">Task Value</p>
+            <p className="text-sm font-bold font-[Montserrat] tabular-nums text-foreground">${taskValue.toFixed(2)}</p>
+          </div>
+          <div className="rounded-xl bg-card border border-border p-3 text-center" style={{ boxShadow: "0 2px 8px hsl(var(--foreground) / 0.03)" }}>
+            <p className="text-[10px] text-muted-foreground mb-0.5">Current Rate</p>
+            <p className="text-sm font-bold font-[Montserrat] tabular-nums text-primary">{(dynamicPercent * 100).toFixed(2)}%</p>
+          </div>
+          <div className="rounded-xl bg-card border border-border p-3 text-center" style={{ boxShadow: "0 2px 8px hsl(var(--foreground) / 0.03)" }}>
+            <p className="text-[10px] text-muted-foreground mb-0.5">Est. Profit</p>
+            <p className="text-sm font-bold font-[Montserrat] tabular-nums text-green-500">${estimatedProfit.toFixed(2)}</p>
+          </div>
+        </div>
+
         {/* Ad Match Button - CRITICAL: always visible */}
         <div className="mb-4">
           {isCycleCompleted ? (
             <div className="rounded-2xl bg-card border border-border p-4 text-center space-y-2.5">
-              <p className="text-sm font-semibold text-foreground">Task sets completed</p>
+              <p className="text-sm font-semibold text-foreground">All task sets completed</p>
               <p className="text-xs text-muted-foreground">Contact support to renew or upgrade.</p>
               <a
                 href="#"
@@ -427,10 +441,23 @@ const Starting = () => {
                 Contact Support
               </a>
             </div>
+          ) : isSetLocked ? (
+            <div className="rounded-2xl bg-card border border-amber-500/30 p-4 text-center space-y-2.5">
+              <p className="text-sm font-semibold text-foreground">Set {currentUnlockedSet} Completed</p>
+              <p className="text-xs text-muted-foreground">Contact customer support to unlock the next set.</p>
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-amber-500 text-white hover:bg-amber-500/90 transition-colors"
+              >
+                <Headphones className="h-3.5 w-3.5" />
+                Unlock Next Set
+              </a>
+            </div>
           ) : (
             <motion.button
               onClick={handleMatchAd}
-              disabled={isRestricted || Number(profile?.balance ?? 0) < MIN_BALANCE || completedCount >= DAILY_LIMIT || matchState !== "idle"}
+              disabled={isRestricted || userBalance < MIN_BALANCE || completedCount >= DAILY_LIMIT}
               whileTap={{ scale: 0.97 }}
               className="w-full py-4 rounded-2xl font-bold text-base tracking-wide flex items-center justify-center gap-2.5 transition-all duration-200 bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed font-[Montserrat]"
               style={{ boxShadow: "0 6px 24px hsl(var(--primary) / 0.4), 0 0 40px hsl(var(--primary) / 0.15)" }}
@@ -517,14 +544,18 @@ const Starting = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-5 border-t border-border/30 pt-4">
+              <div className="grid grid-cols-3 gap-3 mb-5 border-t border-border/30 pt-4">
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.totalAmount}</p>
+                  <p className="text-[10px] text-muted-foreground mb-1">Task Value</p>
+                  <p className="text-base font-bold text-primary font-[Montserrat]">${taskValue.toFixed(2)}</p>
                 </div>
                 <div className="text-center border-l border-border/30">
-                  <p className="text-xs text-muted-foreground mb-1">Advertising salary</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.adSalary}</p>
+                  <p className="text-[10px] text-muted-foreground mb-1">Rate</p>
+                  <p className="text-base font-bold text-primary font-[Montserrat]">{(dynamicPercent * 100).toFixed(2)}%</p>
+                </div>
+                <div className="text-center border-l border-border/30">
+                  <p className="text-[10px] text-muted-foreground mb-1">Profit</p>
+                  <p className="text-base font-bold font-[Montserrat]" style={{ color: 'hsl(142 71% 45%)' }}>${estimatedProfit.toFixed(4)}</p>
                 </div>
               </div>
 

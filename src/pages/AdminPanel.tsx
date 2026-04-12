@@ -318,10 +318,25 @@ const AdminPanel = () => {
   const handleResetCycle = async (userId: string) => {
     setProcessingId(userId);
     try {
-      const { error } = await supabase.from("profiles").update({ task_cycle_completed: false, tasks_completed_today: 0 } as any).eq("user_id", userId);
+      const { error } = await supabase.from("profiles").update({ task_cycle_completed: false, tasks_completed_today: 0, current_unlocked_set: 1 } as any).eq("user_id", userId);
       if (error) { toast.error("Failed to reset task cycle: " + error.message); return; }
-      await logAdminAction("task_cycle_reset", userId, "Reset task cycle");
+      await logAdminAction("task_cycle_reset", userId, "Reset task cycle (all sets)");
       toast.success("Task cycle reset successfully.");
+      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleUnlockNextSet = async (userId: string, currentSet: number) => {
+    setProcessingId(userId);
+    try {
+      const nextSet = Math.min(currentSet + 1, 3);
+      const { error } = await supabase.from("profiles").update({ current_unlocked_set: nextSet } as any).eq("user_id", userId);
+      if (error) { toast.error("Failed to unlock set: " + error.message); return; }
+      await logAdminAction("set_unlock", userId, `Unlocked set ${nextSet}`);
+      toast.success(`Set ${nextSet} unlocked successfully.`);
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } finally {
@@ -730,13 +745,20 @@ const AdminPanel = () => {
                         </button>
                       </td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
-                        {u.task_cycle_completed ? (
-                          <button onClick={() => handleResetCycle(u.user_id)} disabled={processingId === u.user_id} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 transition-colors">
-                            <RotateCcw className="h-3 w-3" /> Reset
-                          </button>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">Active</span>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs tabular-nums font-medium">Set {u.current_unlocked_set ?? 1}/3</span>
+                          {u.task_cycle_completed ? (
+                            <button onClick={() => handleResetCycle(u.user_id)} disabled={processingId === u.user_id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 transition-colors">
+                              <RotateCcw className="h-2.5 w-2.5" /> Reset
+                            </button>
+                          ) : (u.tasks_completed_today ?? 0) >= (u.current_unlocked_set ?? 1) * 40 && (u.current_unlocked_set ?? 1) < 3 ? (
+                            <button onClick={() => handleUnlockNextSet(u.user_id, u.current_unlocked_set ?? 1)} disabled={processingId === u.user_id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/15 text-primary hover:bg-primary/25 transition-colors">
+                              Unlock
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground">Active</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>

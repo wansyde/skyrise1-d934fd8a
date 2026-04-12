@@ -24,7 +24,7 @@ const slideMenuItems = [
   { href: "/app/certificate", label: "Certificate", icon: Award },
   { href: "/app/wallet/withdraw", label: "Withdrawal", icon: ArrowUpFromLine },
   { href: "/app/wallet/deposit", label: "Deposit", icon: ArrowDownToLine },
-  { href: "/terms", label: "T & C", icon: Scale },
+  { href: "/app/terms", label: "T & C", icon: Scale },
   { href: "/app/event", label: "Event", icon: Calendar },
   { href: "/faq", label: "FAQs", icon: HelpCircle },
   { href: "/about", label: "About", icon: Info },
@@ -130,9 +130,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       <main className="flex-1 overflow-y-auto pb-20">
         <motion.div
           key={location.pathname}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
         >
           {children}
         </motion.div>
