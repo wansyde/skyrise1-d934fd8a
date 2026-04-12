@@ -157,7 +157,7 @@ const Profile = () => {
               <span className="text-xl font-semibold tabular-nums">
                 {balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
-              <span className="text-[10px] text-white/40 font-medium">AC</span>
+               <span className="text-[10px] text-white/40 font-medium">USDC</span>
             </div>
           </div>
           <div className="balance-card p-4 rounded-xl">
@@ -166,7 +166,7 @@ const Profile = () => {
               <span className="text-xl font-semibold tabular-nums">
                 {Number(profile?.advertising_salary ?? 0).toFixed(2)}
               </span>
-              <span className="text-[10px] text-white/40 font-medium">AC</span>
+              <span className="text-[10px] text-white/40 font-medium">USDC</span>
             </div>
           </div>
         </div>

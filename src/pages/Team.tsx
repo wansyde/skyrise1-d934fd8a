@@ -8,9 +8,9 @@ const referralCode = "SKY-JD2026X";
 const referralLink = "https://skyrise.com/ref/SKY-JD2026X";
 
 const teamMembers = [
-  { name: "Alice M.", joined: "Mar 10, 2026", status: "Active", earned: "$50.00" },
-  { name: "Bob K.", joined: "Feb 28, 2026", status: "Active", earned: "$120.00" },
-  { name: "Carol S.", joined: "Feb 15, 2026", status: "Inactive", earned: "$30.00" },
+   { name: "Alice M.", joined: "Mar 10, 2026", status: "Active", earned: "50.00 USDC" },
+   { name: "Bob K.", joined: "Feb 28, 2026", status: "Active", earned: "120.00 USDC" },
+   { name: "Carol S.", joined: "Feb 15, 2026", status: "Inactive", earned: "30.00 USDC" },
 ];
 
 const Team = () => {
@@ -36,7 +36,7 @@ const Team = () => {
           </div>
           <div className="glass-card p-3 text-center">
             <Gift className="h-4 w-4 mx-auto text-success mb-1" strokeWidth={1.5} />
-            <div className="text-lg font-semibold tabular-nums">$200</div>
+            <div className="text-lg font-semibold tabular-nums">200 USDC</div>
             <span className="text-[10px] text-muted-foreground">Total Earned</span>
           </div>
           <div className="glass-card p-3 text-center">

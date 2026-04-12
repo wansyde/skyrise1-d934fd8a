@@ -52,7 +52,7 @@ const Transactions = () => {
                     <p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
                   </div>
                 </div>
-                <span className="text-sm font-semibold tabular-nums text-primary">+${Number(r.advertising_salary).toFixed(2)}</span>
+                <span className="text-sm font-semibold tabular-nums text-primary">+{Number(r.advertising_salary).toFixed(2)} USDC</span>
               </div>
             ))}
           </div>

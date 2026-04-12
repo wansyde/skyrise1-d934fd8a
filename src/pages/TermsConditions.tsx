@@ -112,7 +112,7 @@ const TermsConditions = () => (
                 <li>If the user applies for an assignment extension, they may need to pay a 50% delay fee, and all promotion assignments in that set must be completed before a withdrawal can be made.</li>
               </ul>
             </li>
-            <li>Users must complete 3 sets of promotion assignments daily. After meeting the check-in requirements, they can receive a $900 base salary every 5 days.</li>
+            <li>Users must complete 3 sets of promotion assignments daily. After meeting the check-in requirements, they can receive a 900 USDC base salary every 5 days.</li>
             <li>
               Automobile Alliance assignments are randomly allocated by the system. Users must understand and accept the platform rules and select their deposit amounts based on their financial capacity.
               <ul className="list-disc pl-5 mt-1 space-y-1">

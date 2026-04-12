@@ -4,10 +4,10 @@ import { TrendingUp, Clock } from "lucide-react";
 const investments = [
   {
     plan: "Alpha Growth",
-    amount: "$10,000.00",
-    rate: "12%/mo",
-    started: "Feb 1, 2026",
-    accrued: "$1,440.00",
+     amount: "10,000.00 USDC",
+     rate: "12%/mo",
+     started: "Feb 1, 2026",
+     accrued: "1,440.00 USDC",
     status: "Active",
     progress: 70,
   },
