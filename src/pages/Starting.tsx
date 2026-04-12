@@ -410,27 +410,11 @@ const Starting = () => {
           </div>
         </div>
 
-        {/* Dynamic Earnings Info */}
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          <div className="rounded-xl bg-card border border-border p-3 text-center" style={{ boxShadow: "0 2px 8px hsl(var(--foreground) / 0.03)" }}>
-            <p className="text-[10px] text-muted-foreground mb-0.5">Task Value</p>
-            <p className="text-sm font-bold font-[Montserrat] tabular-nums text-foreground">${taskValue.toFixed(2)}</p>
-          </div>
-          <div className="rounded-xl bg-card border border-border p-3 text-center" style={{ boxShadow: "0 2px 8px hsl(var(--foreground) / 0.03)" }}>
-            <p className="text-[10px] text-muted-foreground mb-0.5">Current Rate</p>
-            <p className="text-sm font-bold font-[Montserrat] tabular-nums text-primary">{(dynamicPercent * 100).toFixed(2)}%</p>
-          </div>
-          <div className="rounded-xl bg-card border border-border p-3 text-center" style={{ boxShadow: "0 2px 8px hsl(var(--foreground) / 0.03)" }}>
-            <p className="text-[10px] text-muted-foreground mb-0.5">Est. Profit</p>
-            <p className="text-sm font-bold font-[Montserrat] tabular-nums text-green-500">${estimatedProfit.toFixed(2)}</p>
-          </div>
-        </div>
-
         {/* Ad Match Button - CRITICAL: always visible */}
         <div className="mb-4">
-          {isCycleCompleted ? (
+          {(isCycleCompleted || isSetLocked) ? (
             <div className="rounded-2xl bg-card border border-border p-4 text-center space-y-2.5">
-              <p className="text-sm font-semibold text-foreground">All task sets completed</p>
+              <p className="text-sm font-semibold text-foreground">Task sets completed</p>
               <p className="text-xs text-muted-foreground">Contact support to renew or upgrade.</p>
               <a
                 href="#"
@@ -439,19 +423,6 @@ const Starting = () => {
               >
                 <Headphones className="h-3.5 w-3.5" />
                 Contact Support
-              </a>
-            </div>
-          ) : isSetLocked ? (
-            <div className="rounded-2xl bg-card border border-amber-500/30 p-4 text-center space-y-2.5">
-              <p className="text-sm font-semibold text-foreground">Set {currentUnlockedSet} Completed</p>
-              <p className="text-xs text-muted-foreground">Contact customer support to unlock the next set.</p>
-              <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-amber-500 text-white hover:bg-amber-500/90 transition-colors"
-              >
-                <Headphones className="h-3.5 w-3.5" />
-                Unlock Next Set
               </a>
             </div>
           ) : (
@@ -544,18 +515,14 @@ const Starting = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mb-5 border-t border-border/30 pt-4">
+              <div className="grid grid-cols-2 gap-4 mb-5 border-t border-border/30 pt-4">
                 <div className="text-center">
-                  <p className="text-[10px] text-muted-foreground mb-1">Task Value</p>
-                  <p className="text-base font-bold text-primary font-[Montserrat]">${taskValue.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.totalAmount}</p>
                 </div>
                 <div className="text-center border-l border-border/30">
-                  <p className="text-[10px] text-muted-foreground mb-1">Rate</p>
-                  <p className="text-base font-bold text-primary font-[Montserrat]">{(dynamicPercent * 100).toFixed(2)}%</p>
-                </div>
-                <div className="text-center border-l border-border/30">
-                  <p className="text-[10px] text-muted-foreground mb-1">Profit</p>
-                  <p className="text-base font-bold font-[Montserrat]" style={{ color: 'hsl(142 71% 45%)' }}>${estimatedProfit.toFixed(4)}</p>
+                  <p className="text-xs text-muted-foreground mb-1">Advertising salary</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.adSalary}</p>
                 </div>
               </div>
 
