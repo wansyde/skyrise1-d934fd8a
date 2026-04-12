@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getVipTier, getSetProgress, getTaskProfit, generateRandomTaskValue } from "@/lib/vip-config";
+import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
