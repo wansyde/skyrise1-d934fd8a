@@ -544,14 +544,18 @@ const Starting = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-5 border-t border-border/30 pt-4">
+              <div className="grid grid-cols-3 gap-3 mb-5 border-t border-border/30 pt-4">
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.totalAmount}</p>
+                  <p className="text-[10px] text-muted-foreground mb-1">Task Value</p>
+                  <p className="text-base font-bold text-primary font-[Montserrat]">${taskValue.toFixed(2)}</p>
                 </div>
                 <div className="text-center border-l border-border/30">
-                  <p className="text-xs text-muted-foreground mb-1">Advertising salary</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">AC {matchedCar.adSalary}</p>
+                  <p className="text-[10px] text-muted-foreground mb-1">Rate</p>
+                  <p className="text-base font-bold text-primary font-[Montserrat]">{(dynamicPercent * 100).toFixed(2)}%</p>
+                </div>
+                <div className="text-center border-l border-border/30">
+                  <p className="text-[10px] text-muted-foreground mb-1">Profit</p>
+                  <p className="text-base font-bold font-[Montserrat]" style={{ color: 'hsl(142 71% 45%)' }}>${estimatedProfit.toFixed(4)}</p>
                 </div>
               </div>
 
