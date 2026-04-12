@@ -247,8 +247,8 @@ const Starting = () => {
 
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
-    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); return; }
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum $100 required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
 
     isProcessingRef.current = true;
     setSubmitting(true);
