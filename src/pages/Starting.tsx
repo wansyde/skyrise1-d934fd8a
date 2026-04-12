@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getVipTier, getSetProgress, getTaskProfit, generateRandomTaskValue } from "@/lib/vip-config";
+import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
@@ -90,6 +91,7 @@ type MatchState = "idle" | "matching" | "matched" | "submitted";
 
 const Starting = () => {
   const { profile, user, refreshProfile } = useAuth();
+  const { url: whatsappUrl } = useWhatsAppNumber();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [matchState, setMatchState] = useState<MatchState>("idle");
@@ -423,8 +425,9 @@ const Starting = () => {
               <p className="text-sm font-semibold text-foreground">Task sets completed</p>
               <p className="text-xs text-muted-foreground">Contact support to renew or upgrade.</p>
               <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
+                href={whatsappUrl || "#"}
+                target={whatsappUrl ? "_blank" : undefined}
+                rel={whatsappUrl ? "noopener noreferrer" : undefined}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 <Headphones className="h-3.5 w-3.5" />
