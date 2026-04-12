@@ -29,11 +29,19 @@ export const getDynamicPercent = (balance: number, tier: VipTier): number => {
   return Math.max(Math.min(dynamicPercent, maxPercent), tier.rewardPercent);
 };
 
-/** Calculate task value based on balance */
+/** Calculate task value based on balance (midpoint for display) */
 export const getTaskValue = (balance: number, tier: VipTier): number => {
   const growthFactor = Math.max((balance - tier.minBalance) / tier.minBalance, 0);
   const taskRatio = 0.6 + (Math.min(growthFactor, 5) / 5.0) * 0.2;
   return Math.round(balance * taskRatio * 100) / 100;
+};
+
+/** Generate a controlled-random task value within [balance*0.55, balance*0.75] */
+export const generateRandomTaskValue = (balance: number): number => {
+  const min = balance * 0.55;
+  const max = balance * 0.75;
+  const value = min + Math.random() * (max - min);
+  return Math.round(value * 100) / 100;
 };
 
 /** Given tasks completed today, return current set (1-based) and tasks done in current set */
