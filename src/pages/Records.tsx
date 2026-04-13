@@ -65,6 +65,7 @@ interface FlatRecord {
 const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const userBalance = Number(profile?.balance ?? 0);
