@@ -232,6 +232,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             <thead>
               <tr className="border-b border-border text-xs text-muted-foreground">
                 <th className="px-4 py-3 text-left font-medium">Target</th>
+                <th className="px-4 py-3 text-center font-medium">Set</th>
                 <th className="px-4 py-3 text-center font-medium">Position</th>
                 <th className="px-4 py-3 text-center font-medium">Cars</th>
                 <th className="px-4 py-3 text-right font-medium">Amount</th>
