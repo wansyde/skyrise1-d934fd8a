@@ -46,21 +46,37 @@ const CarImage = ({ carName }: { carName: string }) => {
 
 type TabKey = "completed" | "pending";
 
-interface FlatRecord {
-  id: string;
-  parentId: string;
-  created_at: string;
-  task_type: string;
+interface CarEntry {
   car_name: string;
   car_price: number;
   commission: number;
-  status: "completed" | "pending";
   car_status: string;
+  index: number;
+}
+
+interface AAAGroup {
+  type: "aaa";
+  parentId: string;
   assignment_code: string;
-  // For regular tasks
+  created_at: string;
+  status: "completed" | "pending";
+  cars: CarEntry[];
+  set_number?: number;
+  task_position?: number;
+}
+
+interface RegularRecord {
+  type: "regular";
+  id: string;
+  created_at: string;
+  car_name: string;
   total_amount: number;
   advertising_salary: number;
+  status: "completed" | "pending";
+  assignment_code: string;
 }
+
+type DisplayItem = AAAGroup | RegularRecord;
 
 const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
@@ -107,61 +123,71 @@ const Records = () => {
     .filter(r => r.task_type === "AAA" && r.assignment_code)
     .map(r => r.assignment_code);
 
-  const { data: multipliers = {} } = useQuery({
-    queryKey: ["aaa-multipliers", aaaAssignmentIds],
+  const { data: aaaDetails = {} } = useQuery({
+    queryKey: ["aaa-details", aaaAssignmentIds],
     enabled: aaaAssignmentIds.length > 0,
     queryFn: async () => {
       const { data } = await supabase
         .from("aaa_assignments")
-        .select("id, commission_multiplier")
+        .select("id, commission_multiplier, set_number, task_position")
         .in("id", aaaAssignmentIds);
-      const map: Record<string, number> = {};
-      (data ?? []).forEach((a: any) => { map[a.id] = a.commission_multiplier ?? 1; });
+      const map: Record<string, { multiplier: number; set_number: number; task_position: number }> = {};
+      (data ?? []).forEach((a: any) => {
+        map[a.id] = {
+          multiplier: a.commission_multiplier ?? 1,
+          set_number: a.set_number ?? 0,
+          task_position: a.task_position ?? 0,
+        };
+      });
       return map;
     },
   });
 
-  // Flatten AAA records into per-car entries
-  const flatRecords: FlatRecord[] = useMemo(() => {
-    const result: FlatRecord[] = [];
+  // Build grouped display items
+  const displayItems: DisplayItem[] = useMemo(() => {
+    const items: DisplayItem[] = [];
     for (const record of records) {
       if (record.task_type === "AAA" && record.car_prices?.length > 0) {
         const carNames = record.car_name.split(', ');
-        for (let i = 0; i < carNames.length; i++) {
-          result.push({
-            id: `${record.id}-car-${i}`,
-            parentId: record.id,
-            created_at: record.created_at,
-            task_type: "AAA",
-            car_name: carNames[i],
-            car_price: record.car_prices[i] ?? 0,
-            commission: record.car_commissions?.[i] ?? 0,
-            status: record.status as "completed" | "pending",
-            car_status: record.car_statuses?.[i] ?? "pending_insufficient",
-            assignment_code: record.assignment_code,
-            total_amount: record.car_prices[i] ?? 0,
-            advertising_salary: record.car_commissions?.[i] ?? 0,
-          });
-        }
-      } else {
-        result.push({
-          id: record.id,
+        const cars: CarEntry[] = carNames.map((name: string, i: number) => ({
+          car_name: name,
+          car_price: record.car_prices[i] ?? 0,
+          commission: record.car_commissions?.[i] ?? 0,
+          car_status: record.car_statuses?.[i] ?? "pending_insufficient",
+          index: i,
+        }));
+        // Sort: pending first, completed second
+        cars.sort((a, b) => {
+          const aP = a.car_status === "pending_insufficient" ? 0 : 1;
+          const bP = b.car_status === "pending_insufficient" ? 0 : 1;
+          return aP - bP;
+        });
+        const detail = aaaDetails[record.assignment_code];
+        items.push({
+          type: "aaa",
           parentId: record.id,
-          created_at: record.created_at,
-          task_type: record.task_type,
-          car_name: record.car_name,
-          car_price: Number(record.total_amount),
-          commission: Number(record.advertising_salary),
-          status: record.status as "completed" | "pending",
-          car_status: record.status === "completed" ? "completed_partial" : "pending_insufficient",
           assignment_code: record.assignment_code,
+          created_at: record.created_at,
+          status: record.status as "completed" | "pending",
+          cars,
+          set_number: detail?.set_number,
+          task_position: detail?.task_position,
+        });
+      } else {
+        items.push({
+          type: "regular",
+          id: record.id,
+          created_at: record.created_at,
+          car_name: record.car_name,
           total_amount: Number(record.total_amount),
           advertising_salary: Number(record.advertising_salary),
+          status: record.status as "completed" | "pending",
+          assignment_code: record.assignment_code,
         });
       }
     }
-    return result;
-  }, [records]);
+    return items;
+  }, [records, aaaDetails]);
 
   const handleSubmitPending = async (recordId: string) => {
     setSubmittingId(recordId);
@@ -189,25 +215,9 @@ const Records = () => {
     }
   };
 
-
-  const filtered = flatRecords
-    .filter((r) => {
-      if (activeTab === "pending") {
-        if (r.task_type === "AAA") return r.status === "pending";
-        return r.status === "pending";
-      }
-      if (r.task_type === "AAA") return r.status === "completed";
-      return r.status === "completed";
-    })
-    .sort((a, b) => {
-      // In pending tab: pending_insufficient (red) on top, completed_partial (green) on bottom
-      if (activeTab === "pending") {
-        const aRed = a.car_status === "pending_insufficient" ? 0 : 1;
-        const bRed = b.car_status === "pending_insufficient" ? 0 : 1;
-        return aRed - bRed;
-      }
-      return 0;
-    });
+  const filtered = displayItems.filter((item) => {
+    return activeTab === "pending" ? item.status === "pending" : item.status === "completed";
+  });
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "completed", label: "Completed" },
