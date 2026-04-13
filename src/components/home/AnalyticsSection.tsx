@@ -341,14 +341,25 @@ const AnalyticsSection = () => (
         transition={{ duration: 0.6 }}
       >
         <div className="relative">
-          <div className="flex ticker-scroll w-max">
+          <div className="flex ticker-scroll w-max items-center">
             {[...brandLogos, ...brandLogos, ...brandLogos].map((brand, i) => (
-              <span
+              <div
                 key={`${brand.name}-${i}`}
-                className={`whitespace-nowrap text-foreground/20 cursor-default select-none mx-8 sm:mx-12 ${brand.style}`}
+                className="mx-8 sm:mx-14 flex-shrink-0 cursor-default select-none"
+                style={{
+                  filter: "drop-shadow(0 4px 12px hsl(0 0% 0% / 0.15))",
+                }}
               >
-                {brand.name}
-              </span>
+                <img
+                  src={brand.src}
+                  alt={brand.name}
+                  loading="lazy"
+                  className={`${brand.height} w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-300`}
+                  style={{
+                    filter: "contrast(1.1) brightness(1.05)",
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>
