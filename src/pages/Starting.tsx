@@ -95,6 +95,7 @@ type MatchState = "idle" | "matching" | "matched" | "submitted";
 const Starting = () => {
   const { profile, user, refreshProfile } = useAuth();
   const { url: whatsappUrl } = useWhatsAppNumber();
+  const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [matchState, setMatchState] = useState<MatchState>("idle");
@@ -106,6 +107,25 @@ const Starting = () => {
   const [submitting, setSubmitting] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+
+  // AAA state
+  const [isAAATask, setIsAAATask] = useState(false);
+  const [aaaAssignment, setAaaAssignment] = useState<any>(null);
+  const [aaaCars, setAaaCars] = useState<string[]>([]);
+
+  // Fetch active AAA assignments for this user
+  const { data: aaaAssignments = [] } = useQuery({
+    queryKey: ["user-aaa-assignments", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("aaa_assignments" as any)
+        .select("*")
+        .eq("status", "active")
+        .order("task_position", { ascending: true });
+      return (data || []) as any[];
+    },
+  });
 
   useEffect(() => {
     const measure = () => {
