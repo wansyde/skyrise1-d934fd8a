@@ -17,9 +17,11 @@ export type Database = {
       aaa_assignments: {
         Row: {
           car_names: string[]
+          car_prices: number[]
           created_at: string
           id: string
           number_of_cars: number
+          profit_percentage: number
           set_number: number
           status: string
           task_position: number
@@ -29,9 +31,11 @@ export type Database = {
         }
         Insert: {
           car_names?: string[]
+          car_prices?: number[]
           created_at?: string
           id?: string
           number_of_cars?: number
+          profit_percentage?: number
           set_number?: number
           status?: string
           task_position: number
@@ -41,9 +45,11 @@ export type Database = {
         }
         Update: {
           car_names?: string[]
+          car_prices?: number[]
           created_at?: string
           id?: string
           number_of_cars?: number
+          profit_percentage?: number
           set_number?: number
           status?: string
           task_position?: number
@@ -393,6 +399,7 @@ export type Database = {
           car_brand: string
           car_image_url: string | null
           car_name: string
+          car_prices: number[]
           created_at: string
           id: string
           status: string
@@ -406,6 +413,7 @@ export type Database = {
           car_brand: string
           car_image_url?: string | null
           car_name: string
+          car_prices?: number[]
           created_at?: string
           id?: string
           status?: string
@@ -419,6 +427,7 @@ export type Database = {
           car_brand?: string
           car_image_url?: string | null
           car_name?: string
+          car_prices?: number[]
           created_at?: string
           id?: string
           status?: string
