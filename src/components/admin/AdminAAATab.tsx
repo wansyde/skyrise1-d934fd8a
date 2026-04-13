@@ -132,7 +132,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       {/* Create Form */}
       <div className="glass-card p-5">
         <h2 className="text-sm font-medium mb-4">Create AAA Assignment</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Target User</label>
             <select
@@ -149,8 +149,20 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             </select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Task Position</label>
-            <Input value={taskPosition} onChange={e => setTaskPosition(e.target.value)} placeholder="e.g. 15" className="h-9 text-xs" type="number" />
+            <label className="text-xs text-muted-foreground mb-1 block">Target Set</label>
+            <select
+              value={setNumber}
+              onChange={e => setSetNumber(e.target.value)}
+              className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs"
+            >
+              <option value="1">Set 1</option>
+              <option value="2">Set 2</option>
+              <option value="3">Set 3</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Position in Set (1–40)</label>
+            <Input value={taskPosition} onChange={e => setTaskPosition(e.target.value)} placeholder="e.g. 15" className="h-9 text-xs" type="number" min={1} max={40} />
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Number of Cars</label>
