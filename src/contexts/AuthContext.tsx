@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { useInactivityTimeout } from "@/hooks/useInactivityTimeout";
 
 interface Profile {
@@ -30,6 +29,9 @@ interface Profile {
   pending_popup_message: string | null;
   pending_popup_type: string | null;
   current_unlocked_set: number;
+  escrow_balance: number;
+  task_cycle_completed: boolean;
+  credit_score: number;
 }
 
 interface AuthContextType {
@@ -61,16 +63,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
       .single();
     if (data) setProfile(data as Profile);
-  };
+  }, []);
 
-  const checkAdmin = async (userId: string) => {
+  const checkAdmin = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
@@ -78,16 +80,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq("role", "admin")
       .maybeSingle();
     setIsAdmin(!!data);
-  };
+  }, []);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) await fetchProfile(user.id);
-  };
+  }, [user, fetchProfile]);
+
+  // Realtime profile subscription for instant balance/status sync
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`profile-sync-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.new) {
+            setProfile(payload.new as Profile);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   useEffect(() => {
     let mounted = true;
 
-    // Safety timeout — ensure loading resolves even if auth hangs
     const timeout = setTimeout(() => {
       if (mounted) setLoading(false);
     }, 5000);
@@ -145,15 +173,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile, checkAdmin]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setSession(null);
     setUser(null);
     setProfile(null);
     setIsAdmin(false);
-  };
+  }, []);
 
   useInactivityTimeout(!!session);
 
