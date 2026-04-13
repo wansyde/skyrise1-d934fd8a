@@ -19,6 +19,15 @@ const PendingPopup = () => {
     }
   }, [profile?.pending_popup_message]);
 
+  // Auto-dismiss after 5 seconds
+  useEffect(() => {
+    if (!visible) return;
+    const timer = setTimeout(() => {
+      dismiss();
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [visible]);
+
   const dismiss = async () => {
     setVisible(false);
     if (profile?.user_id) {

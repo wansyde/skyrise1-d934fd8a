@@ -1,10 +1,10 @@
 import AppLayout from "@/components/layout/AppLayout";
-import { motion } from "framer-motion";
-import { Diamond, ChevronRight, Crown, Award, Star, Gem, CalendarCheck, Copy, ArrowLeft, Share2, Clipboard, CheckCircle, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Diamond, ChevronRight, Crown, Award, Star, Gem, CalendarCheck, Copy, ArrowLeft, Share2, CheckCircle, Info, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { useRef, useCallback } from "react";
-import { toPng, toBlob } from "html-to-image";
+import { useRef, useCallback, useState } from "react";
+import { toPng } from "html-to-image";
 
 const tiers = [
   {
@@ -74,6 +74,10 @@ const Event = () => {
   const salaryRef = useRef<HTMLDivElement>(null);
   const rulesRef = useRef<HTMLDivElement>(null);
 
+  // Image preview state: which section is being previewed
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  const [previewName, setPreviewName] = useState("");
+
   const copyAllText = useCallback(() => {
     const lines: string[] = ["=== SKYRISE MEMBERSHIP LEVELS ===\n"];
     tiers.forEach((t) => {
@@ -84,47 +88,43 @@ const Event = () => {
       lines.push(`${s.days} Days → ${s.reward.toLocaleString()} USDC`);
     });
     navigator.clipboard.writeText(lines.join("\n"));
-    toast.success("Copied to clipboard");
+    toast.success("Copied");
   }, []);
 
-  const saveImage = useCallback(async (ref: React.RefObject<HTMLDivElement>, name: string) => {
+  const generatePreview = useCallback(async (ref: React.RefObject<HTMLDivElement>, name: string) => {
     if (!ref.current) return;
     try {
       const dataUrl = await toPng(ref.current, { backgroundColor: "#ffffff", pixelRatio: 3 });
-      const res = await fetch(dataUrl);
+      setPreviewSrc(dataUrl);
+      setPreviewName(name);
+    } catch {
+      toast.error("Failed to generate image");
+    }
+  }, []);
+
+  const saveCurrentImage = useCallback(async () => {
+    if (!previewSrc) return;
+    try {
+      const res = await fetch(previewSrc);
       const blob = await res.blob();
-      const file = new File([blob], `skyrise-${name}.png`, { type: "image/png" });
+      const file = new File([blob], `skyrise-${previewName}.png`, { type: "image/png" });
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: `Skyrise ${name}` });
-        toast.success("Image shared");
+        await navigator.share({ files: [file], title: `Skyrise ${previewName}` });
+        toast.success("Shared");
         return;
       }
 
       const link = document.createElement("a");
-      link.download = `skyrise-${name}.png`;
-      link.href = dataUrl;
+      link.download = `skyrise-${previewName}.png`;
+      link.href = previewSrc;
       link.click();
       toast.success("Image saved");
     } catch (err: any) {
       if (err?.name === "AbortError") return;
-      toast.error("Failed to save image");
+      toast.error("Failed to save");
     }
-  }, []);
-
-  const copyImage = useCallback(async (ref: React.RefObject<HTMLDivElement>) => {
-    if (!ref.current) return;
-    try {
-      const blob = await toBlob(ref.current, { backgroundColor: "#ffffff", pixelRatio: 3 });
-      if (!blob) throw new Error("Failed to generate image");
-      await navigator.clipboard.write([
-        new ClipboardItem({ "image/png": blob }),
-      ]);
-      toast.success("Image copied to clipboard — paste it anywhere!");
-    } catch (err: any) {
-      toast.error("Copy not supported on this device. Use Save instead.");
-    }
-  }, []);
+  }, [previewSrc, previewName]);
 
   return (
     <AppLayout>
@@ -153,30 +153,23 @@ const Event = () => {
                 <Diamond className="h-4.5 w-4.5 text-primary" strokeWidth={1.5} />
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight">Membership Levels</h1>
+                <h1 className="text-lg font-bold tracking-tight font-[Montserrat]">Membership Levels</h1>
                 <p className="text-sm text-muted-foreground">Unlock tiers by increasing your deposit</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <button onClick={() => copyImage(memberRef)} title="Copy as image" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-                <Clipboard className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button onClick={() => saveImage(memberRef, "membership")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-                <Share2 className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
+            <button onClick={() => generatePreview(memberRef, "membership")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+              <Share2 className="h-4 w-4 text-muted-foreground" />
+            </button>
           </div>
 
           <div ref={memberRef} className="flex flex-col gap-3 p-4 rounded-2xl border border-border/40">
-            {/* Branding header for image export */}
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <Diamond className="h-4 w-4 text-primary" strokeWidth={1.5} />
-                <span className="text-sm font-bold tracking-tight text-foreground">Skyrise</span>
+                <span className="text-sm font-bold tracking-tight text-foreground font-[Montserrat]">Skyrise</span>
               </div>
               <span className="text-[10px] text-muted-foreground">Membership Levels</span>
             </div>
-            {/* Header row */}
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2 px-2 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <span>VIP Level</span>
               <span className="text-center">Salary</span>
@@ -207,7 +200,7 @@ const Event = () => {
                 </motion.div>
               );
             })}
-            <p className="text-[9px] text-muted-foreground/50 text-center mt-2">Share this with friends</p>
+            <p className="text-[9px] text-muted-foreground/50 text-center mt-2">Long press the image preview to copy or share</p>
           </div>
         </motion.div>
 
@@ -223,26 +216,20 @@ const Event = () => {
                 <CalendarCheck className="h-4.5 w-4.5 text-primary" strokeWidth={1.5} />
               </div>
               <div>
-                <h2 className="text-lg font-bold tracking-tight">Base Salary</h2>
+                <h2 className="text-lg font-bold tracking-tight font-[Montserrat]">Base Salary</h2>
                 <p className="text-sm text-muted-foreground">Earn rewards for consecutive daily check-ins</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <button onClick={() => copyImage(salaryRef)} title="Copy as image" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-                <Clipboard className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button onClick={() => saveImage(salaryRef, "salary")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-                <Share2 className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
+            <button onClick={() => generatePreview(salaryRef, "salary")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+              <Share2 className="h-4 w-4 text-muted-foreground" />
+            </button>
           </div>
 
           <div ref={salaryRef} className="flex flex-col gap-2.5 p-4 rounded-2xl border border-border/40">
-            {/* Branding header for image export */}
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <CalendarCheck className="h-4 w-4 text-primary" strokeWidth={1.5} />
-                <span className="text-sm font-bold tracking-tight text-foreground">Skyrise</span>
+                <span className="text-sm font-bold tracking-tight text-foreground font-[Montserrat]">Skyrise</span>
               </div>
               <span className="text-[10px] text-muted-foreground">Base Salary Rewards</span>
             </div>
@@ -273,7 +260,7 @@ const Event = () => {
                 </div>
               </motion.div>
             ))}
-            <p className="text-[9px] text-muted-foreground/50 text-center mt-2">Share this with friends</p>
+            <p className="text-[9px] text-muted-foreground/50 text-center mt-2">Long press the image preview to copy or share</p>
           </div>
 
           <p className="mt-5 text-center text-[11px] text-muted-foreground/60">
@@ -298,18 +285,12 @@ const Event = () => {
                 <p className="text-sm text-muted-foreground">How the base salary system works</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <button onClick={() => copyImage(rulesRef)} title="Copy as image" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-                <Clipboard className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <button onClick={() => saveImage(rulesRef, "salary-rules")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-                <Share2 className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
+            <button onClick={() => generatePreview(rulesRef, "salary-rules")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+              <Share2 className="h-4 w-4 text-muted-foreground" />
+            </button>
           </div>
 
           <div ref={rulesRef} className="flex flex-col gap-3 p-5 rounded-2xl border border-border/40">
-            {/* Branding header */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Diamond className="h-4 w-4 text-primary" strokeWidth={1.5} />
@@ -336,10 +317,67 @@ const Event = () => {
             <p className="text-[10px] text-muted-foreground/60 text-center mt-2">
               The final interpretation right belongs to Skyrise.
             </p>
-            <p className="text-[9px] text-muted-foreground/50 text-center">Share this with friends</p>
+            <p className="text-[9px] text-muted-foreground/50 text-center">Long press the image preview to copy or share</p>
           </div>
         </motion.div>
       </div>
+
+      {/* Image Preview Modal — renders real <img> for native long-press */}
+      <AnimatePresence>
+        {previewSrc && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={() => setPreviewSrc(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-[51] flex flex-col items-center justify-center p-4"
+              onClick={() => setPreviewSrc(null)}
+            >
+              <div
+                className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* The real <img> — supports native long-press on iOS/Android */}
+                <img
+                  src={previewSrc}
+                  alt={`Skyrise ${previewName}`}
+                  className="w-full h-auto select-auto"
+                  draggable
+                  style={{ WebkitTouchCallout: "default" } as React.CSSProperties}
+                />
+              </div>
+
+              <div className="mt-3 flex gap-2 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={saveCurrentImage}
+                  className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Save Image
+                </button>
+                <button
+                  onClick={() => setPreviewSrc(null)}
+                  className="h-11 w-11 rounded-xl bg-white/90 flex items-center justify-center hover:bg-white transition-colors"
+                >
+                  <X className="h-5 w-5 text-foreground" strokeWidth={1.5} />
+                </button>
+              </div>
+
+              <p className="mt-3 text-xs text-white/70 text-center">
+                Long press the image to copy or share
+              </p>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </AppLayout>
   );
 };
