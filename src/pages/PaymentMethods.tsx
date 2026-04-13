@@ -35,12 +35,13 @@ const PaymentMethods = () => {
     }
   }, [authenticated, profile]);
 
-  const handleAuthenticate = () => {
+  const handleAuthenticate = async () => {
     if (!password) {
       toast.error("Enter password");
       return;
     }
-    if (profile?.withdraw_password && password !== profile.withdraw_password) {
+    const { data: isValid, error: verifyError } = await supabase.rpc("verify_withdraw_password", { _password: password });
+    if (verifyError || !isValid) {
       toast.error("Incorrect password");
       return;
     }
