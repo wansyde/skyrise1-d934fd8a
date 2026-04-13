@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import MiniCalculator from "./MiniCalculator";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Check, X, AlertTriangle, ArrowUpDown, DollarSign, MessageSquare, Trash2 } from "lucide-react";
@@ -317,6 +318,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
           </div>
         ))}
       </div>
+      <MiniCalculator />
     </div>
   );
 };
