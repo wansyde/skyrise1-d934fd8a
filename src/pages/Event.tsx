@@ -338,24 +338,25 @@ const Event = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed inset-0 z-[51] flex flex-col items-center justify-center p-4"
-              onClick={() => setPreviewSrc(null)}
+              className="fixed inset-0 z-[51] flex flex-col items-center justify-center p-4 pointer-events-none"
             >
-              <div
-                className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* The real <img> — supports native long-press on iOS/Android */}
+              {/* Image container — pointer-events restored, no click dismiss so long-press works */}
+              <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl pointer-events-auto">
                 <img
                   src={previewSrc}
                   alt={`Skyrise ${previewName}`}
-                  className="w-full h-auto select-auto"
+                  className="w-full h-auto block"
                   draggable
-                  style={{ WebkitTouchCallout: "default" } as React.CSSProperties}
+                  style={{
+                    WebkitTouchCallout: "default",
+                    WebkitUserSelect: "auto",
+                    userSelect: "auto",
+                    touchAction: "auto",
+                  } as React.CSSProperties}
                 />
               </div>
 
-              <div className="mt-3 flex gap-2 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+              <div className="mt-3 flex gap-2 w-full max-w-md pointer-events-auto">
                 <button
                   onClick={saveCurrentImage}
                   className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
