@@ -83,12 +83,14 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     const numCars = parseInt(numberOfCars);
     const setNum = parseInt(setNumber);
     const commPct = parseFloat(commissionPercentage) / 100;
+    const multiplier = parseFloat(commissionMultiplier) || 1;
 
     if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
     if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
     if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
     if (selectedCars.some(c => !c.price || parseFloat(c.price) <= 0)) { toast.error("All cars must have a valid price"); return; }
     if (commissionMode === "percentage" && (commPct <= 0 || commPct > 1)) { toast.error("Enter a valid commission percentage (1–100)"); return; }
+    if (multiplier < 1 || multiplier > 100) { toast.error("Multiplier must be between 1 and 100"); return; }
 
     const carNames = selectedCars.map(c => c.name);
     const carPrices = selectedCars.map(c => parseFloat(c.price));
@@ -107,6 +109,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
         car_names: carNames,
         car_prices: carPrices,
         car_commissions: carCommissions,
+        commission_multiplier: multiplier,
         profit_percentage: commPct,
         status: "active",
       } as any);
@@ -117,6 +120,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       setTargetUserId("");
       setSetNumber("1");
       setCommissionPercentage("5");
+      setCommissionMultiplier("1");
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
