@@ -96,9 +96,20 @@ const AdminPanel = () => {
   const { data: profiles } = useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*");
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session) {
+        console.error("Admin profiles query: No active session");
+        throw new Error("Not authenticated");
+      }
+      const { data, error } = await supabase.from("profiles").select("*");
+      if (error) {
+        console.error("Admin profiles query error:", error);
+        throw error;
+      }
+      console.log("Admin profiles loaded:", data?.length || 0);
       return data || [];
     },
+    retry: 2,
   });
 
   const { data: allDeposits } = useQuery({
