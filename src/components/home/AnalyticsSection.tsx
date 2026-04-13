@@ -354,9 +354,9 @@ const AnalyticsSection = () => (
                   src={brand.src}
                   alt={brand.name}
                   loading="lazy"
-                  className={`${brand.height} w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-300`}
+                  className={`${brand.height} w-auto object-contain opacity-40 hover:opacity-70 transition-opacity duration-300`}
                   style={{
-                    filter: "contrast(1.1) brightness(1.05)",
+                    filter: "grayscale(100%) contrast(1.1) brightness(1.05)",
                   }}
                 />
               </div>
