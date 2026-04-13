@@ -198,25 +198,25 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Balance</span>
                 <span className={`text-sm font-semibold tabular-nums ${rec.balance < 0 ? "text-red-400" : ""}`}>
-                  ${rec.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  {rec.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Required to Complete</span>
                 <span className="text-sm font-semibold tabular-nums">
-                  ${rec.remainingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  {rec.remainingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Deficit</span>
                 <span className={`text-sm font-semibold tabular-nums ${rec.deficit > 0 ? "text-red-400" : "text-green-400"}`}>
-                  {rec.deficit > 0 ? `-$${rec.deficit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "$0.00"}
+                  {rec.deficit > 0 ? `-${rec.deficit.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC` : "0.00 AC"}
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Pending Earnings</span>
                 <span className="text-sm font-semibold tabular-nums text-amber-400">
-                  ${rec.escrow.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  {rec.escrow.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
                 </span>
               </div>
             </div>
@@ -226,7 +226,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-xs text-muted-foreground">Cars: {rec.completedCars}/{rec.totalCars} completed</span>
                 <span className="text-[10px] text-muted-foreground">· AAA Multiplier: ×{rec.multiplier}</span>
-                <span className="text-[10px] text-muted-foreground">· Final Commission: ${rec.finalCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className="text-[10px] text-muted-foreground">· Final Commission: {rec.finalCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
                 {(rec.car_prices as number[]).map((price: number, i: number) => {
@@ -252,7 +252,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
                         <span className="font-medium truncate">{name}</span>
                       </div>
                       <div className="text-muted-foreground">
-                        ${price.toLocaleString()} · +${commission.toLocaleString()}
+                        {price.toLocaleString()} AC · +{commission.toLocaleString()} AC
                       </div>
                     </div>
                   );
