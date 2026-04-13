@@ -35,7 +35,7 @@ const WalletPage = () => {
         <div className="balance-card p-5 mb-5">
           <span className="text-sm text-white/70">Available Balance</span>
           <div className="text-3xl font-semibold tabular-nums mt-1">
-            ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            {balance.toLocaleString("en-US", { minimumFractionDigits: 2 })} AC
           </div>
         </div>
 
@@ -87,7 +87,7 @@ const WalletPage = () => {
                 </div>
                 <div className="text-right">
                   <span className={`text-sm font-medium tabular-nums ${positive ? "text-success" : "text-foreground"}`}>
-                    {positive ? "+" : ""} AC{Math.abs(Number(tx.amount)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    {positive ? "+" : ""}{Math.abs(Number(tx.amount)).toLocaleString("en-US", { minimumFractionDigits: 2 })} AC
                   </span>
                   <span className={`text-[10px] block mt-0.5 ${tx.status === "pending" ? "text-warning" : "text-success"}`}>
                     {tx.status}
