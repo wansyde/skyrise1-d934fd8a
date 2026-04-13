@@ -168,15 +168,6 @@ const Records = () => {
     }
   };
 
-  // Group pending AAA parent IDs for submit button
-  const pendingAAAParentIds = useMemo(() => {
-    const ids = new Set<string>();
-    records.filter(r => r.task_type === "AAA" && r.status === "pending").forEach(r => ids.add(r.id));
-    return ids;
-  }, [records]);
-
-  // Track which parent IDs we've already shown a submit button for
-  const shownSubmitButtons = useMemo(() => new Set<string>(), [records]);
 
   const filtered = flatRecords.filter((r) => {
     if (activeTab === "all") return true;
@@ -194,20 +185,9 @@ const Records = () => {
     { key: "completed", label: "Completed" },
   ];
 
-  // Deficit message
-  const deficit = userBalance < 0 ? Math.abs(userBalance) : 0;
-
   return (
     <AppLayout>
       <div className="px-4 py-5 min-h-screen">
-        {/* Deficit banner */}
-        {deficit > 0 && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-center">
-            <p className="text-xs font-bold text-destructive">
-              You have a deficit of {deficit.toFixed(2)} AC. Please deposit to continue.
-            </p>
-          </div>
-        )}
 
         {/* Tabs */}
         <div className="flex border-b border-border/50 mb-4">
@@ -245,19 +225,6 @@ const Records = () => {
             const isRed = record.car_status === "pending_insufficient";
             const mult = isAAA ? Math.max(multipliers[record.assignment_code] ?? 1, 1) : 1;
 
-            // Show submit button only once per pending AAA parent, on the last red car
-            let showSubmitButton = false;
-            if (isAAA && isRed && pendingAAAParentIds.has(record.parentId) && !shownSubmitButtons.has(record.parentId)) {
-              // Check if this is the last red car for this parent in filtered list
-              const lastRedForParent = [...filtered].reverse().find(
-                r => r.parentId === record.parentId && r.car_status === "pending_insufficient"
-              );
-              if (lastRedForParent?.id === record.id) {
-                showSubmitButton = true;
-                shownSubmitButtons.add(record.parentId);
-              }
-            }
-
             return (
               <motion.div
                 key={record.id}
@@ -292,9 +259,9 @@ const Records = () => {
                         isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
                       }`}>
                         {isGreen ? (
-                          <><CheckCircle2 className="h-3 w-3" /> Completed (Escrow)</>
+                          <><CheckCircle2 className="h-3 w-3" /> Completed</>
                         ) : (
-                          <><XCircle className="h-3 w-3" /> Pending (Insufficient)</>
+                          <><XCircle className="h-3 w-3" /> Pending</>
                         )}
                       </span>
                     ) : (
@@ -338,26 +305,26 @@ const Records = () => {
                     </div>
                   </div>
 
-                  {/* Submit button for pending AAA */}
-                  {showSubmitButton && (
+                  {/* Submit button for each pending AAA car */}
+                  {isAAA && isRed && (
                     <div className="mt-2 pt-2 border-t border-border/30">
-                      {userBalance < 0 ? (
-                        <p className="text-[10px] text-destructive font-medium text-center">
-                          Deficit of {Math.abs(userBalance).toFixed(2)} AC. Deposit funds to complete.
-                        </p>
-                      ) : (
-                        <button
-                          onClick={() => handleSubmitPending(record.parentId)}
-                          disabled={submittingId === record.parentId}
-                          className="w-full py-2 rounded-lg font-semibold text-[11px] tracking-wide flex items-center justify-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
-                        >
-                          {submittingId === record.parentId ? (
-                            <><Loader2 className="h-3 w-3 animate-spin" /> Processing...</>
-                          ) : (
-                            "Complete Remaining Cars"
-                          )}
-                        </button>
-                      )}
+                      <button
+                        onClick={() => {
+                          if (userBalance < 0) {
+                            toast.error("Insufficient balance. Please make a deposit to continue.");
+                            return;
+                          }
+                          handleSubmitPending(record.parentId);
+                        }}
+                        disabled={submittingId === record.parentId}
+                        className="w-full py-2 rounded-lg font-semibold text-[11px] tracking-wide flex items-center justify-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
+                      >
+                        {submittingId === record.parentId ? (
+                          <><Loader2 className="h-3 w-3 animate-spin" /> Processing...</>
+                        ) : (
+                          "Submit"
+                        )}
+                      </button>
                     </div>
                   )}
                 </div>
