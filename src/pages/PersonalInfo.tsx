@@ -214,18 +214,15 @@ const PersonalInfo = () => {
       toast.error("Passwords don't match");
       return;
     }
-    if (profile?.withdraw_password && profile.withdraw_password !== oldTxPassword) {
-      toast.error("Old password incorrect");
-      return;
-    }
     setUpdatingTxPassword(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ withdraw_password: newTxPassword })
-      .eq("user_id", user.id);
+    const { data, error } = await supabase.rpc("update_withdraw_password", {
+      _old_password: oldTxPassword,
+      _new_password: newTxPassword,
+    });
     setUpdatingTxPassword(false);
-    if (error) {
-      toast.error("Update failed");
+    const result = data as any;
+    if (error || result?.error) {
+      toast.error(result?.error || "Update failed");
     } else {
       toast.success("Updated");
       await refreshProfile();

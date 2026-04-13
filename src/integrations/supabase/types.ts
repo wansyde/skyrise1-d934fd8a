@@ -700,7 +700,15 @@ export type Database = {
             }
             Returns: Json
           }
+      update_withdraw_password: {
+        Args: { _new_password: string; _old_password: string }
+        Returns: Json
+      }
       validate_referral_code: { Args: { _code: string }; Returns: boolean }
+      verify_withdraw_password: {
+        Args: { _password: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
