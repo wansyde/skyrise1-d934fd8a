@@ -106,7 +106,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     setNumberOfCars("3");
     setCommissionPercentage("5");
     setCommissionMode("percentage");
-    setCommissionMultiplier("1");
+    commissionManuallyEdited.current = false;
   };
 
   const handleEdit = (a: any) => {
