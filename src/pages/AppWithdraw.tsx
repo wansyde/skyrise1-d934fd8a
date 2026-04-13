@@ -61,6 +61,15 @@ const AppWithdraw = () => {
     setAmount(balance.toFixed(2));
   };
 
+  const tierMaxWithdrawal: Record<string, number> = {
+    Junior: 5000,
+    Professional: 10000,
+    Expert: 60000,
+    Elite: 100000,
+  };
+
+  const userTierMax = tierMaxWithdrawal[profile?.vip_level || "Junior"] || 5000;
+
   const handleProceedToStep2 = () => {
     if (!user) return;
     const num = Number(amount);
@@ -70,6 +79,10 @@ const AppWithdraw = () => {
     }
     if (num <= 0 || num > balance) {
       toast.error("Invalid amount");
+      return;
+    }
+    if (num > userTierMax) {
+      toast.error(`Maximum withdrawal for your level is ${userTierMax.toLocaleString()} USDC`);
       return;
     }
     if (!password) {
@@ -110,6 +123,12 @@ const AppWithdraw = () => {
       if (result?.error) {
         toast.error(result.error);
         return;
+      }
+
+      if (result?.status === "pending_review") {
+        toast.info("Withdrawal submitted. Awaiting manual review.", { duration: 6000 });
+      } else {
+        toast.success("Withdrawal submitted successfully");
       }
 
       // Show receipt
@@ -367,8 +386,8 @@ const AppWithdraw = () => {
                         <span className="text-sm font-medium tabular-nums">
                           -${Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </span>
-                        <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "completed" ? "text-primary" : w.status === "approved" ? "text-primary" : "text-destructive"}`}>
-                          {w.status === "approved" ? "completed" : w.status}
+                        <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "pending_review" ? "text-amber-400" : w.status === "completed" ? "text-primary" : w.status === "approved" ? "text-primary" : "text-destructive"}`}>
+                          {w.status === "approved" ? "completed" : w.status === "pending_review" ? "Pending Review" : w.status}
                         </span>
                       </div>
                     </div>
