@@ -46,10 +46,11 @@ const CarImage = ({ carName }: { carName: string }) => {
 type TabKey = "all" | "pending" | "completed";
 
 const Records = () => {
-  const { user, refreshProfile } = useAuth();
+  const { user, refreshProfile, profile } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const userBalance = Number(profile?.balance ?? 0);
 
   const { data: records = [] } = useQuery({
     queryKey: ["task-records", user?.id],
