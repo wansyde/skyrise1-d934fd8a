@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      aaa_assignments: {
+        Row: {
+          car_names: string[]
+          created_at: string
+          id: string
+          number_of_cars: number
+          status: string
+          task_position: number
+          total_assignment_amount: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          car_names?: string[]
+          created_at?: string
+          id?: string
+          number_of_cars?: number
+          status?: string
+          task_position: number
+          total_assignment_amount: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          car_names?: string[]
+          created_at?: string
+          id?: string
+          number_of_cars?: number
+          status?: string
+          task_position?: number
+          total_assignment_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_logs: {
         Row: {
           action_type: string
@@ -357,6 +393,7 @@ export type Database = {
           created_at: string
           id: string
           status: string
+          task_type: string
           total_amount: number
           user_id: string
         }
@@ -369,6 +406,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          task_type?: string
           total_amount?: number
           user_id: string
         }
@@ -381,6 +419,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          task_type?: string
           total_amount?: number
           user_id?: string
         }
@@ -574,6 +613,14 @@ export type Database = {
         Args: { _amount: number; _note?: string; _user_id: string }
         Returns: Json
       }
+      complete_aaa_task: {
+        Args: {
+          _assignment_id: string
+          _car_names: string[]
+          _total_amount: number
+        }
+        Returns: Json
+      }
       complete_task: {
         Args: {
           _assignment_code: string
@@ -615,6 +662,7 @@ export type Database = {
         }
         Returns: Json
       }
+      submit_pending_task: { Args: { _record_id: string }; Returns: Json }
       submit_withdrawal:
         | { Args: { _amount: number; _wallet_address: string }; Returns: Json }
         | {

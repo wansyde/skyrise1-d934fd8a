@@ -1,12 +1,15 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, DollarSign, Play, ChevronRight, ChevronLeft, X, Loader2, Check, Headphones, Clock } from "lucide-react";
+import { Wallet, DollarSign, Play, ChevronRight, ChevronLeft, X, Loader2, Check, Headphones, Clock, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getVipTier, getSetProgress, getTaskProfit, generateRandomTaskValue } from "@/lib/vip-config";
 import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
+import { useQuery } from "@tanstack/react-query";
+import { getCarImage } from "@/lib/car-images";
+import { useNavigate } from "react-router-dom";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
@@ -92,6 +95,7 @@ type MatchState = "idle" | "matching" | "matched" | "submitted";
 const Starting = () => {
   const { profile, user, refreshProfile } = useAuth();
   const { url: whatsappUrl } = useWhatsAppNumber();
+  const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [matchState, setMatchState] = useState<MatchState>("idle");
@@ -103,6 +107,25 @@ const Starting = () => {
   const [submitting, setSubmitting] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+
+  // AAA state
+  const [isAAATask, setIsAAATask] = useState(false);
+  const [aaaAssignment, setAaaAssignment] = useState<any>(null);
+  const [aaaCars, setAaaCars] = useState<string[]>([]);
+
+  // Fetch active AAA assignments for this user
+  const { data: aaaAssignments = [] } = useQuery({
+    queryKey: ["user-aaa-assignments", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("aaa_assignments" as any)
+        .select("*")
+        .eq("status", "active")
+        .order("task_position", { ascending: true });
+      return (data || []) as any[];
+    },
+  });
 
   useEffect(() => {
     const measure = () => {
@@ -128,7 +151,13 @@ const Starting = () => {
   const tierPercent = vipTier.rewardPercent;
   const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
   const taskValue = matchedTaskValue ?? generateRandomTaskValue(userBalance);
-  const estimatedProfit = useMemo(() => getTaskProfit(taskValue, vipTier), [taskValue, vipTier]);
+  const estimatedProfit = useMemo(() => {
+    if (isAAATask && aaaAssignment) {
+      const baseProfit = taskValue * tierPercent;
+      return Math.round(baseProfit * 12 * 100) / 100;
+    }
+    return getTaskProfit(taskValue, vipTier);
+  }, [taskValue, vipTier, isAAATask, aaaAssignment, tierPercent]);
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
@@ -221,6 +250,44 @@ const Starting = () => {
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
     if (isSetLocked) { toast.error("Set completed. Contact support to unlock next set."); return; }
 
+    // Check if next task is an AAA task
+    const nextTaskNumber = completedCount + 1;
+    const matchingAAA = aaaAssignments.find((a: any) =>
+      a.task_position === nextTaskNumber && a.status === "active" &&
+      (a.user_id === null || a.user_id === user?.id)
+    );
+
+    if (matchingAAA) {
+      // AAA Task
+      setIsAAATask(true);
+      setAaaAssignment(matchingAAA);
+      setAaaCars(matchingAAA.car_names || []);
+      setMatchedCar(carCampaigns[0]); // placeholder
+      setMatchedTaskValue(matchingAAA.total_assignment_amount);
+      setAssignmentCode(generateAssignmentCode());
+      setMatchProgress(0);
+      setMatchState("matching");
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 12 + 3;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          setMatchProgress(100);
+          setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 400);
+        } else {
+          setMatchProgress(progress);
+        }
+      }, 250);
+      return;
+    }
+
+    // Regular task
+    setIsAAATask(false);
+    setAaaAssignment(null);
+    setAaaCars([]);
+
     const affordable = carCampaigns.filter(c => c.totalAmount <= currentBalance);
     const pool = affordable.length > 0 ? affordable : carCampaigns;
     const car = pool[Math.floor(Math.random() * pool.length)];
@@ -250,28 +317,54 @@ const Starting = () => {
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
     if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
 
     isProcessingRef.current = true;
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.rpc("complete_task", {
-        _car_brand: matchedCar.brand,
-        _car_name: matchedCar.name,
-        _car_image_url: matchedCar.featured,
-        _total_amount: taskValue,
-        _assignment_code: assignmentCode,
-      });
-      if (error) throw error;
-      const result = data as any;
-      if (result?.error) {
-        toast.error(result.error);
-        setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
+      if (isAAATask && aaaAssignment) {
+        // AAA task submission
+        const { data, error } = await supabase.rpc("complete_aaa_task" as any, {
+          _assignment_id: aaaAssignment.id,
+          _car_names: aaaCars,
+          _total_amount: aaaAssignment.total_assignment_amount,
+        });
+        if (error) throw error;
+        const result = data as any;
+        if (result?.error) {
+          toast.error(result.error);
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); return;
+        }
+        setCompletedCount(prev => prev + 1);
+        refreshProfile();
+        if (result.went_negative) {
+          toast.error("Insufficient balance. Task marked as pending. Please deposit funds and complete it from Records.");
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false);
+          setTimeout(() => navigate("/app/records"), 1500);
+        } else {
+          setMatchState("submitted");
+          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1500);
+        }
+      } else {
+        // Regular task
+        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+        const { data, error } = await supabase.rpc("complete_task", {
+          _car_brand: matchedCar.brand,
+          _car_name: matchedCar.name,
+          _car_image_url: matchedCar.featured,
+          _total_amount: taskValue,
+          _assignment_code: assignmentCode,
+        });
+        if (error) throw error;
+        const result = data as any;
+        if (result?.error) {
+          toast.error(result.error);
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
+        }
+        setCompletedCount(prev => prev + 1);
+        refreshProfile();
+        setMatchState("submitted");
+        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
       }
-      setCompletedCount(prev => prev + 1);
-      refreshProfile();
-      setMatchState("submitted");
-      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
     } catch (e: any) {
       console.error("Task submission error:", e);
       toast.error(e?.message || "Submission failed. Please try again.");
@@ -509,13 +602,46 @@ const Starting = () => {
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
 
-              <h3 className="text-lg font-semibold text-primary mb-6 font-[Montserrat]">Assignment Submission</h3>
+              <h3 className="text-lg font-semibold text-primary mb-6 font-[Montserrat]">
+                {isAAATask ? (
+                  <span className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                    Automotive Alliance Assignment
+                  </span>
+                ) : "Assignment Submission"}
+              </h3>
 
-              <div className="flex justify-center mb-4">
-                <img src={matchedCar.featured} alt={matchedCar.name} className="h-28 object-contain" />
-              </div>
-
-              <p className="text-center text-sm font-semibold mb-4 px-4">{matchedCar.name}</p>
+              {isAAATask && aaaCars.length > 0 ? (
+                <div className="mb-4">
+                  <div className="flex justify-center gap-2 flex-wrap">
+                    {aaaCars.map((carName, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="relative"
+                      >
+                        <div className="w-24 h-20 rounded-xl bg-muted/30 border border-primary/20 overflow-hidden flex items-center justify-center p-1"
+                          style={{ boxShadow: "0 4px 20px hsl(var(--primary) / 0.15)" }}>
+                          <img src={getCarImage(carName)} alt={carName} className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-[9px] text-center text-muted-foreground mt-1 max-w-24 truncate">{carName.split(" ").slice(0, 2).join(" ")}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <p className="text-center text-xs font-semibold mt-3 px-4 text-amber-600">
+                    {aaaCars.length} Vehicle Alliance Package
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-center mb-4">
+                    <img src={matchedCar.featured} alt={matchedCar.name} className="h-28 object-contain" />
+                  </div>
+                  <p className="text-center text-sm font-semibold mb-4 px-4">{matchedCar.name}</p>
+                </>
+              )}
 
               <div className="flex justify-center mb-5">
                 <div className="w-48 h-8 rounded-full bg-muted/50 border border-border/50 relative overflow-hidden">
