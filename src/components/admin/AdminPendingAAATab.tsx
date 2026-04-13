@@ -302,8 +302,14 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
                   >
                     <DollarSign className="h-3 w-3" /> Adjust Balance
                   </Button>
-                </>
-              )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1 text-destructive border-destructive/30 hover:bg-destructive/10"
+                    onClick={() => handleDeletePending(rec.id, rec.user_id)}
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </Button>
             </div>
           </div>
         ))}
