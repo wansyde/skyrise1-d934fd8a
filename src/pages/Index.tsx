@@ -94,7 +94,7 @@ const Index = () => {
 
   return (
     <PublicLayout>
-      
+      <WhatsAppButton />
       {/* Hero with image slider */}
       <section className="relative h-[90vh] min-h-[600px] overflow-hidden">
         {heroSlides.map((slide, i) => (
