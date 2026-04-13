@@ -231,7 +231,11 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               <label className="text-xs text-muted-foreground mb-1 block">Commission %</label>
               <Input value={commissionPercentage} onChange={e => setCommissionPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
             </div>
-          )}
+           )}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Multiplier (×)</label>
+            <Input value={commissionMultiplier} onChange={e => setCommissionMultiplier(e.target.value)} placeholder="e.g. 1" className="h-9 text-xs" type="number" min={1} max={100} step={0.1} />
+          </div>
         </div>
 
         {/* Car selection with individual prices + commissions */}
@@ -271,7 +275,9 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               ))}
               <div className="flex justify-between text-xs font-bold">
                 <span className="text-primary">Total: {totalAmount.toFixed(2)} USDC</span>
-                <span className="text-emerald-600">Commission: {totalCommission.toFixed(2)} USDC</span>
+                <span className="text-muted-foreground">Commission: {totalCommission.toFixed(2)}</span>
+                {multiplierVal > 1 && <span className="text-muted-foreground">×{multiplierVal}</span>}
+                <span className="text-emerald-600">Final Earnings: {finalEarnings.toFixed(2)} USDC</span>
               </div>
             </div>
           )}
