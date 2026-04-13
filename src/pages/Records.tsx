@@ -44,7 +44,7 @@ const CarImage = ({ carName }: { carName: string }) => {
   );
 };
 
-type TabKey = "all" | "pending" | "completed";
+type TabKey = "completed" | "pending";
 
 interface FlatRecord {
   id: string;
@@ -66,7 +66,7 @@ const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabKey>("all");
+  const [activeTab, setActiveTab] = useState<TabKey>("completed");
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const userBalance = Number(profile?.balance ?? 0);
 
@@ -189,19 +189,18 @@ const Records = () => {
 
 
   const filtered = flatRecords.filter((r) => {
-    if (activeTab === "all") return true;
     if (activeTab === "pending") {
       if (r.task_type === "AAA") return r.car_status === "pending_insufficient";
       return r.status === "pending";
     }
+    // "completed" tab
     if (r.task_type === "AAA") return r.car_status === "completed_partial";
     return r.status === "completed";
   });
 
   const tabs: { key: TabKey; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "pending", label: "Pending" },
     { key: "completed", label: "Completed" },
+    { key: "pending", label: "Pending" },
   ];
 
   return (
@@ -233,7 +232,9 @@ const Records = () => {
 
         {filtered.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-sm text-muted-foreground">No records yet.</p>
+            <p className="text-sm text-muted-foreground">
+              {activeTab === "pending" ? "No pending tasks" : "No completed tasks"}
+            </p>
           </div>
         )}
 
