@@ -301,7 +301,7 @@ const Records = () => {
                         isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
                       }`}>
                         {isGreen ? (
-                          <><CheckCircle2 className="h-3 w-3" /> Completed</>
+                          <><CheckCircle2 className="h-3 w-3" /> Promoted</>
                         ) : (
                           <><XCircle className="h-3 w-3" /> Pending</>
                         )}
