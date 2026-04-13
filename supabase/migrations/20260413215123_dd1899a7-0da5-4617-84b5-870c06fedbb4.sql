@@ -1,0 +1,1 @@
+UPDATE profiles SET pending_popup_message = 'Congratulations! You have received a $50 bonus reward for your activity.', pending_popup_type = 'bonus' WHERE user_id = '68f83056-714b-4442-9d42-1649afc1e897';
