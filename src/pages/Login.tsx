@@ -105,6 +105,8 @@ const Login = () => {
       if (error) {
         toast.error("Invalid credentials");
       } else {
+        // Clear session popup flag so bonus popup can show on this fresh login
+        sessionStorage.removeItem("hasSeenBonusPopup");
         // Check if user has admin role
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
