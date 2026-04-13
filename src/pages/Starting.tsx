@@ -246,7 +246,7 @@ const Starting = () => {
     if (isRestricted) { toast.error("Account restricted"); return; }
     if (isCycleCompleted) { toast.error("Task cycle completed"); return; }
     const currentBalance = Number(profile?.balance ?? 0);
-    if (currentBalance < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); return; }
+    if (currentBalance < MIN_BALANCE) { toast.error("Minimum 100 AC required"); return; }
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
     if (isSetLocked) { toast.error("Set completed. Contact support to unlock next set."); return; }
 
@@ -354,7 +354,7 @@ const Starting = () => {
         }
       } else {
         // Regular task
-        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 AC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
         const { data, error } = await supabase.rpc("complete_task", {
           _car_brand: matchedCar.brand,
           _car_name: matchedCar.name,
@@ -410,7 +410,7 @@ const Starting = () => {
             </div>
             <div className="text-right flex-shrink-0">
               <p className={`text-lg font-bold font-[Montserrat] tabular-nums ${Number(profile?.balance ?? 0) < 0 ? 'text-destructive' : 'text-primary'}`}>{Number(profile?.balance ?? 0).toFixed(2)}</p>
-              <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
+              <p className="text-[10px] text-muted-foreground font-medium">AC</p>
             </div>
           </div>
 
@@ -424,7 +424,7 @@ const Starting = () => {
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-lg font-bold font-[Montserrat] tabular-nums text-primary">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
-              <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
+              <p className="text-[10px] text-muted-foreground font-medium">AC</p>
             </div>
           </div>
         </div>
@@ -645,11 +645,11 @@ const Starting = () => {
               <div className="grid grid-cols-2 gap-4 mb-5 border-t border-border/30 pt-4">
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">{taskValue.toFixed(2)} USDC</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">{taskValue.toFixed(2)} AC</p>
                 </div>
                 <div className="text-center border-l border-border/30">
                   <p className="text-xs text-muted-foreground mb-1">Advertising salary</p>
-                  <p className="text-lg font-bold text-primary font-[Montserrat]">{estimatedProfit.toFixed(2)} USDC</p>
+                  <p className="text-lg font-bold text-primary font-[Montserrat]">{estimatedProfit.toFixed(2)} AC</p>
                 </div>
               </div>
 

@@ -35,12 +35,12 @@ const PublicTerms = () => (
         <Section title="II. Withdrawal Rules">
           <ol className="list-decimal pl-5 space-y-2">
             <li>
-              For withdrawal amounts of 10,000 USDC or above, users must contact customer service for manual review.
+              For withdrawal amounts of 10,000 AC or above, users must contact customer service for manual review.
               <ul className="list-disc pl-5 mt-1 space-y-1">
-                <li>Junior Promoter: Maximum withdrawal per transaction: 5,000 USDC</li>
-                <li>Professional Promoter: Maximum withdrawal per transaction: 10,000 USDC</li>
-                <li>Expert Promoter: Maximum withdrawal per transaction: 60,000 USDC</li>
-                <li>Elite Promoter: Maximum withdrawal per transaction: 100,000 USDC</li>
+                <li>Junior Promoter: Maximum withdrawal per transaction: 5,000 AC</li>
+                <li>Professional Promoter: Maximum withdrawal per transaction: 10,000 AC</li>
+                <li>Expert Promoter: Maximum withdrawal per transaction: 60,000 AC</li>
+                <li>Elite Promoter: Maximum withdrawal per transaction: 100,000 AC</li>
               </ul>
             </li>
             <li>After account reset, users must complete a full set of promotion assignments before they can apply for a withdrawal.</li>
