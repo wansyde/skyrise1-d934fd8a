@@ -215,7 +215,7 @@ const Records = () => {
                         <div>
                           <p className="text-[9px] text-muted-foreground">Amount</p>
                           <p className="text-xs font-bold text-primary">
-                            {Number(record.total_amount)} <span className="text-[9px] font-normal text-muted-foreground">USDC</span>
+                            {Number(record.total_amount)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                         <div>
@@ -223,7 +223,7 @@ const Records = () => {
                             {isAAA ? "Final Earnings" : "Salary"}
                           </p>
                           <p className="text-xs font-bold text-emerald-600">
-                            +{finalEarnings.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">USDC</span>
+                            +{finalEarnings.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                         {isAAA && mult > 1 && (
@@ -273,7 +273,7 @@ const Records = () => {
                       <div className="mt-1.5 pt-1.5 border-t border-border/20 space-y-0.5">
                         <div className="flex justify-between text-[11px]">
                           <span className="text-muted-foreground">Raw Commission</span>
-                          <span className="font-semibold">{rawCommission.toFixed(2)} USDC</span>
+                          <span className="font-semibold">{rawCommission.toFixed(2)} AC</span>
                         </div>
                         {mult > 1 && (
                           <div className="flex justify-between text-[11px]">
@@ -283,7 +283,7 @@ const Records = () => {
                         )}
                         <div className="flex justify-between text-[11px]">
                           <span className="font-semibold text-foreground">Final Earnings</span>
-                          <span className="font-bold text-emerald-600">+{finalEarnings.toFixed(2)} USDC</span>
+                          <span className="font-bold text-emerald-600">+{finalEarnings.toFixed(2)} AC</span>
                         </div>
                       </div>
                       {isPending && (

@@ -48,10 +48,10 @@ const faqs: FaqEntry[] = [
       <>
         <p className="mb-2">Minimum balance requirements vary by promoter level:</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>Junior Promoter: Minimum deposit 100 USDC – 499 USDC, suitable for basic assignments with relatively lower Advertising Salary</li>
-          <li>Professional Promoter: Minimum deposit 501 USDC – 2,999 USDC, eligible for higher-level assignments with better Advertising Salary returns</li>
-          <li>Expert Promoter: Minimum deposit 3,000 USDC – 4,999 USDC, matches with high-value assignments and higher Advertising Salary rewards</li>
-          <li>Elite Promoter: Minimum deposit 5,000 USDC and above, eligible for the highest-value assignments with the highest Advertising Salary returns</li>
+          <li>Junior Promoter: Minimum deposit 100 AC – 499 AC, suitable for basic assignments with relatively lower Advertising Salary</li>
+          <li>Professional Promoter: Minimum deposit 501 AC – 2,999 AC, eligible for higher-level assignments with better Advertising Salary returns</li>
+          <li>Expert Promoter: Minimum deposit 3,000 AC – 4,999 AC, matches with high-value assignments and higher Advertising Salary rewards</li>
+          <li>Elite Promoter: Minimum deposit 5,000 AC and above, eligible for the highest-value assignments with the highest Advertising Salary returns</li>
         </ul>
         <p className="mt-2">The deposit amount determines the level of assignments that can be matched. The higher the deposit, the greater the value of assignments and the higher the Advertising Salary. All principal and Advertising Salary will be fully refunded upon completion to ensure fund security.</p>
       </>
@@ -80,7 +80,7 @@ const faqs: FaqEntry[] = [
           <li>Maintain account activity: Stay active and avoid long periods of inactivity to ensure stable promotion</li>
           <li>Follow platform rules: No violations like fraud, assignment interruption, or misconduct</li>
         </ul>
-        <p className="mt-2">After meeting these conditions, a base salary of 900 USDC will be settled every 5 days based on assignment completion.</p>
+        <p className="mt-2">After meeting these conditions, a base salary of 900 AC will be settled every 5 days based on assignment completion.</p>
       </>
     ),
   },

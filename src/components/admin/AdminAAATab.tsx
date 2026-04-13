@@ -347,7 +347,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <Input
                     value={car.price}
                     onChange={e => handleCarFieldChange(i, "price", e.target.value)}
-                    placeholder="Price (USDC)"
+                    placeholder="Price (AC)"
                     className="h-7 text-xs w-28"
                     type="number"
                     min={1}
@@ -371,10 +371,10 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 </div>
               ))}
               <div className="flex justify-between text-xs font-bold">
-                <span className="text-primary">Total: {totalAmount.toFixed(2)} USDC</span>
+                <span className="text-primary">Total: {totalAmount.toFixed(2)} AC</span>
                 <span className="text-muted-foreground">Commission: {totalCommission.toFixed(2)}</span>
                 {multiplierVal > 1 && <span className="text-muted-foreground">×{multiplierVal}</span>}
-                <span className="text-emerald-600">Final Earnings: {finalEarnings.toFixed(2)} USDC</span>
+                <span className="text-emerald-600">Final Earnings: {finalEarnings.toFixed(2)} AC</span>
               </div>
             </div>
           )}
@@ -441,7 +441,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <td className="px-4 py-3 text-center font-mono text-xs">Set {a.set_number || 1}</td>
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
-                  <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
+                  <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} AC</td>
                   <td className="px-4 py-3 text-center font-mono text-xs font-bold">{Number(a.commission_multiplier || 1) > 1 ? `×${a.commission_multiplier}` : '—'}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${

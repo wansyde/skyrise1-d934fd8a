@@ -140,7 +140,7 @@ const Notifications = () => {
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-sm font-semibold capitalize">{n.type}</span>
                         <span className={`text-sm font-semibold tabular-nums ${isDeposit ? "text-success" : "text-foreground"}`}>
-                          {isDeposit ? "+" : "-"}${Math.abs(n.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          {isDeposit ? "+" : "-"}{Math.abs(n.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })} AC
                         </span>
                       </div>
 

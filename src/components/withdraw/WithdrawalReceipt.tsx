@@ -42,7 +42,7 @@ const WithdrawalReceipt = ({
 
   const rows = [
     { label: "Username", value: `@${username}` },
-    { label: "Amount", value: `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` },
+    { label: "Amount", value: `${amount.toLocaleString("en-US", { minimumFractionDigits: 2 })} AC` },
     { label: "VIP Level", value: vipLevel },
     { label: "Network", value: "USDT (TRC-20)" },
     { label: "Wallet Name", value: walletName },

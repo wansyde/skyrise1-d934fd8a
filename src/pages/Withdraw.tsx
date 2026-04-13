@@ -20,7 +20,7 @@ const Withdraw = () => {
     e.preventDefault();
     const num = Number(amount);
     if (num < 100) {
-      toast.error("Minimum withdrawal amount is 100 USDC");
+      toast.error("Minimum withdrawal amount is 100 AC");
       return;
     }
     if (num <= 0 || num > balance) {
@@ -50,7 +50,7 @@ const Withdraw = () => {
       <div className="mx-auto max-w-lg">
         <div className="vault-card mb-6 p-5">
           <span className="text-xs text-muted-foreground">Available Balance</span>
-          <div className="mt-1 text-2xl font-semibold tabular-nums">{balance.toLocaleString()}.00 USDC</div>
+          <div className="mt-1 text-2xl font-semibold tabular-nums">{balance.toLocaleString()}.00 AC</div>
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-5 p-8">
@@ -70,7 +70,7 @@ const Withdraw = () => {
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium">Amount (USD)</label>
+            <label className="text-sm font-medium">Amount (AC)</label>
             <Input
               type="number"
               placeholder="0.00"
