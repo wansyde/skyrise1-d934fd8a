@@ -39,6 +39,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
 
   // Form state
   const [targetUserId, setTargetUserId] = useState("");
+  const [setNumber, setSetNumber] = useState("1");
   const [taskPosition, setTaskPosition] = useState("");
   const [numberOfCars, setNumberOfCars] = useState("3");
   const [totalAmount, setTotalAmount] = useState("");
@@ -78,8 +79,9 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     const pos = parseInt(taskPosition);
     const amt = parseFloat(totalAmount);
     const numCars = parseInt(numberOfCars);
+    const setNum = parseInt(setNumber);
 
-    if (!pos || pos < 1) { toast.error("Enter a valid task position (1+)"); return; }
+    if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
     if (!amt || amt <= 0) { toast.error("Enter a valid total amount"); return; }
     if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
     if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
@@ -88,6 +90,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     try {
       const { error } = await supabase.from("aaa_assignments" as any).insert({
         user_id: targetUserId || null,
+        set_number: setNum,
         task_position: pos,
         number_of_cars: numCars,
         total_assignment_amount: amt,
@@ -100,6 +103,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       setTotalAmount("");
       setSelectedCars([]);
       setTargetUserId("");
+      setSetNumber("1");
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
@@ -129,7 +133,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       {/* Create Form */}
       <div className="glass-card p-5">
         <h2 className="text-sm font-medium mb-4">Create AAA Assignment</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Target User</label>
             <select
@@ -146,8 +150,20 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             </select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Task Position</label>
-            <Input value={taskPosition} onChange={e => setTaskPosition(e.target.value)} placeholder="e.g. 15" className="h-9 text-xs" type="number" />
+            <label className="text-xs text-muted-foreground mb-1 block">Target Set</label>
+            <select
+              value={setNumber}
+              onChange={e => setSetNumber(e.target.value)}
+              className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs"
+            >
+              <option value="1">Set 1</option>
+              <option value="2">Set 2</option>
+              <option value="3">Set 3</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Position in Set (1–40)</label>
+            <Input value={taskPosition} onChange={e => setTaskPosition(e.target.value)} placeholder="e.g. 15" className="h-9 text-xs" type="number" min={1} max={40} />
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Number of Cars</label>
@@ -217,6 +233,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             <thead>
               <tr className="border-b border-border text-xs text-muted-foreground">
                 <th className="px-4 py-3 text-left font-medium">Target</th>
+                <th className="px-4 py-3 text-center font-medium">Set</th>
                 <th className="px-4 py-3 text-center font-medium">Position</th>
                 <th className="px-4 py-3 text-center font-medium">Cars</th>
                 <th className="px-4 py-3 text-right font-medium">Amount</th>
@@ -229,6 +246,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               {filteredAssignments.map((a: any) => (
                 <tr key={a.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
                   <td className="px-4 py-3 font-medium text-xs">{getUserName(a.user_id)}</td>
+                  <td className="px-4 py-3 text-center font-mono text-xs">Set {a.set_number || 1}</td>
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
                   <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
@@ -256,7 +274,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 </tr>
               ))}
               {filteredAssignments.length === 0 && (
-                <tr><td colSpan={7} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
+                <tr><td colSpan={8} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
               )}
             </tbody>
           </table>
