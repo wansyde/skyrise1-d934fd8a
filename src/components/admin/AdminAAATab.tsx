@@ -57,6 +57,56 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [commissionMultiplier, setCommissionMultiplier] = useState("1");
   const [submitting, setSubmitting] = useState(false);
 
+  // Real-time balance for selected user
+  const [liveBalance, setLiveBalance] = useState<number | null>(null);
+  const [balanceUpdatedAt, setBalanceUpdatedAt] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (!targetUserId) {
+      setLiveBalance(null);
+      setBalanceUpdatedAt(null);
+      return;
+    }
+
+    // Initial fetch
+    const fetchBalance = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("balance")
+        .eq("user_id", targetUserId)
+        .single();
+      if (data) {
+        setLiveBalance(data.balance);
+        setBalanceUpdatedAt(new Date());
+      }
+    };
+    fetchBalance();
+
+    // Realtime subscription
+    const channel = supabase
+      .channel(`admin-balance-${targetUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${targetUserId}`,
+        },
+        (payload: any) => {
+          if (payload.new?.balance !== undefined) {
+            setLiveBalance(payload.new.balance);
+            setBalanceUpdatedAt(new Date());
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [targetUserId]);
+
   const { data: assignments = [] } = useQuery({
     queryKey: ["admin-aaa-assignments"],
     queryFn: async () => {
