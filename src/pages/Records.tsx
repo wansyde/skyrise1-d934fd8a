@@ -346,9 +346,9 @@ const Records = () => {
                       </div>
                     </div>
 
-                    {/* Compact submit button - per-car balance check */}
+                    {/* Compact submit button - balance already deducted upfront, just need >= 0 */}
                     {isAAA && isRed && (() => {
-                      const canAfford = userBalance >= record.car_price;
+                      const canAfford = userBalance >= 0;
                       const isSubmitting = submittingId === record.parentId;
                       return (
                         <button
