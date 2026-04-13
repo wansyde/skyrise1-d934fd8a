@@ -103,6 +103,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       setTotalAmount("");
       setSelectedCars([]);
       setTargetUserId("");
+      setSetNumber("1");
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
