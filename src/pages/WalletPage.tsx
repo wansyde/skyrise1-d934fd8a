@@ -87,7 +87,7 @@ const WalletPage = () => {
                 </div>
                 <div className="text-right">
                   <span className={`text-sm font-medium tabular-nums ${positive ? "text-success" : "text-foreground"}`}>
-                    {positive ? "+" : ""}${Math.abs(Number(tx.amount)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    {positive ? "+" : ""} AC{Math.abs(Number(tx.amount)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </span>
                   <span className={`text-[10px] block mt-0.5 ${tx.status === "pending" ? "text-warning" : "text-success"}`}>
                     {tx.status}
