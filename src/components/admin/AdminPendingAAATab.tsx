@@ -67,7 +67,8 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
         return carStatuses[i] === "pending_insufficient" ? sum + price : sum;
       }, 0);
 
-      const deficit = balance < remainingCost ? remainingCost - balance : 0;
+      // Required deposit = absolute value of negative balance only
+      const deficit = balance < 0 ? Math.abs(balance) : 0;
 
       const totalRawCommission = carCommissions.reduce((s: number, c: number) => s + c, 0);
       const finalCommission = totalRawCommission * multiplier;
