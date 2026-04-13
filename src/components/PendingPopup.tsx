@@ -5,6 +5,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import SkyriseLogo from "@/components/SkyriseLogo";
 
+// Only these popup types are allowed to show
+const ALLOWED_TYPES = ["upgrade", "reset", "bonus", "info"];
+// These are blocked (transaction-related)
+const BLOCKED_TYPES = ["deposit", "withdrawal", "balance"];
+
 const PendingPopup = () => {
   const { profile, refreshProfile } = useAuth();
   const [visible, setVisible] = useState(false);
@@ -12,11 +17,28 @@ const PendingPopup = () => {
   const [popupType, setPopupType] = useState("");
 
   useEffect(() => {
-    if (profile?.pending_popup_message) {
-      setMessage(profile.pending_popup_message);
-      setPopupType(profile.pending_popup_type || "info");
-      setVisible(true);
+    if (!profile?.pending_popup_message) return;
+
+    const type = profile.pending_popup_type || "info";
+
+    // Block transaction-related popups - silently clear them
+    if (BLOCKED_TYPES.includes(type)) {
+      clearPopup();
+      return;
     }
+
+    // Session guard: only show once per login session
+    const seen = sessionStorage.getItem("hasSeenBonusPopup");
+    if (seen === "true") {
+      // Already shown this session, clear DB but don't show
+      clearPopup();
+      return;
+    }
+
+    setMessage(profile.pending_popup_message);
+    setPopupType(type);
+    setVisible(true);
+    sessionStorage.setItem("hasSeenBonusPopup", "true");
   }, [profile?.pending_popup_message]);
 
   // Auto-dismiss after 5 seconds
@@ -28,8 +50,7 @@ const PendingPopup = () => {
     return () => clearTimeout(timer);
   }, [visible]);
 
-  const dismiss = async () => {
-    setVisible(false);
+  const clearPopup = async () => {
     if (profile?.user_id) {
       await supabase
         .from("profiles")
@@ -37,6 +58,11 @@ const PendingPopup = () => {
         .eq("user_id", profile.user_id);
       refreshProfile();
     }
+  };
+
+  const dismiss = async () => {
+    setVisible(false);
+    await clearPopup();
   };
 
   const getIcon = () => {
@@ -58,11 +84,11 @@ const PendingPopup = () => {
             </svg>
           </div>
         );
-      case "deposit":
+      case "bonus":
         return (
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
         );
@@ -82,7 +108,6 @@ const PendingPopup = () => {
     <AnimatePresence>
       {visible && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -91,7 +116,6 @@ const PendingPopup = () => {
             onClick={dismiss}
             className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
           />
-          {/* Popup */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -100,24 +124,15 @@ const PendingPopup = () => {
             className="fixed inset-0 z-[101] flex items-center justify-center p-6"
           >
             <div className="relative w-full max-w-sm rounded-3xl bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden">
-              {/* Subtle top accent */}
               <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
-
               <div className="px-8 pt-7 pb-8 text-center">
-                {/* Logo */}
                 <div className="flex justify-center mb-4">
                   <SkyriseLogo className="h-10 w-auto" />
                 </div>
-
-                {/* Icon */}
                 {getIcon()}
-
-                {/* Message */}
                 <p className="text-sm leading-relaxed text-foreground/80 font-medium" style={{ fontFamily: "Montserrat, sans-serif" }}>
                   {message}
                 </p>
-
-                {/* Dismiss */}
                 <button
                   onClick={dismiss}
                   className="mt-6 flex items-center justify-center mx-auto h-9 w-9 rounded-full border border-border/40 text-muted-foreground hover:text-foreground hover:border-border transition-all duration-200"
