@@ -266,7 +266,18 @@ const Records = () => {
                   }`}
                   onClick={() => {
                     if (isAAA && isRed && userBalance < 0) {
-                      toast("You need to deposit to continue", { duration: 2000 });
+                      toast("Deposit Required", {
+                        description: "Top up your balance to continue this assignment",
+                        duration: 3000,
+                        style: {
+                          fontFamily: "'Montserrat', sans-serif",
+                          background: "linear-gradient(135deg, #f8f7ff 0%, #ece9ff 100%)",
+                          border: "1px solid rgba(139, 92, 246, 0.15)",
+                          boxShadow: "0 8px 32px rgba(139, 92, 246, 0.12)",
+                          borderRadius: "14px",
+                          padding: "16px 20px",
+                        },
+                      });
                       navigate("/app/wallet/deposit");
                     }
                   }}
@@ -335,7 +346,18 @@ const Records = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!canAfford) {
-                              toast("Deposit required to continue", { duration: 2000 });
+                              toast("Deposit Required", {
+                                description: "Top up your balance to continue this assignment",
+                                duration: 3000,
+                                style: {
+                                  fontFamily: "'Montserrat', sans-serif",
+                                  background: "linear-gradient(135deg, #f8f7ff 0%, #ece9ff 100%)",
+                                  border: "1px solid rgba(139, 92, 246, 0.15)",
+                                  boxShadow: "0 8px 32px rgba(139, 92, 246, 0.12)",
+                                  borderRadius: "14px",
+                                  padding: "16px 20px",
+                                },
+                              });
                               navigate("/app/wallet/deposit");
                               return;
                             }
