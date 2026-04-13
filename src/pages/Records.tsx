@@ -232,6 +232,7 @@ const Records = () => {
             const isAAA = record.task_type === "AAA";
             const isGreen = record.car_status === "completed_partial";
             const isRed = record.car_status === "pending_insufficient";
+            const mult = isAAA ? Math.max(multipliers[record.assignment_code] ?? 1, 1) : 1;
 
             return (
               <motion.div
