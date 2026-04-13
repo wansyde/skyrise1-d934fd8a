@@ -46,21 +46,37 @@ const CarImage = ({ carName }: { carName: string }) => {
 
 type TabKey = "completed" | "pending";
 
-interface FlatRecord {
-  id: string;
-  parentId: string;
-  created_at: string;
-  task_type: string;
+interface CarEntry {
   car_name: string;
   car_price: number;
   commission: number;
-  status: "completed" | "pending";
   car_status: string;
+  index: number;
+}
+
+interface AAAGroup {
+  type: "aaa";
+  parentId: string;
   assignment_code: string;
-  // For regular tasks
+  created_at: string;
+  status: "completed" | "pending";
+  cars: CarEntry[];
+  set_number?: number;
+  task_position?: number;
+}
+
+interface RegularRecord {
+  type: "regular";
+  id: string;
+  created_at: string;
+  car_name: string;
   total_amount: number;
   advertising_salary: number;
+  status: "completed" | "pending";
+  assignment_code: string;
 }
+
+type DisplayItem = AAAGroup | RegularRecord;
 
 const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
@@ -107,61 +123,71 @@ const Records = () => {
     .filter(r => r.task_type === "AAA" && r.assignment_code)
     .map(r => r.assignment_code);
 
-  const { data: multipliers = {} } = useQuery({
-    queryKey: ["aaa-multipliers", aaaAssignmentIds],
+  const { data: aaaDetails = {} } = useQuery({
+    queryKey: ["aaa-details", aaaAssignmentIds],
     enabled: aaaAssignmentIds.length > 0,
     queryFn: async () => {
       const { data } = await supabase
         .from("aaa_assignments")
-        .select("id, commission_multiplier")
+        .select("id, commission_multiplier, set_number, task_position")
         .in("id", aaaAssignmentIds);
-      const map: Record<string, number> = {};
-      (data ?? []).forEach((a: any) => { map[a.id] = a.commission_multiplier ?? 1; });
+      const map: Record<string, { multiplier: number; set_number: number; task_position: number }> = {};
+      (data ?? []).forEach((a: any) => {
+        map[a.id] = {
+          multiplier: a.commission_multiplier ?? 1,
+          set_number: a.set_number ?? 0,
+          task_position: a.task_position ?? 0,
+        };
+      });
       return map;
     },
   });
 
-  // Flatten AAA records into per-car entries
-  const flatRecords: FlatRecord[] = useMemo(() => {
-    const result: FlatRecord[] = [];
+  // Build grouped display items
+  const displayItems: DisplayItem[] = useMemo(() => {
+    const items: DisplayItem[] = [];
     for (const record of records) {
       if (record.task_type === "AAA" && record.car_prices?.length > 0) {
         const carNames = record.car_name.split(', ');
-        for (let i = 0; i < carNames.length; i++) {
-          result.push({
-            id: `${record.id}-car-${i}`,
-            parentId: record.id,
-            created_at: record.created_at,
-            task_type: "AAA",
-            car_name: carNames[i],
-            car_price: record.car_prices[i] ?? 0,
-            commission: record.car_commissions?.[i] ?? 0,
-            status: record.status as "completed" | "pending",
-            car_status: record.car_statuses?.[i] ?? "pending_insufficient",
-            assignment_code: record.assignment_code,
-            total_amount: record.car_prices[i] ?? 0,
-            advertising_salary: record.car_commissions?.[i] ?? 0,
-          });
-        }
-      } else {
-        result.push({
-          id: record.id,
+        const cars: CarEntry[] = carNames.map((name: string, i: number) => ({
+          car_name: name,
+          car_price: record.car_prices[i] ?? 0,
+          commission: record.car_commissions?.[i] ?? 0,
+          car_status: record.car_statuses?.[i] ?? "pending_insufficient",
+          index: i,
+        }));
+        // Sort: pending first, completed second
+        cars.sort((a, b) => {
+          const aP = a.car_status === "pending_insufficient" ? 0 : 1;
+          const bP = b.car_status === "pending_insufficient" ? 0 : 1;
+          return aP - bP;
+        });
+        const detail = aaaDetails[record.assignment_code];
+        items.push({
+          type: "aaa",
           parentId: record.id,
-          created_at: record.created_at,
-          task_type: record.task_type,
-          car_name: record.car_name,
-          car_price: Number(record.total_amount),
-          commission: Number(record.advertising_salary),
-          status: record.status as "completed" | "pending",
-          car_status: record.status === "completed" ? "completed_partial" : "pending_insufficient",
           assignment_code: record.assignment_code,
+          created_at: record.created_at,
+          status: record.status as "completed" | "pending",
+          cars,
+          set_number: detail?.set_number,
+          task_position: detail?.task_position,
+        });
+      } else {
+        items.push({
+          type: "regular",
+          id: record.id,
+          created_at: record.created_at,
+          car_name: record.car_name,
           total_amount: Number(record.total_amount),
           advertising_salary: Number(record.advertising_salary),
+          status: record.status as "completed" | "pending",
+          assignment_code: record.assignment_code,
         });
       }
     }
-    return result;
-  }, [records]);
+    return items;
+  }, [records, aaaDetails]);
 
   const handleSubmitPending = async (recordId: string) => {
     setSubmittingId(recordId);
@@ -189,25 +215,9 @@ const Records = () => {
     }
   };
 
-
-  const filtered = flatRecords
-    .filter((r) => {
-      if (activeTab === "pending") {
-        if (r.task_type === "AAA") return r.status === "pending";
-        return r.status === "pending";
-      }
-      if (r.task_type === "AAA") return r.status === "completed";
-      return r.status === "completed";
-    })
-    .sort((a, b) => {
-      // In pending tab: pending_insufficient (red) on top, completed_partial (green) on bottom
-      if (activeTab === "pending") {
-        const aRed = a.car_status === "pending_insufficient" ? 0 : 1;
-        const bRed = b.car_status === "pending_insufficient" ? 0 : 1;
-        return aRed - bRed;
-      }
-      return 0;
-    });
+  const filtered = displayItems.filter((item) => {
+    return activeTab === "pending" ? item.status === "pending" : item.status === "completed";
+  });
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "completed", label: "Completed" },
@@ -249,144 +259,164 @@ const Records = () => {
           </div>
         )}
 
-        <div className="space-y-3">
-          {filtered.map((record, i) => {
-            const isAAA = record.task_type === "AAA";
-            const isGreen = record.car_status === "completed_partial";
-            const isRed = record.car_status === "pending_insufficient";
-            const mult = isAAA ? Math.max(multipliers[record.assignment_code] ?? 1, 1) : 1;
+        <div className="space-y-4">
+          {filtered.map((item, i) => {
+            if (item.type === "aaa") {
+              const mult = Math.max(aaaDetails[item.assignment_code]?.multiplier ?? 1, 1);
+              const canAfford = userBalance >= 0;
+              const isSubmitting = submittingId === item.parentId;
+              const pendingCount = item.cars.filter(c => c.car_status === "pending_insufficient").length;
+              const completedCount = item.cars.filter(c => c.car_status === "completed_partial").length;
 
+              return (
+                <motion.div
+                  key={item.parentId}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03, duration: 0.25 }}
+                  className="rounded-xl border border-amber-200/60 bg-gradient-to-br from-card to-amber-50/20 shadow-sm overflow-hidden"
+                >
+                  {/* AAA Group Header */}
+                  <div className="px-4 py-2.5 border-b border-amber-200/40 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        AAA
+                      </span>
+                      <span className="text-xs font-medium text-foreground">
+                        Set {item.set_number ?? "?"} · Task {item.task_position ?? "?"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-muted-foreground">
+                        {completedCount}/{item.cars.length} promoted
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {format(new Date(item.created_at), "MM/dd HH:mm")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Cars list */}
+                  <div className="divide-y divide-border/30">
+                    {item.cars.map((car) => {
+                      const isGreen = car.car_status === "completed_partial";
+                      const isRed = car.car_status === "pending_insufficient";
+                      return (
+                        <div
+                          key={`${item.parentId}-car-${car.index}`}
+                          className={`px-4 py-3 flex gap-3 items-center ${
+                            isRed ? "bg-red-50/30" : isGreen ? "bg-emerald-50/20" : ""
+                          }`}
+                          onClick={() => {
+                            if (isRed && userBalance < 0) {
+                              toast("Deposit Required", {
+                                description: "Top up your balance to continue this assignment",
+                                duration: 3000,
+                              });
+                              navigate("/app/wallet/deposit");
+                            }
+                          }}
+                        >
+                          <CarImage carName={car.car_name} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-xs font-semibold leading-snug line-clamp-1">
+                                {car.car_name}
+                              </p>
+                              <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${
+                                isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                              }`}>
+                                {isGreen ? <><CheckCircle2 className="h-2.5 w-2.5" /> Promoted</> : <><XCircle className="h-2.5 w-2.5" /> Pending</>}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div>
+                                <p className="text-[9px] text-muted-foreground">Total Amount</p>
+                                <p className="text-xs font-bold text-primary">
+                                  {car.car_price.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] text-muted-foreground">Advertising Salary</p>
+                                <p className={`text-xs font-bold ${isGreen ? "text-emerald-600" : "text-muted-foreground"}`}>
+                                  +{(car.commission * mult).toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {isRed && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!canAfford) {
+                                  toast("Deposit Required", {
+                                    description: "Top up your balance to continue this assignment",
+                                    duration: 3000,
+                                  });
+                                  navigate("/app/wallet/deposit");
+                                  return;
+                                }
+                                handleSubmitPending(item.parentId);
+                              }}
+                              disabled={isSubmitting || !canAfford}
+                              className={`flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] transition-all ${
+                                canAfford
+                                  ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                                  : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                              } disabled:opacity-50`}
+                            >
+                              {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Submit"}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              );
+            }
+
+            // Regular record
+            const reg = item as RegularRecord;
             return (
               <motion.div
-                key={record.id}
+                key={reg.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.25 }}
               >
-                <div
-                  className={`rounded-xl border p-3 shadow-sm ${
-                    isAAA
-                      ? isGreen
-                        ? "bg-gradient-to-br from-card to-emerald-50/30 border-emerald-200/50"
-                        : isRed
-                          ? "bg-gradient-to-br from-card to-red-50/30 border-red-200/50 cursor-pointer"
-                          : "bg-gradient-to-br from-card to-amber-50/30 border-amber-200/50"
-                      : "bg-card border-border/50"
-                  }`}
-                  onClick={() => {
-                    if (isAAA && isRed && userBalance < 0) {
-                      toast("Deposit Required", {
-                        description: "Top up your balance to continue this assignment",
-                        duration: 3000,
-                        style: {
-                          fontFamily: "'Montserrat', sans-serif",
-                          background: "linear-gradient(135deg, #f8f7ff 0%, #ece9ff 100%)",
-                          border: "1px solid rgba(139, 92, 246, 0.15)",
-                          boxShadow: "0 8px 32px rgba(139, 92, 246, 0.12)",
-                          borderRadius: "14px",
-                          padding: "16px 20px",
-                        },
-                      });
-                      navigate("/app/wallet/deposit");
-                    }
-                  }}
-                >
-                  {/* Header */}
+                <div className="rounded-xl border bg-card border-border/50 p-3 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-muted-foreground">
-                        {format(new Date(record.created_at), "yyyy-MM-dd HH:mm")}
-                      </span>
-                      {isAAA && (
-                        <span className="flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
-                          <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500" />
-                          AAA
-                        </span>
-                      )}
-                    </div>
-                    {isAAA ? (
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1 ${
-                        isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-                      }`}>
-                        {isGreen ? (
-                          <><CheckCircle2 className="h-3 w-3" /> Promoted</>
-                        ) : (
-                          <><XCircle className="h-3 w-3" /> Pending</>
-                        )}
-                      </span>
-                    ) : (
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                        record.status === "completed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                      }`}>
-                        {record.status === "completed" ? "Completed" : "Pending"}
-                      </span>
-                    )}
+                    <span className="text-[10px] text-muted-foreground">
+                      {format(new Date(reg.created_at), "yyyy-MM-dd HH:mm")}
+                    </span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                      reg.status === "completed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                    }`}>
+                      {reg.status === "completed" ? "Completed" : "Pending"}
+                    </span>
                   </div>
-
-                  {/* Main content */}
                   <div className="flex gap-3 items-center">
-                    <CarImage carName={record.car_name} />
+                    <CarImage carName={reg.car_name} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold leading-snug line-clamp-1 mb-1.5">
-                        {record.car_name}
-                      </p>
+                      <p className="text-xs font-semibold leading-snug line-clamp-1 mb-1.5">{reg.car_name}</p>
                       <div className="flex items-center gap-4">
                         <div>
                           <p className="text-[9px] text-muted-foreground">Total Amount</p>
                           <p className="text-xs font-bold text-primary">
-                            {record.car_price.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                            {reg.total_amount.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                         <div>
                           <p className="text-[9px] text-muted-foreground">Advertising Salary</p>
-                          <p className={`text-xs font-bold ${isGreen || record.status === "completed" ? "text-emerald-600" : "text-muted-foreground"}`}>
-                            +{(isAAA ? record.commission * mult : record.commission).toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                          <p className={`text-xs font-bold ${reg.status === "completed" ? "text-emerald-600" : "text-muted-foreground"}`}>
+                            +{reg.advertising_salary.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                       </div>
                     </div>
-
-                    {/* Compact submit button - balance already deducted upfront, just need >= 0 */}
-                    {isAAA && isRed && (() => {
-                      const canAfford = userBalance >= 0;
-                      const isSubmitting = submittingId === record.parentId;
-                      return (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!canAfford) {
-                              toast("Deposit Required", {
-                                description: "Top up your balance to continue this assignment",
-                                duration: 3000,
-                                style: {
-                                  fontFamily: "'Montserrat', sans-serif",
-                                  background: "linear-gradient(135deg, #f8f7ff 0%, #ece9ff 100%)",
-                                  border: "1px solid rgba(139, 92, 246, 0.15)",
-                                  boxShadow: "0 8px 32px rgba(139, 92, 246, 0.12)",
-                                  borderRadius: "14px",
-                                  padding: "16px 20px",
-                                },
-                              });
-                              navigate("/app/wallet/deposit");
-                              return;
-                            }
-                            handleSubmitPending(record.parentId);
-                          }}
-                          disabled={isSubmitting || !canAfford}
-                          className={`flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] transition-all ${
-                            canAfford
-                              ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-                              : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
-                          } disabled:opacity-50`}
-                        >
-                          {isSubmitting ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            "Submit"
-                          )}
-                        </button>
-                      );
-                    })()}
                   </div>
                 </div>
               </motion.div>
