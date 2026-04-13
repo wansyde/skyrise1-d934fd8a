@@ -188,17 +188,15 @@ const Records = () => {
     return r.status === "completed";
   });
 
+  const tabs: { key: TabKey; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "pending", label: "Pending" },
+    { key: "completed", label: "Completed" },
+  ];
+
   return (
     <AppLayout>
       <div className="px-4 py-5 min-h-screen">
-        {/* Deficit banner */}
-        {deficit > 0 && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-center">
-            <p className="text-xs font-bold text-destructive">
-              You have a deficit of {deficit.toFixed(2)} AC. Please deposit to continue.
-            </p>
-          </div>
-        )}
 
         {/* Tabs */}
         <div className="flex border-b border-border/50 mb-4">
