@@ -345,7 +345,7 @@ const Starting = () => {
         if (!result.all_completed) {
           toast.error("Some cars could not be completed due to insufficient balance. Check Records → Pending for details.");
           setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false);
-          setTimeout(() => navigate("/app/records"), 1500);
+          setTimeout(() => navigate("/app/records", { state: { tab: "pending" } }), 1500);
         } else {
           const multiplierText = result.multiplier > 1 ? ` (×${result.multiplier})` : '';
           console.log("AAA completed — raw:", result.raw_commission, "multiplier:", result.multiplier, "final:", result.total_commission, "new_balance:", result.new_balance);
