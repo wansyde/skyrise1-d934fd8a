@@ -188,15 +188,6 @@ const Records = () => {
     return r.status === "completed";
   });
 
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "pending", label: "Pending" },
-    { key: "completed", label: "Completed" },
-  ];
-
-  // Deficit message
-  const deficit = userBalance < 0 ? Math.abs(userBalance) : 0;
-
   return (
     <AppLayout>
       <div className="px-4 py-5 min-h-screen">
