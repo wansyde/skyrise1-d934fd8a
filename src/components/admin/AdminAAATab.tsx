@@ -43,7 +43,8 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [taskPosition, setTaskPosition] = useState("");
   const [numberOfCars, setNumberOfCars] = useState("3");
   const [profitPercentage, setProfitPercentage] = useState("5");
-  const [selectedCars, setSelectedCars] = useState<{ name: string; price: string }[]>([]);
+  const [commissionMode, setCommissionMode] = useState<"percentage" | "fixed">("percentage");
+  const [selectedCars, setSelectedCars] = useState<{ name: string; price: string; commission: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const { data: assignments = [] } = useQuery({
@@ -79,6 +80,9 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
 
     const carNames = selectedCars.map(c => c.name);
     const carPrices = selectedCars.map(c => parseFloat(c.price));
+    const carCommissions = commissionMode === "fixed"
+      ? selectedCars.map(c => parseFloat(c.commission) || 0)
+      : selectedCars.map(c => Math.round(parseFloat(c.price) * profitPct * 100) / 100);
 
     setSubmitting(true);
     try {
@@ -90,6 +94,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
         total_assignment_amount: totalAmount,
         car_names: carNames,
         car_prices: carPrices,
+        car_commissions: carCommissions,
         profit_percentage: profitPct,
         status: "active",
       } as any);
@@ -122,16 +127,16 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     const maxCars = parseInt(numberOfCars) || 3;
     if (selectedCars.length >= maxCars) { toast.error(`Max ${maxCars} cars`); return; }
     if (selectedCars.find(c => c.name === carName)) return;
-    setSelectedCars([...selectedCars, { name: carName, price: "" }]);
+    setSelectedCars([...selectedCars, { name: carName, price: "", commission: "" }]);
   };
 
   const handleRemoveCar = (index: number) => {
     setSelectedCars(selectedCars.filter((_, i) => i !== index));
   };
 
-  const handleCarPriceChange = (index: number, price: string) => {
+  const handleCarFieldChange = (index: number, field: "price" | "commission", value: string) => {
     const updated = [...selectedCars];
-    updated[index] = { ...updated[index], price };
+    updated[index] = { ...updated[index], [field]: value };
     setSelectedCars(updated);
   };
 
@@ -141,12 +146,16 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     return getUserName(a.user_id).toLowerCase().includes(q) || (a.status || "").toLowerCase().includes(q);
   });
 
+  const totalCommission = commissionMode === "fixed"
+    ? selectedCars.reduce((sum, c) => sum + (parseFloat(c.commission) || 0), 0)
+    : totalAmount * (parseFloat(profitPercentage) / 100 || 0);
+
   return (
     <div className="space-y-6">
       {/* Create Form */}
       <div className="glass-card p-5">
         <h2 className="text-sm font-medium mb-4">Create AAA Assignment</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Target User</label>
             <select
@@ -189,14 +198,27 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             </select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Profit %</label>
-            <Input value={profitPercentage} onChange={e => setProfitPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
+            <label className="text-xs text-muted-foreground mb-1 block">Commission Mode</label>
+            <select
+              value={commissionMode}
+              onChange={e => setCommissionMode(e.target.value as "percentage" | "fixed")}
+              className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs"
+            >
+              <option value="percentage">% of Price</option>
+              <option value="fixed">Fixed Value</option>
+            </select>
           </div>
+          {commissionMode === "percentage" && (
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Profit %</label>
+              <Input value={profitPercentage} onChange={e => setProfitPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
+            </div>
+          )}
         </div>
 
-        {/* Car selection with individual prices */}
+        {/* Car selection with individual prices + commissions */}
         <div className="mb-4">
-          <label className="text-xs text-muted-foreground mb-2 block">Cars & Prices ({selectedCars.length}/{numberOfCars})</label>
+          <label className="text-xs text-muted-foreground mb-2 block">Cars, Prices & Commissions ({selectedCars.length}/{numberOfCars})</label>
           
           {selectedCars.length > 0 && (
             <div className="space-y-2 mb-3">
@@ -205,17 +227,33 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <span className="text-xs font-medium flex-1 truncate">{car.name}</span>
                   <Input
                     value={car.price}
-                    onChange={e => handleCarPriceChange(i, e.target.value)}
+                    onChange={e => handleCarFieldChange(i, "price", e.target.value)}
                     placeholder="Price (USDC)"
                     className="h-7 text-xs w-28"
                     type="number"
                     min={1}
                   />
+                  {commissionMode === "fixed" && (
+                    <Input
+                      value={car.commission}
+                      onChange={e => handleCarFieldChange(i, "commission", e.target.value)}
+                      placeholder="Commission"
+                      className="h-7 text-xs w-24"
+                      type="number"
+                      min={0}
+                    />
+                  )}
+                  {commissionMode === "percentage" && car.price && (
+                    <span className="text-[10px] text-muted-foreground w-20 text-right">
+                      +{(parseFloat(car.price) * (parseFloat(profitPercentage) / 100 || 0)).toFixed(2)}
+                    </span>
+                  )}
                   <button onClick={() => handleRemoveCar(i)} className="text-destructive hover:text-destructive/80">×</button>
                 </div>
               ))}
-              <div className="flex justify-end text-xs font-bold text-primary">
-                Total: {totalAmount.toFixed(2)} USDC
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-primary">Total: {totalAmount.toFixed(2)} USDC</span>
+                <span className="text-emerald-600">Commission: {totalCommission.toFixed(2)} USDC</span>
               </div>
             </div>
           )}
@@ -259,9 +297,8 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 <th className="px-4 py-3 text-center font-medium">Position</th>
                 <th className="px-4 py-3 text-center font-medium">Cars</th>
                 <th className="px-4 py-3 text-right font-medium">Amount</th>
-                <th className="px-4 py-3 text-center font-medium">Profit %</th>
                 <th className="px-4 py-3 text-center font-medium">Status</th>
-                <th className="px-4 py-3 text-left font-medium">Cars + Prices</th>
+                <th className="px-4 py-3 text-left font-medium">Cars + Prices + Commission</th>
                 <th className="px-4 py-3 text-center font-medium">Actions</th>
               </tr>
             </thead>
@@ -273,7 +310,6 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
                   <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
-                  <td className="px-4 py-3 text-center text-xs font-semibold">{((a.profit_percentage || 0.05) * 100).toFixed(1)}%</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                       a.status === "active" ? "bg-emerald-100 text-emerald-700" :
@@ -288,9 +324,14 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                       {(a.car_names || []).map((c: string, i: number) => (
                         <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded flex items-center justify-between gap-2">
                           <span className="truncate">{c.split(" ").slice(0, 2).join(" ")}</span>
-                          {a.car_prices?.[i] != null && (
-                            <span className="font-bold text-primary">{Number(a.car_prices[i]).toLocaleString()}</span>
-                          )}
+                          <span className="flex gap-2">
+                            {a.car_prices?.[i] != null && (
+                              <span className="font-bold text-primary">{Number(a.car_prices[i]).toLocaleString()}</span>
+                            )}
+                            {a.car_commissions?.[i] != null && a.car_commissions[i] > 0 && (
+                              <span className="font-bold text-emerald-600">+{Number(a.car_commissions[i]).toLocaleString()}</span>
+                            )}
+                          </span>
                         </span>
                       ))}
                     </div>
@@ -303,7 +344,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 </tr>
               ))}
               {filteredAssignments.length === 0 && (
-                <tr><td colSpan={9} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
+                <tr><td colSpan={8} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
               )}
             </tbody>
           </table>

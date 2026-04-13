@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       aaa_assignments: {
         Row: {
+          car_commissions: number[]
           car_names: string[]
           car_prices: number[]
           created_at: string
@@ -30,6 +31,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          car_commissions?: number[]
           car_names?: string[]
           car_prices?: number[]
           created_at?: string
@@ -44,6 +46,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          car_commissions?: number[]
           car_names?: string[]
           car_prices?: number[]
           created_at?: string
@@ -182,6 +185,7 @@ export type Database = {
           credit_score: number
           current_unlocked_set: number
           email: string
+          escrow_balance: number
           full_name: string
           gender: string | null
           id: string
@@ -230,6 +234,7 @@ export type Database = {
           credit_score?: number
           current_unlocked_set?: number
           email?: string
+          escrow_balance?: number
           full_name?: string
           gender?: string | null
           id?: string
@@ -278,6 +283,7 @@ export type Database = {
           credit_score?: number
           current_unlocked_set?: number
           email?: string
+          escrow_balance?: number
           full_name?: string
           gender?: string | null
           id?: string
@@ -397,9 +403,11 @@ export type Database = {
           advertising_salary: number
           assignment_code: string
           car_brand: string
+          car_commissions: number[]
           car_image_url: string | null
           car_name: string
           car_prices: number[]
+          car_statuses: string[]
           created_at: string
           id: string
           status: string
@@ -411,9 +419,11 @@ export type Database = {
           advertising_salary?: number
           assignment_code: string
           car_brand: string
+          car_commissions?: number[]
           car_image_url?: string | null
           car_name: string
           car_prices?: number[]
+          car_statuses?: string[]
           created_at?: string
           id?: string
           status?: string
@@ -425,9 +435,11 @@ export type Database = {
           advertising_salary?: number
           assignment_code?: string
           car_brand?: string
+          car_commissions?: number[]
           car_image_url?: string | null
           car_name?: string
           car_prices?: number[]
+          car_statuses?: string[]
           created_at?: string
           id?: string
           status?: string
