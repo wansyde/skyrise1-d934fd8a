@@ -30,7 +30,6 @@ const PendingPopup = () => {
     // Session guard: only show once per login session
     const seen = sessionStorage.getItem("hasSeenBonusPopup");
     if (seen === "true") {
-      // Already shown this session, clear DB but don't show
       clearPopup();
       return;
     }
@@ -40,15 +39,6 @@ const PendingPopup = () => {
     setVisible(true);
     sessionStorage.setItem("hasSeenBonusPopup", "true");
   }, [profile?.pending_popup_message]);
-
-  // Auto-dismiss after 5 seconds
-  useEffect(() => {
-    if (!visible) return;
-    const timer = setTimeout(() => {
-      dismiss();
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [visible]);
 
   const clearPopup = async () => {
     if (profile?.user_id) {
@@ -113,7 +103,6 @@ const PendingPopup = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            onClick={dismiss}
             className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
           />
           <motion.div
@@ -133,12 +122,20 @@ const PendingPopup = () => {
                 <p className="text-sm leading-relaxed text-foreground/80 font-medium" style={{ fontFamily: "Montserrat, sans-serif" }}>
                   {message}
                 </p>
-                <button
-                  onClick={dismiss}
-                  className="mt-6 flex items-center justify-center mx-auto h-9 w-9 rounded-full border border-border/40 text-muted-foreground hover:text-foreground hover:border-border transition-all duration-200"
-                >
-                  <X className="h-4 w-4" strokeWidth={1.5} />
-                </button>
+                <div className="mt-6 flex flex-col items-center gap-3">
+                  <button
+                    onClick={dismiss}
+                    className="flex items-center justify-center mx-auto h-9 w-9 rounded-full border border-border/40 text-muted-foreground hover:text-foreground hover:border-border transition-all duration-200"
+                  >
+                    <X className="h-4 w-4" strokeWidth={1.5} />
+                  </button>
+                  <button
+                    onClick={dismiss}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
