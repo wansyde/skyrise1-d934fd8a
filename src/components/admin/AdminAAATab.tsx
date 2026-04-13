@@ -162,9 +162,11 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     return getUserName(a.user_id).toLowerCase().includes(q) || (a.status || "").toLowerCase().includes(q);
   });
 
+  const multiplierVal = parseFloat(commissionMultiplier) || 1;
   const totalCommission = commissionMode === "fixed"
     ? selectedCars.reduce((sum, c) => sum + (parseFloat(c.commission) || 0), 0)
     : totalAmount * (parseFloat(commissionPercentage) / 100 || 0);
+  const finalEarnings = Math.round(totalCommission * multiplierVal * 100) / 100;
 
   return (
     <div className="space-y-6">
