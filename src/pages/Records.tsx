@@ -83,7 +83,7 @@ const Records = () => {
       } else {
         toast.info("Some cars completed. Deposit more funds to finish the remaining cars.");
       }
-      refreshProfile();
+      await refreshProfile();
       queryClient.invalidateQueries({ queryKey: ["task-records"] });
     } catch (e: any) {
       toast.error(e?.message || "Failed to submit task");

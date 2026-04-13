@@ -340,12 +340,14 @@ const Starting = () => {
           setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); return;
         }
         setCompletedCount(prev => prev + 1);
-        refreshProfile();
+        await refreshProfile();
         if (!result.all_completed) {
           toast.error("Some cars could not be completed due to insufficient balance. Check Records → Pending for details.");
           setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false);
           setTimeout(() => navigate("/app/records"), 1500);
         } else {
+          console.log("AAA completed — commission:", result.total_commission, "new_balance:", result.new_balance);
+          toast.success(`AAA assignment completed. Earnings of $${result.total_commission} added to your balance.`);
           setMatchState("submitted");
           setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1500);
         }
@@ -366,7 +368,7 @@ const Starting = () => {
           setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
         }
         setCompletedCount(prev => prev + 1);
-        refreshProfile();
+        await refreshProfile();
         setMatchState("submitted");
         setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
       }
