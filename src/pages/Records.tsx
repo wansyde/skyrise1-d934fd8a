@@ -190,16 +190,24 @@ const Records = () => {
   };
 
 
-  const filtered = flatRecords.filter((r) => {
-    if (activeTab === "pending") {
-      // For AAA: show ALL cars from a pending parent record (both green and red)
-      if (r.task_type === "AAA") return r.status === "pending";
-      return r.status === "pending";
-    }
-    // "completed" tab — only show when the entire AAA record is completed
-    if (r.task_type === "AAA") return r.status === "completed";
-    return r.status === "completed";
-  });
+  const filtered = flatRecords
+    .filter((r) => {
+      if (activeTab === "pending") {
+        if (r.task_type === "AAA") return r.status === "pending";
+        return r.status === "pending";
+      }
+      if (r.task_type === "AAA") return r.status === "completed";
+      return r.status === "completed";
+    })
+    .sort((a, b) => {
+      // In pending tab: pending_insufficient (red) on top, completed_partial (green) on bottom
+      if (activeTab === "pending") {
+        const aRed = a.car_status === "pending_insufficient" ? 0 : 1;
+        const bRed = b.car_status === "pending_insufficient" ? 0 : 1;
+        return aRed - bRed;
+      }
+      return 0;
+    });
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "completed", label: "Completed" },
