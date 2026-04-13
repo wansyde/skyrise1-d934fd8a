@@ -357,8 +357,12 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
           {commissionMode === "percentage" && (
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Commission %</label>
-              <Input value={commissionPercentage} onChange={e => setCommissionPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
+              <Input value={commissionPercentage} onChange={e => { setCommissionPercentage(e.target.value); commissionManuallyEdited.current = true; }} placeholder="e.g. 0.6" className="h-9 text-xs" type="number" min={0.1} max={100} step={0.1} />
+              {commissionManuallyEdited.current && (
+                <p className="text-[10px] text-amber-600 mt-0.5">Manually overridden</p>
+              )}
             </div>
+          )}
           )}
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Multiplier (×)</label>
