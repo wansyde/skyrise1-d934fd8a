@@ -70,7 +70,7 @@ const AppWithdraw = () => {
 
   const userTierMax = tierMaxWithdrawal[profile?.vip_level || "Junior"] || 5000;
 
-  const handleProceedToStep2 = () => {
+  const handleProceedToStep2 = async () => {
     if (!user) return;
     const num = Number(amount);
     if (num < 100) {
