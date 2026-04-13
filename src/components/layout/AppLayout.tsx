@@ -5,7 +5,7 @@ import {
   Home, Car, ClipboardList, Wallet, User,
   Menu, X, ChevronRight, FileText, Award,
   ArrowUpFromLine, ArrowDownToLine, Scale,
-  Calendar, HelpCircle, Info, Shield, Headphones
+  Calendar, HelpCircle, Info, Shield
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import SkyriseLogo from "@/components/SkyriseLogo";
@@ -29,7 +29,6 @@ const slideMenuItems = [
   { href: "/faq", label: "FAQs", icon: HelpCircle },
   { href: "/about", label: "About", icon: Info },
   { href: "/app/aml", label: "AML", icon: Shield },
-  { href: "/app/support", label: "Customer Service", icon: Headphones },
 ];
 
 const AppLayout = ({ children }: { children: ReactNode }) => {

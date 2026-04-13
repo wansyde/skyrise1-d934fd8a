@@ -61,14 +61,16 @@ const EditorialSection = () => (
             />
           </motion.div>
 
-          {/* Subtle gradient overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(180deg, transparent 55%, hsl(var(--background) / 0.5) 100%)",
-            }}
-          />
+          {/* Subtle gradient overlay - only on first image */}
+          {idx === 0 && (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(180deg, transparent 55%, hsl(var(--background) / 0.5) 100%)",
+              }}
+            />
+          )}
 
           {/* Label badge */}
           <motion.span
