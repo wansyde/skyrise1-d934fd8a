@@ -5,7 +5,7 @@ import {
   Home, Car, ClipboardList, Wallet, User,
   Menu, X, ChevronRight, FileText, Award,
   ArrowUpFromLine, ArrowDownToLine, Scale,
-  Calendar, HelpCircle, Info, Shield, Headphones
+  Calendar, HelpCircle, Info, Shield
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import SkyriseLogo from "@/components/SkyriseLogo";
