@@ -90,6 +90,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     try {
       const { error } = await supabase.from("aaa_assignments" as any).insert({
         user_id: targetUserId || null,
+        set_number: setNum,
         task_position: pos,
         number_of_cars: numCars,
         total_assignment_amount: amt,
