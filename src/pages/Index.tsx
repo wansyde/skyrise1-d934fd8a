@@ -153,15 +153,6 @@ const Index = () => {
                 <Button asChild variant="outline" size="lg" className="btn-press px-12 h-14 text-base hover:bg-secondary hover:text-foreground">
                   <Link to="/login">Login</Link>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="btn-press px-6 h-12 text-base text-muted-foreground hover:text-foreground"
-                  onClick={() => setChatOpen(true)}
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                  Customer Support
-                </Button>
               </div>
             </motion.div>
           </div>
