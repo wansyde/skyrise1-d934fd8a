@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,56 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [selectedCars, setSelectedCars] = useState<{ name: string; price: string; commission: string }[]>([]);
   const [commissionMultiplier, setCommissionMultiplier] = useState("1");
   const [submitting, setSubmitting] = useState(false);
+
+  // Real-time balance for selected user
+  const [liveBalance, setLiveBalance] = useState<number | null>(null);
+  const [balanceUpdatedAt, setBalanceUpdatedAt] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (!targetUserId) {
+      setLiveBalance(null);
+      setBalanceUpdatedAt(null);
+      return;
+    }
+
+    // Initial fetch
+    const fetchBalance = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("balance")
+        .eq("user_id", targetUserId)
+        .single();
+      if (data) {
+        setLiveBalance(data.balance);
+        setBalanceUpdatedAt(new Date());
+      }
+    };
+    fetchBalance();
+
+    // Realtime subscription
+    const channel = supabase
+      .channel(`admin-balance-${targetUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${targetUserId}`,
+        },
+        (payload: any) => {
+          if (payload.new?.balance !== undefined) {
+            setLiveBalance(payload.new.balance);
+            setBalanceUpdatedAt(new Date());
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [targetUserId]);
 
   const { data: assignments = [] } = useQuery({
     queryKey: ["admin-aaa-assignments"],
@@ -315,6 +365,19 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 VIP: <span className="font-bold text-primary">{getSelectedUserVip()}</span>
                 {!commissionManuallyEdited.current && " · Commission auto-filled"}
               </p>
+            )}
+            {targetUserId && liveBalance !== null && (
+              <div className="mt-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
+                <p className="text-[10px] text-muted-foreground">Current Balance</p>
+                <p className={`text-lg font-bold ${liveBalance < 0 ? 'text-destructive' : 'text-primary'}`}>
+                  {liveBalance < 0 ? '-' : ''}{Math.abs(liveBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AC
+                </p>
+                {balanceUpdatedAt && (
+                  <p className="text-[9px] text-muted-foreground">
+                    Live · Updated {balanceUpdatedAt.toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
             )}
           </div>
           <div>
