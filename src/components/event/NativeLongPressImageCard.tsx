@@ -53,9 +53,7 @@ const NativeLongPressImageCard = ({
             style={nativeImageStyle}
           />
         ) : (
-          <div className="flex min-h-[280px] items-center justify-center rounded-[24px] bg-secondary/60 px-6 text-center text-sm text-muted-foreground">
-            Preparing image…
-          </div>
+          <div className="min-h-[280px] rounded-[24px] bg-secondary/30 animate-pulse" />
         )}
       </div>
 
