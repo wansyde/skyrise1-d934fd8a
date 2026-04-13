@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Car, Star, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { getCarImage } from "@/lib/car-images";
@@ -69,6 +69,23 @@ const Records = () => {
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const userBalance = Number(profile?.balance ?? 0);
+
+  // Real-time profile subscription for live balance updates
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel('records-profile-sync')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `user_id=eq.${user.id}` },
+        () => {
+          refreshProfile();
+          queryClient.invalidateQueries({ queryKey: ["task-records"] });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, refreshProfile, queryClient]);
 
   const { data: records = [] } = useQuery({
     queryKey: ["task-records", user?.id],
@@ -306,28 +323,36 @@ const Records = () => {
                       </div>
                     </div>
 
-                    {/* Compact submit button */}
-                    {isAAA && isRed && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (userBalance < 0) {
-                            toast("You need to deposit to continue", { duration: 2000 });
-                            navigate("/app/wallet/deposit");
-                            return;
-                          }
-                          handleSubmitPending(record.parentId);
-                        }}
-                        disabled={submittingId === record.parentId}
-                        className="flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
-                      >
-                        {submittingId === record.parentId ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          "Submit"
-                        )}
-                      </button>
-                    )}
+                    {/* Compact submit button - per-car balance check */}
+                    {isAAA && isRed && (() => {
+                      const canAfford = userBalance >= record.car_price;
+                      const isSubmitting = submittingId === record.parentId;
+                      return (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!canAfford) {
+                              toast("Deposit required to continue", { duration: 2000 });
+                              navigate("/app/wallet/deposit");
+                              return;
+                            }
+                            handleSubmitPending(record.parentId);
+                          }}
+                          disabled={isSubmitting || !canAfford}
+                          className={`flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] transition-all ${
+                            canAfford
+                              ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                              : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                          } disabled:opacity-50`}
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            "Submit"
+                          )}
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               </motion.div>
