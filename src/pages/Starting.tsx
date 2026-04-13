@@ -244,6 +244,44 @@ const Starting = () => {
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
     if (isSetLocked) { toast.error("Set completed. Contact support to unlock next set."); return; }
 
+    // Check if next task is an AAA task
+    const nextTaskNumber = completedCount + 1;
+    const matchingAAA = aaaAssignments.find((a: any) =>
+      a.task_position === nextTaskNumber && a.status === "active" &&
+      (a.user_id === null || a.user_id === user?.id)
+    );
+
+    if (matchingAAA) {
+      // AAA Task
+      setIsAAATask(true);
+      setAaaAssignment(matchingAAA);
+      setAaaCars(matchingAAA.car_names || []);
+      setMatchedCar(carCampaigns[0]); // placeholder
+      setMatchedTaskValue(matchingAAA.total_assignment_amount);
+      setAssignmentCode(generateAssignmentCode());
+      setMatchProgress(0);
+      setMatchState("matching");
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 12 + 3;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          setMatchProgress(100);
+          setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 400);
+        } else {
+          setMatchProgress(progress);
+        }
+      }, 250);
+      return;
+    }
+
+    // Regular task
+    setIsAAATask(false);
+    setAaaAssignment(null);
+    setAaaCars([]);
+
     const affordable = carCampaigns.filter(c => c.totalAmount <= currentBalance);
     const pool = affordable.length > 0 ? affordable : carCampaigns;
     const car = pool[Math.floor(Math.random() * pool.length)];
