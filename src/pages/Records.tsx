@@ -2,11 +2,12 @@ import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState, useCallback } from "react";
-import { Car } from "lucide-react";
+import { Car, Star, Loader2 } from "lucide-react";
 import { getCarImage } from "@/lib/car-images";
+import { toast } from "sonner";
 
 const FALLBACK_CAR = "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=400&fit=crop&q=80";
 
@@ -45,8 +46,10 @@ const CarImage = ({ carName }: { carName: string }) => {
 type TabKey = "all" | "pending" | "completed";
 
 const Records = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>("all");
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
 
   const { data: records = [] } = useQuery({
     queryKey: ["task-records", user?.id],
@@ -61,6 +64,28 @@ const Records = () => {
       return data ?? [];
     },
   });
+
+  const handleSubmitPending = async (recordId: string) => {
+    setSubmittingId(recordId);
+    try {
+      const { data, error } = await supabase.rpc("submit_pending_task" as any, {
+        _record_id: recordId,
+      });
+      if (error) throw error;
+      const result = data as any;
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Task completed successfully!");
+      refreshProfile();
+      queryClient.invalidateQueries({ queryKey: ["task-records"] });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to submit task");
+    } finally {
+      setSubmittingId(null);
+    }
+  };
 
   const filtered = records.filter((r) => {
     if (activeTab === "all") return true;
@@ -108,59 +133,97 @@ const Records = () => {
         )}
 
         <div className="space-y-6">
-          {filtered.map((record, i) => (
-            <motion.div
-              key={record.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03, duration: 0.3 }}
-            >
-              {/* Date & Status header */}
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground">
-                  {format(new Date(record.created_at), "yyyy-MM-dd HH:mm:ss")}
-                </span>
-                <span
-                  className={`text-[11px] font-semibold px-3 py-1 rounded-md ${
-                    record.status === "completed"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-amber-100 text-amber-700"
-                  }`}
-                >
-                  {record.status === "completed" ? "Completed" : "Pending"}
-                </span>
-              </div>
+          {filtered.map((record, i) => {
+            const isAAA = (record as any).task_type === "AAA";
+            const isPending = record.status === "pending";
 
-              {/* Card */}
-              <div className="bg-card rounded-2xl border border-border/50 p-4 shadow-sm">
-                <div className="flex gap-4">
-                  <CarImage carName={record.car_name} />
+            return (
+              <motion.div
+                key={record.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03, duration: 0.3 }}
+              >
+                {/* Date & Status header */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(record.created_at), "yyyy-MM-dd HH:mm:ss")}
+                    </span>
+                    {isAAA && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        AAA
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={`text-[11px] font-semibold px-3 py-1 rounded-md ${
+                      record.status === "completed"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {record.status === "completed" ? "Completed" : "Pending"}
+                  </span>
+                </div>
 
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold leading-snug line-clamp-2 mb-3">
-                      {record.car_name}
-                    </p>
+                {/* Card */}
+                <div className={`rounded-2xl border p-4 shadow-sm ${
+                  isAAA ? "bg-gradient-to-br from-card to-amber-50/30 border-amber-200/50" : "bg-card border-border/50"
+                }`}>
+                  <div className="flex gap-4">
+                    <CarImage carName={record.car_name} />
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-[10px] text-muted-foreground mb-0.5">Total Amount</p>
-                        <p className="text-sm font-bold text-primary">
-                          {Number(record.total_amount)} <span className="text-[10px] font-normal text-muted-foreground">USDC</span>
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-muted-foreground mb-0.5">Advertising salary</p>
-                        <p className="text-sm font-bold text-primary">
-                          {Number(record.advertising_salary).toFixed(2)} <span className="text-[10px] font-normal text-muted-foreground">USDC</span>
-                        </p>
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold leading-snug line-clamp-2 mb-3">
+                        {record.car_name}
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-[10px] text-muted-foreground mb-0.5">Total Amount</p>
+                          <p className="text-sm font-bold text-primary">
+                            {Number(record.total_amount)} <span className="text-[10px] font-normal text-muted-foreground">USDC</span>
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground mb-0.5">
+                            {isAAA ? "AAA Profit (12×)" : "Advertising salary"}
+                          </p>
+                          <p className="text-sm font-bold text-primary">
+                            {Number(record.advertising_salary).toFixed(2)} <span className="text-[10px] font-normal text-muted-foreground">USDC</span>
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Submit button for pending AAA tasks */}
+                  {isPending && isAAA && (
+                    <div className="mt-4 pt-3 border-t border-border/30">
+                      <p className="text-[11px] text-muted-foreground mb-2">
+                        Deposit funds to cover the task amount, then submit to complete.
+                      </p>
+                      <button
+                        onClick={() => handleSubmitPending(record.id)}
+                        disabled={submittingId === record.id}
+                        className="w-full py-2.5 rounded-xl font-semibold text-xs tracking-wide flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
+                        style={{ boxShadow: "0 4px 16px hsl(var(--primary) / 0.3)" }}
+                      >
+                        {submittingId === record.id ? (
+                          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Submitting...</>
+                        ) : (
+                          "Submit"
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </AppLayout>
