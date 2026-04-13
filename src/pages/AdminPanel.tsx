@@ -253,7 +253,7 @@ const AdminPanel = () => {
         popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from 1 to 1,000 AC.`;
         popupType = "reset";
       } else if (balanceIncreased) {
-        popupMessage = `Your wallet has been credited with $${(newBalance - Number(oldUser.balance)).toFixed(2)}. Your new balance is $${newBalance.toFixed(2)}.`;
+        popupMessage = `Your wallet has been credited with ${(newBalance - Number(oldUser.balance)).toFixed(2)} AC. Your new balance is ${newBalance.toFixed(2)} AC.`;
         popupType = "deposit";
       }
     }
@@ -272,8 +272,8 @@ const AdminPanel = () => {
 
     // Log changes
     const changes: string[] = [];
-    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: $${oldUser.balance} → $${newBalance}`);
-    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: $${oldUser.advertising_salary} → $${newSalary}`);
+    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: ${oldUser.balance} → ${newBalance} AC`);
+    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: ${oldUser.advertising_salary} → ${newSalary} AC`);
     if (oldUser && oldUser.vip_level !== editVipLevel) changes.push(`VIP: ${oldUser.vip_level} → ${editVipLevel}`);
     if (oldUser && oldUser.tasks_completed_today !== newTasks) changes.push(`Tasks: ${oldUser.tasks_completed_today} → ${newTasks}`);
     if (oldUser && Number((oldUser as any).credit_score ?? 100) !== newCreditScore) changes.push(`Credit: ${(oldUser as any).credit_score ?? 100}% → ${newCreditScore}%`);
@@ -821,7 +821,7 @@ const AdminPanel = () => {
               <h2 className="text-sm font-medium flex items-center gap-2"><ArrowDownToLine className="h-4 w-4 text-green-400" /> Record Deposit</h2>
               <div className="space-y-3">
                 <div><label className="text-xs text-muted-foreground mb-1 block">Select User</label><UserSelect value={depUserId} onChange={setDepUserId} /></div>
-                <div><label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label><Input type="number" placeholder="0.00" value={depAmount} onChange={(e) => setDepAmount(e.target.value)} min={0} step="0.01" /></div>
+                <div><label className="text-xs text-muted-foreground mb-1 block">Amount (AC)</label><Input type="number" placeholder="0.00" value={depAmount} onChange={(e) => setDepAmount(e.target.value)} min={0} step="0.01" /></div>
                 <div><label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label><Input placeholder="e.g. via customer service" value={depNote} onChange={(e) => setDepNote(e.target.value)} /></div>
                 <Button onClick={handleAdminDeposit} disabled={depSubmitting} className="w-full">{depSubmitting ? "Processing..." : "Submit Deposit"}</Button>
               </div>
@@ -876,7 +876,7 @@ const AdminPanel = () => {
                 <h2 className="text-sm font-medium flex items-center gap-2"><ArrowUpFromLine className="h-4 w-4 text-red-400" /> Record Withdrawal</h2>
                 <div className="space-y-3">
                   <div><label className="text-xs text-muted-foreground mb-1 block">Select User</label><UserSelect value={wdUserId} onChange={setWdUserId} /></div>
-                  <div><label className="text-xs text-muted-foreground mb-1 block">Amount ($)</label><Input type="number" placeholder="0.00" value={wdAmount} onChange={(e) => setWdAmount(e.target.value)} min={0} step="0.01" /></div>
+                  <div><label className="text-xs text-muted-foreground mb-1 block">Amount (AC)</label><Input type="number" placeholder="0.00" value={wdAmount} onChange={(e) => setWdAmount(e.target.value)} min={0} step="0.01" /></div>
                   <div><label className="text-xs text-muted-foreground mb-1 block">Note (optional)</label><Input placeholder="e.g. manual payout" value={wdNote} onChange={(e) => setWdNote(e.target.value)} /></div>
                   <Button onClick={handleAdminWithdraw} disabled={wdSubmitting} variant="destructive" className="w-full">{wdSubmitting ? "Processing..." : "Submit Withdrawal"}</Button>
                 </div>
