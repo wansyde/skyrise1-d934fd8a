@@ -17,11 +17,11 @@ const mediaAffinity = [
 ];
 
 const brandLogos = [
-  { name: "British Airways", src: britishAirwaysLogo, height: "h-10 sm:h-14" },
-  { name: "Chanel", src: chanelLogo, height: "h-8 sm:h-12" },
-  { name: "Porsche", src: porscheLogo, height: "h-10 sm:h-14" },
-  { name: "Bentley", src: bentleyLogo, height: "h-8 sm:h-12" },
-  { name: "Aston Martin", src: astonMartinLogo, height: "h-10 sm:h-14" },
+  { name: "British Airways", src: britishAirwaysLogo, height: "h-12 sm:h-16" },
+  { name: "Chanel", src: chanelLogo, height: "h-10 sm:h-14" },
+  { name: "Porsche", src: porscheLogo, height: "h-6 sm:h-8" },
+  { name: "Bentley", src: bentleyLogo, height: "h-10 sm:h-14" },
+  { name: "Aston Martin", src: astonMartinLogo, height: "h-12 sm:h-16" },
 ];
 
 const mapDots = [
@@ -354,9 +354,9 @@ const AnalyticsSection = () => (
                   src={brand.src}
                   alt={brand.name}
                   loading="lazy"
-                  className={`${brand.height} w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-300`}
+                  className={`${brand.height} w-auto object-contain opacity-40 hover:opacity-70 transition-opacity duration-300`}
                   style={{
-                    filter: "contrast(1.1) brightness(1.05)",
+                    filter: "grayscale(100%) contrast(1.1) brightness(1.05)",
                   }}
                 />
               </div>
