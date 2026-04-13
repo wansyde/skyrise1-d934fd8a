@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Car, Star, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { getCarImage } from "@/lib/car-images";
 import { toast } from "sonner";
@@ -66,7 +66,9 @@ const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabKey>("completed");
+  const location = useLocation();
+  const initialTab = (location.state as any)?.tab === "pending" ? "pending" : "completed";
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const userBalance = Number(profile?.balance ?? 0);
 
