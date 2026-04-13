@@ -115,7 +115,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       setSelectedCars([]);
       setTargetUserId("");
       setSetNumber("1");
-      setProfitPercentage("5");
+      setCommissionPercentage("5");
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
@@ -159,7 +159,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
 
   const totalCommission = commissionMode === "fixed"
     ? selectedCars.reduce((sum, c) => sum + (parseFloat(c.commission) || 0), 0)
-    : totalAmount * (parseFloat(profitPercentage) / 100 || 0);
+    : totalAmount * (parseFloat(commissionPercentage) / 100 || 0);
 
   return (
     <div className="space-y-6">
@@ -221,8 +221,8 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
           </div>
           {commissionMode === "percentage" && (
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Profit %</label>
-              <Input value={profitPercentage} onChange={e => setProfitPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
+              <label className="text-xs text-muted-foreground mb-1 block">Commission %</label>
+              <Input value={commissionPercentage} onChange={e => setCommissionPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
             </div>
           )}
         </div>
@@ -256,7 +256,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   )}
                   {commissionMode === "percentage" && car.price && (
                     <span className="text-[10px] text-muted-foreground w-20 text-right">
-                      +{(parseFloat(car.price) * (parseFloat(profitPercentage) / 100 || 0)).toFixed(2)}
+                      +{(parseFloat(car.price) * (parseFloat(commissionPercentage) / 100 || 0)).toFixed(2)}
                     </span>
                   )}
                   <button onClick={() => handleRemoveCar(i)} className="text-destructive hover:text-destructive/80">×</button>
