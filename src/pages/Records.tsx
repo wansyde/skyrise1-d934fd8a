@@ -282,25 +282,17 @@ const Records = () => {
                       </p>
                       <div className="flex items-center gap-4">
                         <div>
-                          <p className="text-[9px] text-muted-foreground">
-                            {isAAA ? "Car Price" : "Amount"}
-                          </p>
+                          <p className="text-[9px] text-muted-foreground">Total Amount</p>
                           <p className="text-xs font-bold text-primary">
                             {record.car_price.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                         <div>
-                          <p className="text-[9px] text-muted-foreground">Commission</p>
+                          <p className="text-[9px] text-muted-foreground">Advertising Salary</p>
                           <p className={`text-xs font-bold ${isGreen || record.status === "completed" ? "text-emerald-600" : "text-muted-foreground"}`}>
-                            +{record.commission.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                            +{(isAAA ? record.commission * mult : record.commission).toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
-                        {isAAA && mult > 1 && (
-                          <div>
-                            <p className="text-[9px] text-muted-foreground">Multiplier</p>
-                            <p className="text-xs font-bold text-amber-600">×{mult}</p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
