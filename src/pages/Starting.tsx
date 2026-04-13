@@ -273,18 +273,18 @@ const Starting = () => {
       setMatchProgress(0);
       setMatchState("matching");
 
-      let progress = 0;
+    let progress = 0;
       const interval = setInterval(() => {
-        progress += Math.random() * 12 + 3;
+        progress += Math.random() * 25 + 15;
         if (progress >= 100) {
           progress = 100;
           clearInterval(interval);
           setMatchProgress(100);
-          setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 400);
+          setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 200);
         } else {
           setMatchProgress(progress);
         }
-      }, 250);
+      }, 120);
       return;
     }
 
@@ -305,16 +305,16 @@ const Starting = () => {
 
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 15 + 5;
+      progress += Math.random() * 25 + 15;
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);
         setMatchProgress(100);
-        setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 400);
+        setTimeout(() => { setMatchedAt(new Date()); setMatchState("matched"); }, 200);
       } else {
         setMatchProgress(progress);
       }
-    }, 200);
+    }, 120);
   };
 
   const isProcessingRef = useRef(false);
