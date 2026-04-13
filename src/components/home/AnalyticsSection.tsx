@@ -1,4 +1,9 @@
 import { motion } from "framer-motion";
+import britishAirwaysLogo from "@/assets/brands/british-airways.webp";
+import chanelLogo from "@/assets/brands/chanel.png";
+import porscheLogo from "@/assets/brands/porsche.png";
+import bentleyLogo from "@/assets/brands/bentley.png";
+import astonMartinLogo from "@/assets/brands/aston-martin.webp";
 
 const mediaAffinity = [
   { label: "SVOD", pct: 82 },
@@ -12,11 +17,11 @@ const mediaAffinity = [
 ];
 
 const brandLogos = [
-  { name: "BRITISH AIRWAYS", style: "font-serif font-bold text-[12px] sm:text-[14px] tracking-[0.08em]" },
-  { name: "CHANEL", style: "font-serif font-bold text-[14px] sm:text-[17px] tracking-[0.25em]" },
-  { name: "PORSCHE", style: "font-sans font-bold text-[12px] sm:text-[14px] tracking-[0.18em]" },
-  { name: "BENTLEY", style: "font-serif font-bold text-[12px] sm:text-[14px] tracking-[0.2em]" },
-  { name: "ASTON MARTIN", style: "font-sans font-medium text-[10px] sm:text-[12px] tracking-[0.3em]" },
+  { name: "British Airways", src: britishAirwaysLogo, height: "h-10 sm:h-14" },
+  { name: "Chanel", src: chanelLogo, height: "h-8 sm:h-12" },
+  { name: "Porsche", src: porscheLogo, height: "h-10 sm:h-14" },
+  { name: "Bentley", src: bentleyLogo, height: "h-8 sm:h-12" },
+  { name: "Aston Martin", src: astonMartinLogo, height: "h-10 sm:h-14" },
 ];
 
 const mapDots = [
