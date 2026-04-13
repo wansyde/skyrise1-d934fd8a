@@ -168,15 +168,6 @@ const Records = () => {
     }
   };
 
-  // Group pending AAA parent IDs for submit button
-  const pendingAAAParentIds = useMemo(() => {
-    const ids = new Set<string>();
-    records.filter(r => r.task_type === "AAA" && r.status === "pending").forEach(r => ids.add(r.id));
-    return ids;
-  }, [records]);
-
-  // Track which parent IDs we've already shown a submit button for
-  const shownSubmitButtons = useMemo(() => new Set<string>(), [records]);
 
   const filtered = flatRecords.filter((r) => {
     if (activeTab === "all") return true;
