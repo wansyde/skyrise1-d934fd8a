@@ -50,12 +50,23 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const { data: assignments = [] } = useQuery({
     queryKey: ["admin-aaa-assignments"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session) {
+        console.error("AAA query: No active session");
+        throw new Error("Not authenticated");
+      }
+      const { data, error } = await supabase
         .from("aaa_assignments" as any)
         .select("*")
         .order("created_at", { ascending: false });
+      if (error) {
+        console.error("AAA assignments query error:", error);
+        throw error;
+      }
+      console.log("AAA assignments loaded:", data?.length || 0);
       return (data || []) as any[];
     },
+    retry: 2,
   });
 
   const getUserName = (userId: string | null) => {
