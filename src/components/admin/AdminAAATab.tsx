@@ -42,7 +42,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [setNumber, setSetNumber] = useState("1");
   const [taskPosition, setTaskPosition] = useState("");
   const [numberOfCars, setNumberOfCars] = useState("3");
-  const [profitPercentage, setProfitPercentage] = useState("5");
+  const [commissionPercentage, setCommissionPercentage] = useState("5");
   const [commissionMode, setCommissionMode] = useState<"percentage" | "fixed">("percentage");
   const [selectedCars, setSelectedCars] = useState<{ name: string; price: string; commission: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
