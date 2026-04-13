@@ -57,13 +57,10 @@ const Event = () => {
       }
     };
 
-    const timer = window.setTimeout(() => {
-      void renderImages();
-    }, 80);
+    void renderImages();
 
     return () => {
       active = false;
-      window.clearTimeout(timer);
     };
   }, [generateImage]);
 
