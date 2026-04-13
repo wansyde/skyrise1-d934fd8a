@@ -66,7 +66,9 @@ const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabKey>("completed");
+  const location = useLocation();
+  const initialTab = (location.state as any)?.tab === "pending" ? "pending" : "completed";
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const userBalance = Number(profile?.balance ?? 0);
 
