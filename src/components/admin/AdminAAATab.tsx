@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -33,9 +33,17 @@ interface AdminAAATabProps {
   profiles: any[];
 }
 
+const VIP_COMMISSION_MAP: Record<string, string> = {
+  Junior: "0.4",
+  Professional: "0.6",
+  Expert: "0.8",
+  Elite: "1.0",
+};
+
 const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const commissionManuallyEdited = useRef(false);
 
   // Form state (create + edit shared)
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -70,6 +78,23 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     return p?.username || p?.email || userId.slice(0, 8);
   };
 
+  const getSelectedUserVip = (): string | null => {
+    if (!targetUserId) return null;
+    const p = profiles.find((p: any) => p.user_id === targetUserId);
+    return p?.vip_level || null;
+  };
+
+  const handleUserChange = (userId: string) => {
+    setTargetUserId(userId);
+    if (!commissionManuallyEdited.current && userId) {
+      const p = profiles.find((p: any) => p.user_id === userId);
+      const vip = p?.vip_level || "Junior";
+      const autoPct = VIP_COMMISSION_MAP[vip] || "0.4";
+      setCommissionPercentage(autoPct);
+      setCommissionMode("percentage");
+    }
+  };
+
   const totalAmount = selectedCars.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
 
   const resetForm = () => {
@@ -81,7 +106,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     setNumberOfCars("3");
     setCommissionPercentage("5");
     setCommissionMode("percentage");
-    setCommissionMultiplier("1");
+    commissionManuallyEdited.current = false;
   };
 
   const handleEdit = (a: any) => {
@@ -275,16 +300,22 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             <label className="text-xs text-muted-foreground mb-1 block">Target User</label>
             <select
               value={targetUserId}
-              onChange={e => setTargetUserId(e.target.value)}
+              onChange={e => handleUserChange(e.target.value)}
               className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs"
             >
               <option value="">Global (All Users)</option>
               {profiles.map((p: any) => (
                 <option key={p.user_id} value={p.user_id}>
-                  {p.username || p.email}
+                  {p.username || p.email} ({p.vip_level || "Junior"})
                 </option>
               ))}
             </select>
+            {getSelectedUserVip() && (
+              <p className="text-[10px] text-muted-foreground mt-1">
+                VIP: <span className="font-bold text-primary">{getSelectedUserVip()}</span>
+                {!commissionManuallyEdited.current && " · Commission auto-filled"}
+              </p>
+            )}
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Target Set</label>
@@ -326,7 +357,10 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
           {commissionMode === "percentage" && (
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Commission %</label>
-              <Input value={commissionPercentage} onChange={e => setCommissionPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
+              <Input value={commissionPercentage} onChange={e => { setCommissionPercentage(e.target.value); commissionManuallyEdited.current = true; }} placeholder="e.g. 0.6" className="h-9 text-xs" type="number" min={0.1} max={100} step={0.1} />
+              {commissionManuallyEdited.current && (
+                <p className="text-[10px] text-amber-600 mt-0.5">Manually overridden</p>
+              )}
             </div>
           )}
           <div>
