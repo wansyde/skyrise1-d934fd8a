@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import britishAirwaysLogo from "@/assets/brands/british-airways.webp";
-import chanelLogo from "@/assets/brands/chanel.png";
-import porscheLogo from "@/assets/brands/porsche.png";
-import bentleyLogo from "@/assets/brands/bentley.png";
-import astonMartinLogo from "@/assets/brands/aston-martin.webp";
+import britishAirwaysLogo from "@/assets/brands/british-airways.png";
+import chanelLogo from "@/assets/brands/chanel-clean.png";
+import porscheLogo from "@/assets/brands/porsche-clean.png";
+import bentleyLogo from "@/assets/brands/bentley-clean.png";
+import astonMartinLogo from "@/assets/brands/aston-martin.png";
 
 const mediaAffinity = [
   { label: "SVOD", pct: 82 },
