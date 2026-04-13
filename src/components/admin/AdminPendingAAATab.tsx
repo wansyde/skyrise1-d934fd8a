@@ -134,6 +134,20 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
     }
   };
 
+  const handleDeletePending = async (recordId: string, userId: string) => {
+    if (!confirm("Delete this pending AAA record? This cannot be undone.")) return;
+    try {
+      // Delete the task record
+      const { error } = await supabase.from("task_records").delete().eq("id", recordId);
+      if (error) throw error;
+      toast.success("Pending AAA record deleted.");
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-aaa"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete.");
+    }
+  };
+
   const formatTime = (dateStr: string) =>
     new Date(dateStr).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "short", timeStyle: "short" });
 
