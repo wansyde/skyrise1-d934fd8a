@@ -250,11 +250,16 @@ const Starting = () => {
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
     if (isSetLocked) { toast.error("Set completed. Contact support to unlock next set."); return; }
 
-    // Check if next task is an AAA task
+    // Check if next task is an AAA task (set-aware)
     const nextTaskNumber = completedCount + 1;
+    const tasksPerSet = vipTier.tasksPerSet; // 40
+    const currentSet = Math.floor(completedCount / tasksPerSet) + 1; // 1, 2, or 3
+    const positionInSet = (completedCount % tasksPerSet) + 1; // 1–40
     const matchingAAA = aaaAssignments.find((a: any) =>
-      a.task_position === nextTaskNumber && a.status === "active" &&
-      (a.user_id === null || a.user_id === user?.id)
+      a.status === "active" &&
+      (a.user_id === null || a.user_id === user?.id) &&
+      (a.set_number || 1) === currentSet &&
+      a.task_position === positionInSet
     );
 
     if (matchingAAA) {

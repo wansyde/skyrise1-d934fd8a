@@ -39,6 +39,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
 
   // Form state
   const [targetUserId, setTargetUserId] = useState("");
+  const [setNumber, setSetNumber] = useState("1");
   const [taskPosition, setTaskPosition] = useState("");
   const [numberOfCars, setNumberOfCars] = useState("3");
   const [totalAmount, setTotalAmount] = useState("");
