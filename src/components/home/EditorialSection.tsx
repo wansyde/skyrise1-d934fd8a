@@ -11,11 +11,7 @@ const editorialBlocks = [
     title: "In-depth analysis",
     subtitle: "Put effective audience design at your fingertips",
     body: "An evidence-based shortcut for marketers to understand audiences, win customers, and make smarter media investments with where+when®.",
-    stats: [
-      { value: "98%", label: "Accuracy" },
-      { value: "2.4B", label: "Data points" },
-      { value: "50+", label: "Markets" },
-    ],
+    stats: [],
   },
   {
     image: editorialOwners,
