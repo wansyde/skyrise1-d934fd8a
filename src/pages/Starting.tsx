@@ -151,7 +151,13 @@ const Starting = () => {
   const tierPercent = vipTier.rewardPercent;
   const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
   const taskValue = matchedTaskValue ?? generateRandomTaskValue(userBalance);
-  const estimatedProfit = useMemo(() => getTaskProfit(taskValue, vipTier), [taskValue, vipTier]);
+  const estimatedProfit = useMemo(() => {
+    if (isAAATask && aaaAssignment) {
+      const baseProfit = taskValue * tierPercent;
+      return Math.round(baseProfit * 12 * 100) / 100;
+    }
+    return getTaskProfit(taskValue, vipTier);
+  }, [taskValue, vipTier, isAAATask, aaaAssignment, tierPercent]);
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
@@ -596,13 +602,46 @@ const Starting = () => {
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
 
-              <h3 className="text-lg font-semibold text-primary mb-6 font-[Montserrat]">Assignment Submission</h3>
+              <h3 className="text-lg font-semibold text-primary mb-6 font-[Montserrat]">
+                {isAAATask ? (
+                  <span className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                    Automotive Alliance Assignment
+                  </span>
+                ) : "Assignment Submission"}
+              </h3>
 
-              <div className="flex justify-center mb-4">
-                <img src={matchedCar.featured} alt={matchedCar.name} className="h-28 object-contain" />
-              </div>
-
-              <p className="text-center text-sm font-semibold mb-4 px-4">{matchedCar.name}</p>
+              {isAAATask && aaaCars.length > 0 ? (
+                <div className="mb-4">
+                  <div className="flex justify-center gap-2 flex-wrap">
+                    {aaaCars.map((carName, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="relative"
+                      >
+                        <div className="w-24 h-20 rounded-xl bg-muted/30 border border-primary/20 overflow-hidden flex items-center justify-center p-1"
+                          style={{ boxShadow: "0 4px 20px hsl(var(--primary) / 0.15)" }}>
+                          <img src={getCarImage(carName)} alt={carName} className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-[9px] text-center text-muted-foreground mt-1 max-w-24 truncate">{carName.split(" ").slice(0, 2).join(" ")}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <p className="text-center text-xs font-semibold mt-3 px-4 text-amber-600">
+                    {aaaCars.length} Vehicle Alliance Package
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-center mb-4">
+                    <img src={matchedCar.featured} alt={matchedCar.name} className="h-28 object-contain" />
+                  </div>
+                  <p className="text-center text-sm font-semibold mb-4 px-4">{matchedCar.name}</p>
+                </>
+              )}
 
               <div className="flex justify-center mb-5">
                 <div className="w-48 h-8 rounded-full bg-muted/50 border border-border/50 relative overflow-hidden">
