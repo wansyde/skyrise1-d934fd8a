@@ -7,6 +7,7 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogout = useCallback(async () => {
+    sessionStorage.removeItem("hasSeenBonusPopup");
     await supabase.auth.signOut();
     window.location.href = "/login";
   }, []);
