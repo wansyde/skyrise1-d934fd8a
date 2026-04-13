@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, X, AlertTriangle, ArrowUpDown, DollarSign, MessageSquare } from "lucide-react";
+import { Check, X, AlertTriangle, ArrowUpDown, DollarSign, MessageSquare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
