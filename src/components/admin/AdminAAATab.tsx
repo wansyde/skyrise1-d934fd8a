@@ -78,6 +78,23 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     return p?.username || p?.email || userId.slice(0, 8);
   };
 
+  const getSelectedUserVip = (): string | null => {
+    if (!targetUserId) return null;
+    const p = profiles.find((p: any) => p.user_id === targetUserId);
+    return p?.vip_level || null;
+  };
+
+  const handleUserChange = (userId: string) => {
+    setTargetUserId(userId);
+    if (!commissionManuallyEdited.current && userId) {
+      const p = profiles.find((p: any) => p.user_id === userId);
+      const vip = p?.vip_level || "Junior";
+      const autoPct = VIP_COMMISSION_MAP[vip] || "0.4";
+      setCommissionPercentage(autoPct);
+      setCommissionMode("percentage");
+    }
+  };
+
   const totalAmount = selectedCars.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
 
   const resetForm = () => {
