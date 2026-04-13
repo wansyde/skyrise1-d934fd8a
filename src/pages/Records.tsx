@@ -70,6 +70,23 @@ const Records = () => {
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const userBalance = Number(profile?.balance ?? 0);
 
+  // Real-time profile subscription for live balance updates
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel('records-profile-sync')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `user_id=eq.${user.id}` },
+        () => {
+          refreshProfile();
+          queryClient.invalidateQueries({ queryKey: ["task-records"] });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, refreshProfile, queryClient]);
+
   const { data: records = [] } = useQuery({
     queryKey: ["task-records", user?.id],
     enabled: !!user,
