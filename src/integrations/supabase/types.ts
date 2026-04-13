@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           id: string
           number_of_cars: number
+          set_number: number
           status: string
           task_position: number
           total_assignment_amount: number
@@ -31,6 +32,7 @@ export type Database = {
           created_at?: string
           id?: string
           number_of_cars?: number
+          set_number?: number
           status?: string
           task_position: number
           total_assignment_amount: number
@@ -42,6 +44,7 @@ export type Database = {
           created_at?: string
           id?: string
           number_of_cars?: number
+          set_number?: number
           status?: string
           task_position?: number
           total_assignment_amount?: number
