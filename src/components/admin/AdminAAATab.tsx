@@ -33,9 +33,17 @@ interface AdminAAATabProps {
   profiles: any[];
 }
 
+const VIP_COMMISSION_MAP: Record<string, string> = {
+  Junior: "0.4",
+  Professional: "0.6",
+  Expert: "0.8",
+  Elite: "1.0",
+};
+
 const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const commissionManuallyEdited = useRef(false);
 
   // Form state (create + edit shared)
   const [editingId, setEditingId] = useState<string | null>(null);
