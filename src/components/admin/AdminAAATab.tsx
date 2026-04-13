@@ -106,7 +106,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
         car_names: carNames,
         car_prices: carPrices,
         car_commissions: carCommissions,
-        profit_percentage: profitPct,
+        profit_percentage: commPct,
         status: "active",
       } as any);
       if (error) throw error;
