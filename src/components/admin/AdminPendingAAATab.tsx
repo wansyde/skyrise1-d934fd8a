@@ -314,7 +314,6 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
               )}
             </div>
           </div>
-          </div>
         ))}
       </div>
     </div>
