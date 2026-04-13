@@ -42,7 +42,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [setNumber, setSetNumber] = useState("1");
   const [taskPosition, setTaskPosition] = useState("");
   const [numberOfCars, setNumberOfCars] = useState("3");
-  const [profitPercentage, setProfitPercentage] = useState("5");
+  const [commissionPercentage, setCommissionPercentage] = useState("5");
   const [commissionMode, setCommissionMode] = useState<"percentage" | "fixed">("percentage");
   const [selectedCars, setSelectedCars] = useState<{ name: string; price: string; commission: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -81,19 +81,19 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     const pos = parseInt(taskPosition);
     const numCars = parseInt(numberOfCars);
     const setNum = parseInt(setNumber);
-    const profitPct = parseFloat(profitPercentage) / 100;
+    const commPct = parseFloat(commissionPercentage) / 100;
 
     if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
     if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
     if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
     if (selectedCars.some(c => !c.price || parseFloat(c.price) <= 0)) { toast.error("All cars must have a valid price"); return; }
-    if (profitPct <= 0 || profitPct > 1) { toast.error("Enter a valid profit percentage (1–100)"); return; }
+    if (commissionMode === "percentage" && (commPct <= 0 || commPct > 1)) { toast.error("Enter a valid commission percentage (1–100)"); return; }
 
     const carNames = selectedCars.map(c => c.name);
     const carPrices = selectedCars.map(c => parseFloat(c.price));
     const carCommissions = commissionMode === "fixed"
       ? selectedCars.map(c => parseFloat(c.commission) || 0)
-      : selectedCars.map(c => Math.round(parseFloat(c.price) * profitPct * 100) / 100);
+      : selectedCars.map(c => Math.round(parseFloat(c.price) * commPct * 100) / 100);
 
     setSubmitting(true);
     try {
@@ -106,7 +106,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
         car_names: carNames,
         car_prices: carPrices,
         car_commissions: carCommissions,
-        profit_percentage: profitPct,
+        profit_percentage: commPct,
         status: "active",
       } as any);
       if (error) throw error;
@@ -115,7 +115,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       setSelectedCars([]);
       setTargetUserId("");
       setSetNumber("1");
-      setProfitPercentage("5");
+      setCommissionPercentage("5");
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
@@ -159,7 +159,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
 
   const totalCommission = commissionMode === "fixed"
     ? selectedCars.reduce((sum, c) => sum + (parseFloat(c.commission) || 0), 0)
-    : totalAmount * (parseFloat(profitPercentage) / 100 || 0);
+    : totalAmount * (parseFloat(commissionPercentage) / 100 || 0);
 
   return (
     <div className="space-y-6">
@@ -221,8 +221,8 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
           </div>
           {commissionMode === "percentage" && (
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Profit %</label>
-              <Input value={profitPercentage} onChange={e => setProfitPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
+              <label className="text-xs text-muted-foreground mb-1 block">Commission %</label>
+              <Input value={commissionPercentage} onChange={e => setCommissionPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
             </div>
           )}
         </div>
@@ -256,7 +256,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   )}
                   {commissionMode === "percentage" && car.price && (
                     <span className="text-[10px] text-muted-foreground w-20 text-right">
-                      +{(parseFloat(car.price) * (parseFloat(profitPercentage) / 100 || 0)).toFixed(2)}
+                      +{(parseFloat(car.price) * (parseFloat(commissionPercentage) / 100 || 0)).toFixed(2)}
                     </span>
                   )}
                   <button onClick={() => handleRemoveCar(i)} className="text-destructive hover:text-destructive/80">×</button>
