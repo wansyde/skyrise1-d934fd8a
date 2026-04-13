@@ -228,7 +228,7 @@ const Records = () => {
                         </div>
                         {isAAA && mult > 1 && (
                           <div>
-                            <p className="text-[9px] text-muted-foreground">Multiplier</p>
+                            <p className="text-[9px] text-muted-foreground">AAA Multiplier</p>
                             <p className="text-xs font-bold text-amber-600">×{mult}</p>
                           </div>
                         )}
@@ -277,7 +277,7 @@ const Records = () => {
                         </div>
                         {mult > 1 && (
                           <div className="flex justify-between text-[11px]">
-                            <span className="text-muted-foreground">Multiplier</span>
+                            <span className="text-muted-foreground">AAA Multiplier</span>
                             <span className="font-semibold text-amber-600">×{mult}</span>
                           </div>
                         )}
