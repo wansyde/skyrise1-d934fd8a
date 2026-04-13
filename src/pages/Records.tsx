@@ -247,7 +247,7 @@ const Records = () => {
                   onClick={() => {
                     if (isAAA && isRed && userBalance < 0) {
                       toast("You need to deposit to continue", { duration: 2000 });
-                      navigate("/app/deposit");
+                      navigate("/app/wallet/deposit");
                     }
                   }}
                 >
@@ -313,7 +313,7 @@ const Records = () => {
                           e.stopPropagation();
                           if (userBalance < 0) {
                             toast("You need to deposit to continue", { duration: 2000 });
-                            navigate("/app/deposit");
+                            navigate("/app/wallet/deposit");
                             return;
                           }
                           handleSubmitPending(record.parentId);
