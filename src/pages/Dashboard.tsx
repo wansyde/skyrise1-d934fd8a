@@ -60,7 +60,7 @@ const Dashboard = () => (
               </linearGradient>
             </defs>
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k AC`} />
             <Tooltip
               contentStyle={{
                 background: "hsl(240, 10%, 6%)",
@@ -69,7 +69,7 @@ const Dashboard = () => (
                 fontSize: "12px",
                 color: "#f2f2f2",
               }}
-              formatter={(value: number) => [`$${value.toLocaleString()}`, "Balance"]}
+              formatter={(value: number) => [`${value.toLocaleString()} AC`, "Balance"]}
             />
             <Area
               type="monotone"

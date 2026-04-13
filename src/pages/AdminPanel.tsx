@@ -933,7 +933,7 @@ const AdminPanel = () => {
                                     const { error } = await supabase.from("withdrawals").update({ status: "completed", admin_note: w.admin_note || "Processed by admin", updated_at: new Date().toISOString() }).eq("id", w.id);
                                     if (error) throw error;
                                     await supabase.from("transactions").update({ status: "approved" } as any).eq("user_id", w.user_id).eq("type", "withdrawal").eq("status", "pending").eq("amount", -Number(w.amount));
-                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of $${Number(w.amount).toLocaleString()}`);
+                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of ${Number(w.amount).toLocaleString()} AC`);
                                     toast.success("Withdrawal marked as completed.");
                                     queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
                                     queryClient.invalidateQueries({ queryKey: ["admin-logs"] });

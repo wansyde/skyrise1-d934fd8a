@@ -122,7 +122,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Deposited $${amt.toLocaleString()} successfully.`);
+      toast.success(`Deposited ${amt.toLocaleString()} AC successfully.`);
       setDepositUserId(null);
       setDepositAmount("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });

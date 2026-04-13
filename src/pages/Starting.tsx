@@ -348,7 +348,7 @@ const Starting = () => {
         } else {
           const multiplierText = result.multiplier > 1 ? ` (×${result.multiplier})` : '';
           console.log("AAA completed — raw:", result.raw_commission, "multiplier:", result.multiplier, "final:", result.total_commission, "new_balance:", result.new_balance);
-          toast.success(`AAA assignment completed${multiplierText}. Earnings of $${result.total_commission} added to your balance.`);
+          toast.success(`AAA assignment completed${multiplierText}. Earnings of ${result.total_commission} AC added to your balance.`);
           setMatchState("submitted");
           setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1500);
         }
