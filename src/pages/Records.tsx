@@ -192,11 +192,12 @@ const Records = () => {
 
   const filtered = flatRecords.filter((r) => {
     if (activeTab === "pending") {
-      if (r.task_type === "AAA") return r.car_status === "pending_insufficient";
+      // For AAA: show ALL cars from a pending parent record (both green and red)
+      if (r.task_type === "AAA") return r.status === "pending";
       return r.status === "pending";
     }
-    // "completed" tab
-    if (r.task_type === "AAA") return r.car_status === "completed_partial";
+    // "completed" tab — only show when the entire AAA record is completed
+    if (r.task_type === "AAA") return r.status === "completed";
     return r.status === "completed";
   });
 
@@ -300,7 +301,7 @@ const Records = () => {
                         isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
                       }`}>
                         {isGreen ? (
-                          <><CheckCircle2 className="h-3 w-3" /> Completed</>
+                          <><CheckCircle2 className="h-3 w-3" /> Promoted</>
                         ) : (
                           <><XCircle className="h-3 w-3" /> Pending</>
                         )}
