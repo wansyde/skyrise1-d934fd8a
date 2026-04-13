@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Car, Star, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { getCarImage } from "@/lib/car-images";
 import { toast } from "sonner";
@@ -45,6 +45,22 @@ const CarImage = ({ carName }: { carName: string }) => {
 
 type TabKey = "all" | "pending" | "completed";
 
+interface FlatRecord {
+  id: string;
+  parentId: string;
+  created_at: string;
+  task_type: string;
+  car_name: string;
+  car_price: number;
+  commission: number;
+  status: "completed" | "pending";
+  car_status: string;
+  assignment_code: string;
+  // For regular tasks
+  total_amount: number;
+  advertising_salary: number;
+}
+
 const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
   const queryClient = useQueryClient();
@@ -66,7 +82,6 @@ const Records = () => {
     },
   });
 
-  // Fetch multipliers for AAA records
   const aaaAssignmentIds = records
     .filter(r => r.task_type === "AAA" && r.assignment_code)
     .map(r => r.assignment_code);
@@ -84,6 +99,48 @@ const Records = () => {
       return map;
     },
   });
+
+  // Flatten AAA records into per-car entries
+  const flatRecords: FlatRecord[] = useMemo(() => {
+    const result: FlatRecord[] = [];
+    for (const record of records) {
+      if (record.task_type === "AAA" && record.car_prices?.length > 0) {
+        const carNames = record.car_name.split(', ');
+        for (let i = 0; i < carNames.length; i++) {
+          result.push({
+            id: `${record.id}-car-${i}`,
+            parentId: record.id,
+            created_at: record.created_at,
+            task_type: "AAA",
+            car_name: carNames[i],
+            car_price: record.car_prices[i] ?? 0,
+            commission: record.car_commissions?.[i] ?? 0,
+            status: record.status as "completed" | "pending",
+            car_status: record.car_statuses?.[i] ?? "pending_insufficient",
+            assignment_code: record.assignment_code,
+            total_amount: record.car_prices[i] ?? 0,
+            advertising_salary: record.car_commissions?.[i] ?? 0,
+          });
+        }
+      } else {
+        result.push({
+          id: record.id,
+          parentId: record.id,
+          created_at: record.created_at,
+          task_type: record.task_type,
+          car_name: record.car_name,
+          car_price: Number(record.total_amount),
+          commission: Number(record.advertising_salary),
+          status: record.status as "completed" | "pending",
+          car_status: record.status === "completed" ? "completed_partial" : "pending_insufficient",
+          assignment_code: record.assignment_code,
+          total_amount: Number(record.total_amount),
+          advertising_salary: Number(record.advertising_salary),
+        });
+      }
+    }
+    return result;
+  }, [records]);
 
   const handleSubmitPending = async (recordId: string) => {
     setSubmittingId(recordId);
@@ -111,9 +168,23 @@ const Records = () => {
     }
   };
 
-  const filtered = records.filter((r) => {
+  // Group pending AAA parent IDs for submit button
+  const pendingAAAParentIds = useMemo(() => {
+    const ids = new Set<string>();
+    records.filter(r => r.task_type === "AAA" && r.status === "pending").forEach(r => ids.add(r.id));
+    return ids;
+  }, [records]);
+
+  // Track which parent IDs we've already shown a submit button for
+  const shownSubmitButtons = useMemo(() => new Set<string>(), [records]);
+
+  const filtered = flatRecords.filter((r) => {
     if (activeTab === "all") return true;
-    if (activeTab === "pending") return r.status === "pending";
+    if (activeTab === "pending") {
+      if (r.task_type === "AAA") return r.car_status === "pending_insufficient";
+      return r.status === "pending";
+    }
+    if (r.task_type === "AAA") return r.car_status === "completed_partial";
     return r.status === "completed";
   });
 
@@ -123,9 +194,21 @@ const Records = () => {
     { key: "completed", label: "Completed" },
   ];
 
+  // Deficit message
+  const deficit = userBalance < 0 ? Math.abs(userBalance) : 0;
+
   return (
     <AppLayout>
       <div className="px-4 py-5 min-h-screen">
+        {/* Deficit banner */}
+        {deficit > 0 && (
+          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-center">
+            <p className="text-xs font-bold text-destructive">
+              You have a deficit of {deficit.toFixed(2)} AC. Please deposit to continue.
+            </p>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex border-b border-border/50 mb-4">
           {tabs.map((tab) => (
@@ -158,16 +241,22 @@ const Records = () => {
         <div className="space-y-3">
           {filtered.map((record, i) => {
             const isAAA = record.task_type === "AAA";
-            const isPending = record.status === "pending";
-            const carStatuses: string[] = record.car_statuses || [];
-            const carCommissions: number[] = record.car_commissions || [];
-            const hasRedCars = carStatuses.some(s => s === "pending_insufficient");
-            const allGreen = carStatuses.length > 0 && carStatuses.every(s => s === "completed_partial");
-
-            // Calculate multiplier & final earnings for AAA
+            const isGreen = record.car_status === "completed_partial";
+            const isRed = record.car_status === "pending_insufficient";
             const mult = isAAA ? Math.max(multipliers[record.assignment_code] ?? 1, 1) : 1;
-            const rawCommission = carCommissions.reduce((s, c) => s + (c ?? 0), 0);
-            const finalEarnings = isAAA ? +(rawCommission * mult).toFixed(2) : Number(record.advertising_salary);
+
+            // Show submit button only once per pending AAA parent, on the last red car
+            let showSubmitButton = false;
+            if (isAAA && isRed && pendingAAAParentIds.has(record.parentId) && !shownSubmitButtons.has(record.parentId)) {
+              // Check if this is the last red car for this parent in filtered list
+              const lastRedForParent = [...filtered].reverse().find(
+                r => r.parentId === record.parentId && r.car_status === "pending_insufficient"
+              );
+              if (lastRedForParent?.id === record.id) {
+                showSubmitButton = true;
+                shownSubmitButtons.add(record.parentId);
+              }
+            }
 
             return (
               <motion.div
@@ -176,11 +265,16 @@ const Records = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.25 }}
               >
-                {/* Card */}
                 <div className={`rounded-xl border p-3 shadow-sm ${
-                  isAAA ? "bg-gradient-to-br from-card to-amber-50/30 border-amber-200/50" : "bg-card border-border/50"
+                  isAAA
+                    ? isGreen
+                      ? "bg-gradient-to-br from-card to-emerald-50/30 border-emerald-200/50"
+                      : isRed
+                        ? "bg-gradient-to-br from-card to-red-50/30 border-red-200/50"
+                        : "bg-gradient-to-br from-card to-amber-50/30 border-amber-200/50"
+                    : "bg-card border-border/50"
                 }`}>
-                  {/* Header row: date + status */}
+                  {/* Header */}
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] text-muted-foreground">
@@ -193,15 +287,23 @@ const Records = () => {
                         </span>
                       )}
                     </div>
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                        record.status === "completed"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-amber-100 text-amber-700"
-                      }`}
-                    >
-                      {record.status === "completed" ? "Completed" : "Pending"}
-                    </span>
+                    {isAAA ? (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1 ${
+                        isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                      }`}>
+                        {isGreen ? (
+                          <><CheckCircle2 className="h-3 w-3" /> Completed (Escrow)</>
+                        ) : (
+                          <><XCircle className="h-3 w-3" /> Pending (Insufficient)</>
+                        )}
+                      </span>
+                    ) : (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                        record.status === "completed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                      }`}>
+                        {record.status === "completed" ? "Completed" : "Pending"}
+                      </span>
+                    )}
                   </div>
 
                   {/* Main content */}
@@ -213,22 +315,22 @@ const Records = () => {
                       </p>
                       <div className="flex items-center gap-4">
                         <div>
-                          <p className="text-[9px] text-muted-foreground">Amount</p>
+                          <p className="text-[9px] text-muted-foreground">
+                            {isAAA ? "Car Price" : "Amount"}
+                          </p>
                           <p className="text-xs font-bold text-primary">
-                            {Number(record.total_amount)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                            {record.car_price.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                         <div>
-                          <p className="text-[9px] text-muted-foreground">
-                            {isAAA ? "Final Earnings" : "Salary"}
-                          </p>
-                          <p className="text-xs font-bold text-emerald-600">
-                            +{finalEarnings.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                          <p className="text-[9px] text-muted-foreground">Commission</p>
+                          <p className={`text-xs font-bold ${isGreen || record.status === "completed" ? "text-emerald-600" : "text-muted-foreground"}`}>
+                            +{record.commission.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                         {isAAA && mult > 1 && (
                           <div>
-                            <p className="text-[9px] text-muted-foreground">AAA Multiplier</p>
+                            <p className="text-[9px] text-muted-foreground">Multiplier</p>
                             <p className="text-xs font-bold text-amber-600">×{mult}</p>
                           </div>
                         )}
@@ -236,105 +338,26 @@ const Records = () => {
                     </div>
                   </div>
 
-                  {/* AAA Per-Car Breakdown — compact */}
-                  {isAAA && record.car_prices?.length > 0 && (
+                  {/* Submit button for pending AAA */}
+                  {showSubmitButton && (
                     <div className="mt-2 pt-2 border-t border-border/30">
-                      <div className="space-y-1">
-                        {record.car_name.split(', ').map((carName: string, ci: number) => {
-                          const status = carStatuses[ci];
-                          const isGreen = status === "completed_partial";
-                          const isRed = status === "pending_insufficient";
-                          const commission = carCommissions[ci] ?? 0;
-
-                          return (
-                            <div key={ci} className={`flex items-center justify-between text-[11px] rounded-md px-2 py-1.5 ${
-                              isGreen ? "bg-emerald-50 border border-emerald-200/50" :
-                              isRed ? "bg-red-50 border border-red-200/50" :
-                              "bg-muted/20"
-                            }`}>
-                              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                                {isGreen && <CheckCircle2 className="h-3 w-3 text-emerald-600 flex-shrink-0" />}
-                                {isRed && <XCircle className="h-3 w-3 text-destructive flex-shrink-0" />}
-                                <span className="truncate font-medium">{carName}</span>
-                              </div>
-                              <div className="flex items-center gap-2 flex-shrink-0 ml-1">
-                                <span className="font-bold text-primary">
-                                  {record.car_prices?.[ci] != null ? Number(record.car_prices[ci]).toFixed(0) : '—'}
-                                </span>
-                                {commission > 0 && (
-                                  <span className="text-[9px] font-semibold text-emerald-600">+{commission.toFixed(2)}</span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      {/* Earnings summary — always visible */}
-                      <div className="mt-1.5 pt-1.5 border-t border-border/20 space-y-0.5">
-                        <div className="flex justify-between text-[11px]">
-                          <span className="text-muted-foreground">Raw Commission</span>
-                          <span className="font-semibold">{rawCommission.toFixed(2)} AC</span>
-                        </div>
-                        {mult > 1 && (
-                          <div className="flex justify-between text-[11px]">
-                            <span className="text-muted-foreground">AAA Multiplier</span>
-                            <span className="font-semibold text-amber-600">×{mult}</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between text-[11px]">
-                          <span className="font-semibold text-foreground">Final Earnings</span>
-                          <span className="font-bold text-emerald-600">+{finalEarnings.toFixed(2)} AC</span>
-                        </div>
-                      </div>
-                      {isPending && (
-                        <div className="mt-1 space-y-0.5">
-                          {greenCount(carStatuses) > 0 && (
-                            <p className="text-[9px] text-emerald-600 font-medium">
-                              ✓ {greenCount(carStatuses)} car(s) completed — held in escrow
-                            </p>
-                          )}
-                          {hasRedCars && (
-                            <p className="text-[9px] text-destructive font-medium">
-                              ✗ {carStatuses.filter(s => s === "pending_insufficient").length} car(s) pending — insufficient balance
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Submit button for pending AAA tasks */}
-                  {isPending && isAAA && (
-                    <div className="mt-2 pt-2 border-t border-border/30">
-                      {hasRedCars && userBalance <= 0 ? (
-                        <p className="text-[10px] text-destructive font-medium">
-                          Insufficient balance. Deposit funds to complete remaining cars.
+                      {userBalance < 0 ? (
+                        <p className="text-[10px] text-destructive font-medium text-center">
+                          Deficit of {Math.abs(userBalance).toFixed(2)} AC. Deposit funds to complete.
                         </p>
-                      ) : hasRedCars ? (
+                      ) : (
                         <button
-                          onClick={() => handleSubmitPending(record.id)}
-                          disabled={submittingId === record.id}
+                          onClick={() => handleSubmitPending(record.parentId)}
+                          disabled={submittingId === record.parentId}
                           className="w-full py-2 rounded-lg font-semibold text-[11px] tracking-wide flex items-center justify-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
                         >
-                          {submittingId === record.id ? (
+                          {submittingId === record.parentId ? (
                             <><Loader2 className="h-3 w-3 animate-spin" /> Processing...</>
                           ) : (
                             "Complete Remaining Cars"
                           )}
                         </button>
-                      ) : allGreen ? (
-                        <button
-                          onClick={() => handleSubmitPending(record.id)}
-                          disabled={submittingId === record.id}
-                          className="w-full py-2 rounded-lg font-semibold text-[11px] tracking-wide flex items-center justify-center gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-all"
-                        >
-                          {submittingId === record.id ? (
-                            <><Loader2 className="h-3 w-3 animate-spin" /> Releasing...</>
-                          ) : (
-                            "Release Escrow & Complete"
-                          )}
-                        </button>
-                      ) : null}
+                      )}
                     </div>
                   )}
                 </div>
@@ -346,9 +369,5 @@ const Records = () => {
     </AppLayout>
   );
 };
-
-function greenCount(statuses: string[]): number {
-  return statuses.filter(s => s === "completed_partial").length;
-}
 
 export default Records;
