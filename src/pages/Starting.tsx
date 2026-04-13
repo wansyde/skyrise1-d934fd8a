@@ -1,12 +1,15 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, DollarSign, Play, ChevronRight, ChevronLeft, X, Loader2, Check, Headphones, Clock } from "lucide-react";
+import { Wallet, DollarSign, Play, ChevronRight, ChevronLeft, X, Loader2, Check, Headphones, Clock, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getVipTier, getSetProgress, getTaskProfit, generateRandomTaskValue } from "@/lib/vip-config";
 import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
+import { useQuery } from "@tanstack/react-query";
+import { getCarImage } from "@/lib/car-images";
+import { useNavigate } from "react-router-dom";
 
 import audiA1Img from "@/assets/cars/audi-a1.jpg";
 import audiA2Img from "@/assets/cars/audi-a2.jpg";
