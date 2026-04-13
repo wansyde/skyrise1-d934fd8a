@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Plus, Trash2, Search } from "lucide-react";
+import { Plus, Trash2, Search, Pencil, X, Save } from "lucide-react";
 
 const CAR_NAMES = [
   "Audi A1 2025 Sportback Premium Edition",
@@ -37,7 +37,8 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
 
-  // Form state
+  // Form state (create + edit shared)
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [targetUserId, setTargetUserId] = useState("");
   const [setNumber, setSetNumber] = useState("1");
   const [taskPosition, setTaskPosition] = useState("");
@@ -52,19 +53,12 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     queryKey: ["admin-aaa-assignments"],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
-      if (!session?.session) {
-        console.error("AAA query: No active session");
-        throw new Error("Not authenticated");
-      }
+      if (!session?.session) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("aaa_assignments" as any)
         .select("*")
         .order("created_at", { ascending: false });
-      if (error) {
-        console.error("AAA assignments query error:", error);
-        throw error;
-      }
-      console.log("AAA assignments loaded:", data?.length || 0);
+      if (error) throw error;
       return (data || []) as any[];
     },
     retry: 2,
@@ -78,19 +72,68 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
 
   const totalAmount = selectedCars.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
 
-  const handleCreate = async () => {
+  const resetForm = () => {
+    setEditingId(null);
+    setTaskPosition("");
+    setSelectedCars([]);
+    setTargetUserId("");
+    setSetNumber("1");
+    setNumberOfCars("3");
+    setCommissionPercentage("5");
+    setCommissionMode("percentage");
+    setCommissionMultiplier("1");
+  };
+
+  const handleEdit = (a: any) => {
+    if (a.status === "used") {
+      toast.error("Cannot edit a completed/used assignment");
+      return;
+    }
+    setEditingId(a.id);
+    setTargetUserId(a.user_id || "");
+    setSetNumber(String(a.set_number || 1));
+    setTaskPosition(String(a.task_position));
+    setNumberOfCars(String(a.number_of_cars));
+    setCommissionMultiplier(String(a.commission_multiplier || 1));
+
+    // Determine commission mode from data
+    const names: string[] = a.car_names || [];
+    const prices: number[] = a.car_prices || [];
+    const commissions: number[] = a.car_commissions || [];
+
+    // Check if commissions look like a percentage of prices
+    const pct = a.profit_percentage ? a.profit_percentage : 0.05;
+    const looksPercentage = prices.length > 0 && prices.every((p: number, i: number) => {
+      const expected = Math.round(p * pct * 100) / 100;
+      return Math.abs(expected - (commissions[i] || 0)) < 0.02;
+    });
+
+    if (looksPercentage && pct > 0) {
+      setCommissionMode("percentage");
+      setCommissionPercentage(String(Math.round(pct * 100)));
+    } else {
+      setCommissionMode("fixed");
+    }
+
+    setSelectedCars(names.map((name, i) => ({
+      name,
+      price: String(prices[i] || ""),
+      commission: String(commissions[i] || ""),
+    })));
+  };
+
+  const validateForm = () => {
     const pos = parseInt(taskPosition);
     const numCars = parseInt(numberOfCars);
-    const setNum = parseInt(setNumber);
     const commPct = parseFloat(commissionPercentage) / 100;
     const multiplier = parseFloat(commissionMultiplier) || 1;
 
-    if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
-    if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
-    if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
-    if (selectedCars.some(c => !c.price || parseFloat(c.price) <= 0)) { toast.error("All cars must have a valid price"); return; }
-    if (commissionMode === "percentage" && (commPct <= 0 || commPct > 1)) { toast.error("Enter a valid commission percentage (1–100)"); return; }
-    if (multiplier < 1 || multiplier > 100) { toast.error("Multiplier must be between 1 and 100"); return; }
+    if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return null; }
+    if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return null; }
+    if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return null; }
+    if (selectedCars.some(c => !c.price || parseFloat(c.price) <= 0)) { toast.error("All cars must have a valid price"); return null; }
+    if (commissionMode === "percentage" && (commPct <= 0 || commPct > 1)) { toast.error("Enter a valid commission percentage (1–100)"); return null; }
+    if (multiplier < 1 || multiplier > 100) { toast.error("Multiplier must be between 1 and 100"); return null; }
 
     const carNames = selectedCars.map(c => c.name);
     const carPrices = selectedCars.map(c => parseFloat(c.price));
@@ -98,32 +141,76 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       ? selectedCars.map(c => parseFloat(c.commission) || 0)
       : selectedCars.map(c => Math.round(parseFloat(c.price) * commPct * 100) / 100);
 
+    return {
+      pos,
+      numCars,
+      setNum: parseInt(setNumber),
+      commPct,
+      multiplier,
+      carNames,
+      carPrices,
+      carCommissions,
+    };
+  };
+
+  const handleCreate = async () => {
+    const v = validateForm();
+    if (!v) return;
+
     setSubmitting(true);
     try {
       const { error } = await supabase.from("aaa_assignments" as any).insert({
         user_id: targetUserId || null,
-        set_number: setNum,
-        task_position: pos,
-        number_of_cars: numCars,
+        set_number: v.setNum,
+        task_position: v.pos,
+        number_of_cars: v.numCars,
         total_assignment_amount: totalAmount,
-        car_names: carNames,
-        car_prices: carPrices,
-        car_commissions: carCommissions,
-        commission_multiplier: multiplier,
-        profit_percentage: commPct,
+        car_names: v.carNames,
+        car_prices: v.carPrices,
+        car_commissions: v.carCommissions,
+        commission_multiplier: v.multiplier,
+        profit_percentage: v.commPct,
         status: "active",
       } as any);
       if (error) throw error;
       toast.success("AAA assignment created");
-      setTaskPosition("");
-      setSelectedCars([]);
-      setTargetUserId("");
-      setSetNumber("1");
-      setCommissionPercentage("5");
-      setCommissionMultiplier("1");
+      resetForm();
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId) return;
+    const v = validateForm();
+    if (!v) return;
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("aaa_assignments" as any)
+        .update({
+          user_id: targetUserId || null,
+          set_number: v.setNum,
+          task_position: v.pos,
+          number_of_cars: v.numCars,
+          total_assignment_amount: totalAmount,
+          car_names: v.carNames,
+          car_prices: v.carPrices,
+          car_commissions: v.carCommissions,
+          commission_multiplier: v.multiplier,
+          profit_percentage: v.commPct,
+          updated_at: new Date().toISOString(),
+        } as any)
+        .eq("id", editingId);
+      if (error) throw error;
+      toast.success("AAA assignment updated");
+      resetForm();
+      queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update");
     } finally {
       setSubmitting(false);
     }
@@ -133,6 +220,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     try {
       await supabase.from("aaa_assignments" as any).delete().eq("id", id);
       toast.success("Deleted");
+      if (editingId === id) resetForm();
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error("Failed to delete");
@@ -170,9 +258,18 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Create Form */}
+      {/* Create/Edit Form */}
       <div className="glass-card p-5">
-        <h2 className="text-sm font-medium mb-4">Create AAA Assignment</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium">
+            {editingId ? "Edit AAA Assignment" : "Create AAA Assignment"}
+          </h2>
+          {editingId && (
+            <Button variant="ghost" size="sm" onClick={resetForm} className="gap-1 text-xs">
+              <X className="h-3.5 w-3.5" /> Cancel Edit
+            </Button>
+          )}
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Target User</label>
@@ -231,14 +328,14 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               <label className="text-xs text-muted-foreground mb-1 block">Commission %</label>
               <Input value={commissionPercentage} onChange={e => setCommissionPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
             </div>
-           )}
+          )}
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Multiplier (×)</label>
             <Input value={commissionMultiplier} onChange={e => setCommissionMultiplier(e.target.value)} placeholder="e.g. 1" className="h-9 text-xs" type="number" min={1} max={100} step={0.1} />
           </div>
         </div>
 
-        {/* Car selection with individual prices + commissions */}
+        {/* Car selection */}
         <div className="mb-4">
           <label className="text-xs text-muted-foreground mb-2 block">Cars, Prices & Commissions ({selectedCars.length}/{numberOfCars})</label>
           
@@ -297,10 +394,20 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
           </select>
         </div>
 
-        <Button onClick={handleCreate} disabled={submitting} size="sm" className="gap-2">
-          <Plus className="h-3.5 w-3.5" />
-          {submitting ? "Creating..." : "Create AAA Assignment"}
-        </Button>
+        {editingId ? (
+          <div className="flex gap-2">
+            <Button onClick={handleSaveEdit} disabled={submitting} size="sm" className="gap-2">
+              <Save className="h-3.5 w-3.5" />
+              {submitting ? "Saving..." : "Save Changes"}
+            </Button>
+            <Button variant="outline" onClick={resetForm} size="sm">Cancel</Button>
+          </div>
+        ) : (
+          <Button onClick={handleCreate} disabled={submitting} size="sm" className="gap-2">
+            <Plus className="h-3.5 w-3.5" />
+            {submitting ? "Creating..." : "Create AAA Assignment"}
+          </Button>
+        )}
       </div>
 
       {/* Assignments list */}
@@ -329,7 +436,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             </thead>
             <tbody>
               {filteredAssignments.map((a: any) => (
-                <tr key={a.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
+                <tr key={a.id} className={`border-b border-border/30 hover:bg-muted/20 transition-colors ${editingId === a.id ? 'bg-primary/5 ring-1 ring-primary/20' : ''}`}>
                   <td className="px-4 py-3 font-medium text-xs">{getUserName(a.user_id)}</td>
                   <td className="px-4 py-3 text-center font-mono text-xs">Set {a.set_number || 1}</td>
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
@@ -363,9 +470,16 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button onClick={() => handleDelete(a.id)} className="text-destructive hover:text-destructive/80">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex items-center justify-center gap-1">
+                      {a.status === "active" && (
+                        <button onClick={() => handleEdit(a)} className="text-primary hover:text-primary/80" title="Edit">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <button onClick={() => handleDelete(a.id)} className="text-destructive hover:text-destructive/80" title="Delete">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
