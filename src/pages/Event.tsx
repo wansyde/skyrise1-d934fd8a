@@ -31,6 +31,7 @@ const Event = () => {
     });
   }, []);
 
+  // Lazily generate shareable images in background after mount
   useEffect(() => {
     let active = true;
 
@@ -39,6 +40,9 @@ const Event = () => {
         if (document.fonts?.ready) {
           await document.fonts.ready;
         }
+
+        // Small delay to let the page render first
+        await new Promise((r) => setTimeout(r, 300));
 
         const [membershipSrc, salarySrc, rulesSrc] = await Promise.all([
           generateImage(memberTemplateRef),
@@ -53,7 +57,7 @@ const Event = () => {
         setRulesImage(rulesSrc);
       } catch {
         if (!active) return;
-        toast.error("Failed to load images");
+        toast.error("Failed to generate shareable images");
       }
     };
 
@@ -79,7 +83,9 @@ const Event = () => {
           icon={Diamond}
           imageSrc={membershipImage}
           alt="Skyrise Membership Levels"
-        />
+        >
+          <MembershipLevelsTemplate />
+        </NativeLongPressImageCard>
 
         <NativeLongPressImageCard
           title="Base Salary"
@@ -88,7 +94,9 @@ const Event = () => {
           imageSrc={salaryImage}
           alt="Skyrise Base Salary"
           delay={0.08}
-        />
+        >
+          <BaseSalaryTemplate />
+        </NativeLongPressImageCard>
 
         <NativeLongPressImageCard
           title="Salary Rules"
@@ -97,8 +105,11 @@ const Event = () => {
           imageSrc={rulesImage}
           alt="Skyrise Salary Rules"
           delay={0.16}
-        />
+        >
+          <SalaryRulesTemplate />
+        </NativeLongPressImageCard>
 
+        {/* Hidden templates for image generation */}
         <div className="pointer-events-none fixed left-[-99999px] top-0" aria-hidden="true">
           <MembershipLevelsTemplate ref={memberTemplateRef} />
           <div className="h-6" />

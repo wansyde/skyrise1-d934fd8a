@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 interface NativeLongPressImageCardProps {
   alt: string;
+  children?: ReactNode;
   delay?: number;
   description: string;
   icon: LucideIcon;
@@ -20,6 +21,7 @@ const nativeImageStyle: CSSProperties = {
 
 const NativeLongPressImageCard = ({
   alt,
+  children,
   delay = 0,
   description,
   icon: Icon,
@@ -52,6 +54,10 @@ const NativeLongPressImageCard = ({
             className="block w-full h-auto rounded-[24px] select-auto [-webkit-user-select:auto]"
             style={nativeImageStyle}
           />
+        ) : children ? (
+          <div className="rounded-[24px] overflow-hidden">
+            {children}
+          </div>
         ) : (
           <div className="min-h-[280px] rounded-[24px] bg-secondary/30 animate-pulse" />
         )}
