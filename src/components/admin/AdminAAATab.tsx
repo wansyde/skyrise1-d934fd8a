@@ -81,19 +81,19 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     const pos = parseInt(taskPosition);
     const numCars = parseInt(numberOfCars);
     const setNum = parseInt(setNumber);
-    const profitPct = parseFloat(profitPercentage) / 100;
+    const commPct = parseFloat(commissionPercentage) / 100;
 
     if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
     if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
     if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
     if (selectedCars.some(c => !c.price || parseFloat(c.price) <= 0)) { toast.error("All cars must have a valid price"); return; }
-    if (profitPct <= 0 || profitPct > 1) { toast.error("Enter a valid profit percentage (1–100)"); return; }
+    if (commissionMode === "percentage" && (commPct <= 0 || commPct > 1)) { toast.error("Enter a valid commission percentage (1–100)"); return; }
 
     const carNames = selectedCars.map(c => c.name);
     const carPrices = selectedCars.map(c => parseFloat(c.price));
     const carCommissions = commissionMode === "fixed"
       ? selectedCars.map(c => parseFloat(c.commission) || 0)
-      : selectedCars.map(c => Math.round(parseFloat(c.price) * profitPct * 100) / 100);
+      : selectedCars.map(c => Math.round(parseFloat(c.price) * commPct * 100) / 100);
 
     setSubmitting(true);
     try {
