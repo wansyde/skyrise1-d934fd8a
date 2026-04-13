@@ -366,6 +366,19 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 {!commissionManuallyEdited.current && " · Commission auto-filled"}
               </p>
             )}
+            {targetUserId && liveBalance !== null && (
+              <div className="mt-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
+                <p className="text-[10px] text-muted-foreground">Current Balance</p>
+                <p className={`text-lg font-bold ${liveBalance < 0 ? 'text-destructive' : 'text-primary'}`}>
+                  {liveBalance < 0 ? '-' : ''}{Math.abs(liveBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AC
+                </p>
+                {balanceUpdatedAt && (
+                  <p className="text-[9px] text-muted-foreground">
+                    Live · Updated {balanceUpdatedAt.toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Target Set</label>
