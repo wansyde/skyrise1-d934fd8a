@@ -178,7 +178,7 @@ const Records = () => {
       if (result.all_completed) {
         toast.success("All cars completed! Escrow released to your balance.");
       } else {
-        toast.info("Some cars completed. Deposit more funds to finish the remaining cars.");
+        toast.info("One car promoted. Submit the remaining cars to finish this assignment.");
       }
       await refreshProfile();
       queryClient.invalidateQueries({ queryKey: ["task-records"] });
