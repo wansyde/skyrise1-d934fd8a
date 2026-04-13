@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Car, Star, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { getCarImage } from "@/lib/car-images";
 import { toast } from "sonner";
@@ -64,6 +65,7 @@ interface FlatRecord {
 const Records = () => {
   const { user, refreshProfile, profile } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const userBalance = Number(profile?.balance ?? 0);
@@ -232,15 +234,23 @@ const Records = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.25 }}
               >
-                <div className={`rounded-xl border p-3 shadow-sm ${
-                  isAAA
-                    ? isGreen
-                      ? "bg-gradient-to-br from-card to-emerald-50/30 border-emerald-200/50"
-                      : isRed
-                        ? "bg-gradient-to-br from-card to-red-50/30 border-red-200/50"
-                        : "bg-gradient-to-br from-card to-amber-50/30 border-amber-200/50"
-                    : "bg-card border-border/50"
-                }`}>
+                <div
+                  className={`rounded-xl border p-3 shadow-sm ${
+                    isAAA
+                      ? isGreen
+                        ? "bg-gradient-to-br from-card to-emerald-50/30 border-emerald-200/50"
+                        : isRed
+                          ? "bg-gradient-to-br from-card to-red-50/30 border-red-200/50 cursor-pointer"
+                          : "bg-gradient-to-br from-card to-amber-50/30 border-amber-200/50"
+                      : "bg-card border-border/50"
+                  }`}
+                  onClick={() => {
+                    if (isAAA && isRed && userBalance < 0) {
+                      toast("You need to deposit to continue", { duration: 2000 });
+                      navigate("/app/deposit");
+                    }
+                  }}
+                >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5">
@@ -274,7 +284,7 @@ const Records = () => {
                   </div>
 
                   {/* Main content */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 items-center">
                     <CarImage carName={record.car_name} />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold leading-snug line-clamp-1 mb-1.5">
@@ -295,30 +305,30 @@ const Records = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Submit button for each pending AAA car */}
-                  {isAAA && isRed && (
-                    <div className="mt-2 pt-2 border-t border-border/30">
+                    {/* Compact submit button */}
+                    {isAAA && isRed && (
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (userBalance < 0) {
-                            toast.error("Insufficient balance. Please make a deposit to continue.");
+                            toast("You need to deposit to continue", { duration: 2000 });
+                            navigate("/app/deposit");
                             return;
                           }
                           handleSubmitPending(record.parentId);
                         }}
                         disabled={submittingId === record.parentId}
-                        className="w-full py-2 rounded-lg font-semibold text-[11px] tracking-wide flex items-center justify-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
+                        className="flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
                       >
                         {submittingId === record.parentId ? (
-                          <><Loader2 className="h-3 w-3 animate-spin" /> Processing...</>
+                          <Loader2 className="h-3 w-3 animate-spin" />
                         ) : (
                           "Submit"
                         )}
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </motion.div>
             );
