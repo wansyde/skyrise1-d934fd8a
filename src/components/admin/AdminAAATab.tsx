@@ -363,7 +363,6 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               )}
             </div>
           )}
-          )}
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Multiplier (×)</label>
             <Input value={commissionMultiplier} onChange={e => setCommissionMultiplier(e.target.value)} placeholder="e.g. 1" className="h-9 text-xs" type="number" min={1} max={100} step={0.1} />
