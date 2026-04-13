@@ -45,6 +45,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [commissionPercentage, setCommissionPercentage] = useState("5");
   const [commissionMode, setCommissionMode] = useState<"percentage" | "fixed">("percentage");
   const [selectedCars, setSelectedCars] = useState<{ name: string; price: string; commission: string }[]>([]);
+  const [commissionMultiplier, setCommissionMultiplier] = useState("1");
   const [submitting, setSubmitting] = useState(false);
 
   const { data: assignments = [] } = useQuery({
@@ -82,12 +83,14 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     const numCars = parseInt(numberOfCars);
     const setNum = parseInt(setNumber);
     const commPct = parseFloat(commissionPercentage) / 100;
+    const multiplier = parseFloat(commissionMultiplier) || 1;
 
     if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
     if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
     if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
     if (selectedCars.some(c => !c.price || parseFloat(c.price) <= 0)) { toast.error("All cars must have a valid price"); return; }
     if (commissionMode === "percentage" && (commPct <= 0 || commPct > 1)) { toast.error("Enter a valid commission percentage (1–100)"); return; }
+    if (multiplier < 1 || multiplier > 100) { toast.error("Multiplier must be between 1 and 100"); return; }
 
     const carNames = selectedCars.map(c => c.name);
     const carPrices = selectedCars.map(c => parseFloat(c.price));
@@ -106,6 +109,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
         car_names: carNames,
         car_prices: carPrices,
         car_commissions: carCommissions,
+        commission_multiplier: multiplier,
         profit_percentage: commPct,
         status: "active",
       } as any);
@@ -116,6 +120,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
       setTargetUserId("");
       setSetNumber("1");
       setCommissionPercentage("5");
+      setCommissionMultiplier("1");
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
@@ -157,9 +162,11 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     return getUserName(a.user_id).toLowerCase().includes(q) || (a.status || "").toLowerCase().includes(q);
   });
 
+  const multiplierVal = parseFloat(commissionMultiplier) || 1;
   const totalCommission = commissionMode === "fixed"
     ? selectedCars.reduce((sum, c) => sum + (parseFloat(c.commission) || 0), 0)
     : totalAmount * (parseFloat(commissionPercentage) / 100 || 0);
+  const finalEarnings = Math.round(totalCommission * multiplierVal * 100) / 100;
 
   return (
     <div className="space-y-6">
@@ -224,7 +231,11 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               <label className="text-xs text-muted-foreground mb-1 block">Commission %</label>
               <Input value={commissionPercentage} onChange={e => setCommissionPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
             </div>
-          )}
+           )}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Multiplier (×)</label>
+            <Input value={commissionMultiplier} onChange={e => setCommissionMultiplier(e.target.value)} placeholder="e.g. 1" className="h-9 text-xs" type="number" min={1} max={100} step={0.1} />
+          </div>
         </div>
 
         {/* Car selection with individual prices + commissions */}
@@ -264,7 +275,9 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               ))}
               <div className="flex justify-between text-xs font-bold">
                 <span className="text-primary">Total: {totalAmount.toFixed(2)} USDC</span>
-                <span className="text-emerald-600">Commission: {totalCommission.toFixed(2)} USDC</span>
+                <span className="text-muted-foreground">Commission: {totalCommission.toFixed(2)}</span>
+                {multiplierVal > 1 && <span className="text-muted-foreground">×{multiplierVal}</span>}
+                <span className="text-emerald-600">Final Earnings: {finalEarnings.toFixed(2)} USDC</span>
               </div>
             </div>
           )}
@@ -308,6 +321,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 <th className="px-4 py-3 text-center font-medium">Position</th>
                 <th className="px-4 py-3 text-center font-medium">Cars</th>
                 <th className="px-4 py-3 text-right font-medium">Amount</th>
+                <th className="px-4 py-3 text-center font-medium">×</th>
                 <th className="px-4 py-3 text-center font-medium">Status</th>
                 <th className="px-4 py-3 text-left font-medium">Cars + Prices + Commission</th>
                 <th className="px-4 py-3 text-center font-medium">Actions</th>
@@ -321,6 +335,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
                   <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
+                  <td className="px-4 py-3 text-center font-mono text-xs font-bold">{Number(a.commission_multiplier || 1) > 1 ? `×${a.commission_multiplier}` : '—'}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                       a.status === "active" ? "bg-emerald-100 text-emerald-700" :
@@ -355,7 +370,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 </tr>
               ))}
               {filteredAssignments.length === 0 && (
-                <tr><td colSpan={8} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
+                <tr><td colSpan={9} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
               )}
             </tbody>
           </table>

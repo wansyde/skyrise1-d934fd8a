@@ -19,6 +19,7 @@ export type Database = {
           car_commissions: number[]
           car_names: string[]
           car_prices: number[]
+          commission_multiplier: number
           created_at: string
           id: string
           number_of_cars: number
@@ -34,6 +35,7 @@ export type Database = {
           car_commissions?: number[]
           car_names?: string[]
           car_prices?: number[]
+          commission_multiplier?: number
           created_at?: string
           id?: string
           number_of_cars?: number
@@ -49,6 +51,7 @@ export type Database = {
           car_commissions?: number[]
           car_names?: string[]
           car_prices?: number[]
+          commission_multiplier?: number
           created_at?: string
           id?: string
           number_of_cars?: number
