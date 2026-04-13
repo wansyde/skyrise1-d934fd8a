@@ -117,10 +117,11 @@ const Starting = () => {
   const { data: aaaAssignments = [] } = useQuery({
     queryKey: ["user-aaa-assignments", user?.id],
     enabled: !!user,
+    staleTime: 10000,
     queryFn: async () => {
       const { data } = await supabase
         .from("aaa_assignments" as any)
-        .select("*")
+        .select("id,user_id,set_number,task_position,status,car_names,car_prices,car_commissions,total_assignment_amount,profit_percentage,commission_multiplier")
         .eq("status", "active")
         .order("task_position", { ascending: true });
       return (data || []) as any[];
@@ -350,7 +351,7 @@ const Starting = () => {
           console.log("AAA completed — raw:", result.raw_commission, "multiplier:", result.multiplier, "final:", result.total_commission, "new_balance:", result.new_balance);
           toast.success(`AAA assignment completed${multiplierText}. Earnings of ${result.total_commission} AC added to your balance.`);
           setMatchState("submitted");
-          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1500);
+          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1000);
         }
       } else {
         // Regular task
@@ -371,7 +372,7 @@ const Starting = () => {
         setCompletedCount(prev => prev + 1);
         await refreshProfile();
         setMatchState("submitted");
-        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
+        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1000);
       }
     } catch (e: any) {
       console.error("Task submission error:", e);
