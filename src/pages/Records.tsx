@@ -323,28 +323,36 @@ const Records = () => {
                       </div>
                     </div>
 
-                    {/* Compact submit button */}
-                    {isAAA && isRed && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (userBalance < 0) {
-                            toast("You need to deposit to continue", { duration: 2000 });
-                            navigate("/app/wallet/deposit");
-                            return;
-                          }
-                          handleSubmitPending(record.parentId);
-                        }}
-                        disabled={submittingId === record.parentId}
-                        className="flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all"
-                      >
-                        {submittingId === record.parentId ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          "Submit"
-                        )}
-                      </button>
-                    )}
+                    {/* Compact submit button - per-car balance check */}
+                    {isAAA && isRed && (() => {
+                      const canAfford = userBalance >= record.car_price;
+                      const isSubmitting = submittingId === record.parentId;
+                      return (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!canAfford) {
+                              toast("Deposit required to continue", { duration: 2000 });
+                              navigate("/app/wallet/deposit");
+                              return;
+                            }
+                            handleSubmitPending(record.parentId);
+                          }}
+                          disabled={isSubmitting || !canAfford}
+                          className={`flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] transition-all ${
+                            canAfford
+                              ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                              : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                          } disabled:opacity-50`}
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            "Submit"
+                          )}
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               </motion.div>
