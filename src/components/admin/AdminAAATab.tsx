@@ -321,6 +321,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 <th className="px-4 py-3 text-center font-medium">Position</th>
                 <th className="px-4 py-3 text-center font-medium">Cars</th>
                 <th className="px-4 py-3 text-right font-medium">Amount</th>
+                <th className="px-4 py-3 text-center font-medium">×</th>
                 <th className="px-4 py-3 text-center font-medium">Status</th>
                 <th className="px-4 py-3 text-left font-medium">Cars + Prices + Commission</th>
                 <th className="px-4 py-3 text-center font-medium">Actions</th>
@@ -334,6 +335,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
                   <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
+                  <td className="px-4 py-3 text-center font-mono text-xs font-bold">{Number(a.commission_multiplier || 1) > 1 ? `×${a.commission_multiplier}` : '—'}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                       a.status === "active" ? "bg-emerald-100 text-emerald-700" :
