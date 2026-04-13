@@ -259,144 +259,164 @@ const Records = () => {
           </div>
         )}
 
-        <div className="space-y-3">
-          {filtered.map((record, i) => {
-            const isAAA = record.task_type === "AAA";
-            const isGreen = record.car_status === "completed_partial";
-            const isRed = record.car_status === "pending_insufficient";
-            const mult = isAAA ? Math.max(multipliers[record.assignment_code] ?? 1, 1) : 1;
+        <div className="space-y-4">
+          {filtered.map((item, i) => {
+            if (item.type === "aaa") {
+              const mult = Math.max(aaaDetails[item.assignment_code]?.multiplier ?? 1, 1);
+              const canAfford = userBalance >= 0;
+              const isSubmitting = submittingId === item.parentId;
+              const pendingCount = item.cars.filter(c => c.car_status === "pending_insufficient").length;
+              const completedCount = item.cars.filter(c => c.car_status === "completed_partial").length;
 
+              return (
+                <motion.div
+                  key={item.parentId}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03, duration: 0.25 }}
+                  className="rounded-xl border border-amber-200/60 bg-gradient-to-br from-card to-amber-50/20 shadow-sm overflow-hidden"
+                >
+                  {/* AAA Group Header */}
+                  <div className="px-4 py-2.5 border-b border-amber-200/40 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        AAA
+                      </span>
+                      <span className="text-xs font-medium text-foreground">
+                        Set {item.set_number ?? "?"} · Task {item.task_position ?? "?"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-muted-foreground">
+                        {completedCount}/{item.cars.length} promoted
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {format(new Date(item.created_at), "MM/dd HH:mm")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Cars list */}
+                  <div className="divide-y divide-border/30">
+                    {item.cars.map((car) => {
+                      const isGreen = car.car_status === "completed_partial";
+                      const isRed = car.car_status === "pending_insufficient";
+                      return (
+                        <div
+                          key={`${item.parentId}-car-${car.index}`}
+                          className={`px-4 py-3 flex gap-3 items-center ${
+                            isRed ? "bg-red-50/30" : isGreen ? "bg-emerald-50/20" : ""
+                          }`}
+                          onClick={() => {
+                            if (isRed && userBalance < 0) {
+                              toast("Deposit Required", {
+                                description: "Top up your balance to continue this assignment",
+                                duration: 3000,
+                              });
+                              navigate("/app/wallet/deposit");
+                            }
+                          }}
+                        >
+                          <CarImage carName={car.car_name} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-xs font-semibold leading-snug line-clamp-1">
+                                {car.car_name}
+                              </p>
+                              <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${
+                                isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                              }`}>
+                                {isGreen ? <><CheckCircle2 className="h-2.5 w-2.5" /> Promoted</> : <><XCircle className="h-2.5 w-2.5" /> Pending</>}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div>
+                                <p className="text-[9px] text-muted-foreground">Total Amount</p>
+                                <p className="text-xs font-bold text-primary">
+                                  {car.car_price.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] text-muted-foreground">Advertising Salary</p>
+                                <p className={`text-xs font-bold ${isGreen ? "text-emerald-600" : "text-muted-foreground"}`}>
+                                  +{(car.commission * mult).toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {isRed && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!canAfford) {
+                                  toast("Deposit Required", {
+                                    description: "Top up your balance to continue this assignment",
+                                    duration: 3000,
+                                  });
+                                  navigate("/app/wallet/deposit");
+                                  return;
+                                }
+                                handleSubmitPending(item.parentId);
+                              }}
+                              disabled={isSubmitting || !canAfford}
+                              className={`flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] transition-all ${
+                                canAfford
+                                  ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                                  : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                              } disabled:opacity-50`}
+                            >
+                              {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Submit"}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              );
+            }
+
+            // Regular record
+            const reg = item as RegularRecord;
             return (
               <motion.div
-                key={record.id}
+                key={reg.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02, duration: 0.25 }}
               >
-                <div
-                  className={`rounded-xl border p-3 shadow-sm ${
-                    isAAA
-                      ? isGreen
-                        ? "bg-gradient-to-br from-card to-emerald-50/30 border-emerald-200/50"
-                        : isRed
-                          ? "bg-gradient-to-br from-card to-red-50/30 border-red-200/50 cursor-pointer"
-                          : "bg-gradient-to-br from-card to-amber-50/30 border-amber-200/50"
-                      : "bg-card border-border/50"
-                  }`}
-                  onClick={() => {
-                    if (isAAA && isRed && userBalance < 0) {
-                      toast("Deposit Required", {
-                        description: "Top up your balance to continue this assignment",
-                        duration: 3000,
-                        style: {
-                          fontFamily: "'Montserrat', sans-serif",
-                          background: "linear-gradient(135deg, #f8f7ff 0%, #ece9ff 100%)",
-                          border: "1px solid rgba(139, 92, 246, 0.15)",
-                          boxShadow: "0 8px 32px rgba(139, 92, 246, 0.12)",
-                          borderRadius: "14px",
-                          padding: "16px 20px",
-                        },
-                      });
-                      navigate("/app/wallet/deposit");
-                    }
-                  }}
-                >
-                  {/* Header */}
+                <div className="rounded-xl border bg-card border-border/50 p-3 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-muted-foreground">
-                        {format(new Date(record.created_at), "yyyy-MM-dd HH:mm")}
-                      </span>
-                      {isAAA && (
-                        <span className="flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
-                          <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500" />
-                          AAA
-                        </span>
-                      )}
-                    </div>
-                    {isAAA ? (
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1 ${
-                        isGreen ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-                      }`}>
-                        {isGreen ? (
-                          <><CheckCircle2 className="h-3 w-3" /> Promoted</>
-                        ) : (
-                          <><XCircle className="h-3 w-3" /> Pending</>
-                        )}
-                      </span>
-                    ) : (
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                        record.status === "completed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                      }`}>
-                        {record.status === "completed" ? "Completed" : "Pending"}
-                      </span>
-                    )}
+                    <span className="text-[10px] text-muted-foreground">
+                      {format(new Date(reg.created_at), "yyyy-MM-dd HH:mm")}
+                    </span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                      reg.status === "completed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                    }`}>
+                      {reg.status === "completed" ? "Completed" : "Pending"}
+                    </span>
                   </div>
-
-                  {/* Main content */}
                   <div className="flex gap-3 items-center">
-                    <CarImage carName={record.car_name} />
+                    <CarImage carName={reg.car_name} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold leading-snug line-clamp-1 mb-1.5">
-                        {record.car_name}
-                      </p>
+                      <p className="text-xs font-semibold leading-snug line-clamp-1 mb-1.5">{reg.car_name}</p>
                       <div className="flex items-center gap-4">
                         <div>
                           <p className="text-[9px] text-muted-foreground">Total Amount</p>
                           <p className="text-xs font-bold text-primary">
-                            {record.car_price.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                            {reg.total_amount.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                         <div>
                           <p className="text-[9px] text-muted-foreground">Advertising Salary</p>
-                          <p className={`text-xs font-bold ${isGreen || record.status === "completed" ? "text-emerald-600" : "text-muted-foreground"}`}>
-                            +{(isAAA ? record.commission * mult : record.commission).toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                          <p className={`text-xs font-bold ${reg.status === "completed" ? "text-emerald-600" : "text-muted-foreground"}`}>
+                            +{reg.advertising_salary.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
                           </p>
                         </div>
                       </div>
                     </div>
-
-                    {/* Compact submit button - balance already deducted upfront, just need >= 0 */}
-                    {isAAA && isRed && (() => {
-                      const canAfford = userBalance >= 0;
-                      const isSubmitting = submittingId === record.parentId;
-                      return (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!canAfford) {
-                              toast("Deposit Required", {
-                                description: "Top up your balance to continue this assignment",
-                                duration: 3000,
-                                style: {
-                                  fontFamily: "'Montserrat', sans-serif",
-                                  background: "linear-gradient(135deg, #f8f7ff 0%, #ece9ff 100%)",
-                                  border: "1px solid rgba(139, 92, 246, 0.15)",
-                                  boxShadow: "0 8px 32px rgba(139, 92, 246, 0.12)",
-                                  borderRadius: "14px",
-                                  padding: "16px 20px",
-                                },
-                              });
-                              navigate("/app/wallet/deposit");
-                              return;
-                            }
-                            handleSubmitPending(record.parentId);
-                          }}
-                          disabled={isSubmitting || !canAfford}
-                          className={`flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] transition-all ${
-                            canAfford
-                              ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-                              : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
-                          } disabled:opacity-50`}
-                        >
-                          {isSubmitting ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            "Submit"
-                          )}
-                        </button>
-                      );
-                    })()}
                   </div>
                 </div>
               </motion.div>
