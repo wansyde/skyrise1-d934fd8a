@@ -245,6 +245,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               {filteredAssignments.map((a: any) => (
                 <tr key={a.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
                   <td className="px-4 py-3 font-medium text-xs">{getUserName(a.user_id)}</td>
+                  <td className="px-4 py-3 text-center font-mono text-xs">Set {a.set_number || 1}</td>
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
                   <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
