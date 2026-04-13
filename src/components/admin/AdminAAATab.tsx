@@ -45,6 +45,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [commissionPercentage, setCommissionPercentage] = useState("5");
   const [commissionMode, setCommissionMode] = useState<"percentage" | "fixed">("percentage");
   const [selectedCars, setSelectedCars] = useState<{ name: string; price: string; commission: string }[]>([]);
+  const [commissionMultiplier, setCommissionMultiplier] = useState("1");
   const [submitting, setSubmitting] = useState(false);
 
   const { data: assignments = [] } = useQuery({
