@@ -311,28 +311,54 @@ const Starting = () => {
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
     if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
-    if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
 
     isProcessingRef.current = true;
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.rpc("complete_task", {
-        _car_brand: matchedCar.brand,
-        _car_name: matchedCar.name,
-        _car_image_url: matchedCar.featured,
-        _total_amount: taskValue,
-        _assignment_code: assignmentCode,
-      });
-      if (error) throw error;
-      const result = data as any;
-      if (result?.error) {
-        toast.error(result.error);
-        setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
+      if (isAAATask && aaaAssignment) {
+        // AAA task submission
+        const { data, error } = await supabase.rpc("complete_aaa_task" as any, {
+          _assignment_id: aaaAssignment.id,
+          _car_names: aaaCars,
+          _total_amount: aaaAssignment.total_assignment_amount,
+        });
+        if (error) throw error;
+        const result = data as any;
+        if (result?.error) {
+          toast.error(result.error);
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); return;
+        }
+        setCompletedCount(prev => prev + 1);
+        refreshProfile();
+        if (result.went_negative) {
+          toast.error("Insufficient balance. Task marked as pending. Please deposit funds and complete it from Records.");
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false);
+          setTimeout(() => navigate("/app/records"), 1500);
+        } else {
+          setMatchState("submitted");
+          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1500);
+        }
+      } else {
+        // Regular task
+        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+        const { data, error } = await supabase.rpc("complete_task", {
+          _car_brand: matchedCar.brand,
+          _car_name: matchedCar.name,
+          _car_image_url: matchedCar.featured,
+          _total_amount: taskValue,
+          _assignment_code: assignmentCode,
+        });
+        if (error) throw error;
+        const result = data as any;
+        if (result?.error) {
+          toast.error(result.error);
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
+        }
+        setCompletedCount(prev => prev + 1);
+        refreshProfile();
+        setMatchState("submitted");
+        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
       }
-      setCompletedCount(prev => prev + 1);
-      refreshProfile();
-      setMatchState("submitted");
-      setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1500);
     } catch (e: any) {
       console.error("Task submission error:", e);
       toast.error(e?.message || "Submission failed. Please try again.");
