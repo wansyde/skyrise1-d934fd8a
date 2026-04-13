@@ -327,7 +327,7 @@ const Starting = () => {
     setSubmitting(true);
     try {
       if (isAAATask && aaaAssignment) {
-        // AAA task submission
+        // AAA task submission - per-car processing
         const { data, error } = await supabase.rpc("complete_aaa_task" as any, {
           _assignment_id: aaaAssignment.id,
           _car_names: aaaCars,
@@ -341,8 +341,8 @@ const Starting = () => {
         }
         setCompletedCount(prev => prev + 1);
         refreshProfile();
-        if (result.went_negative) {
-          toast.error("Insufficient balance. Task marked as pending. Please deposit funds and complete it from Records.");
+        if (!result.all_completed) {
+          toast.error("Some cars could not be completed due to insufficient balance. Check Records → Pending for details.");
           setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false);
           setTimeout(() => navigate("/app/records"), 1500);
         } else {
@@ -406,7 +406,7 @@ const Starting = () => {
               <p className="text-[11px] text-muted-foreground leading-snug">The total balance reflects both the deposited amount and profits earned</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-primary">{Number(profile?.balance ?? 0).toFixed(2)}</p>
+              <p className={`text-lg font-bold font-[Montserrat] tabular-nums ${Number(profile?.balance ?? 0) < 0 ? 'text-destructive' : 'text-primary'}`}>{Number(profile?.balance ?? 0).toFixed(2)}</p>
               <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
             </div>
           </div>
