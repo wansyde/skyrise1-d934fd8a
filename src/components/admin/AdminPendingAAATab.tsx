@@ -310,7 +310,10 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
                   >
                     <Trash2 className="h-3 w-3" /> Delete
                   </Button>
+                </>
+              )}
             </div>
+          </div>
           </div>
         ))}
       </div>
