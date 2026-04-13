@@ -25,10 +25,10 @@ export const getTaskProfit = (taskValue: number, tier: VipTier): number => {
   return Math.round(taskValue * tier.rewardPercent * 100) / 100;
 };
 
-/** Generate a controlled-random task value within [balance*0.55, balance*0.75] (display only) */
+/** Generate a controlled-random task value within [balance*0.30, balance*0.95] — always less than the user's balance */
 export const generateRandomTaskValue = (balance: number): number => {
-  const min = balance * 0.55;
-  const max = balance * 0.75;
+  const min = balance * 0.30;
+  const max = balance * 0.95;
   const value = min + Math.random() * (max - min);
   return Math.round(value * 100) / 100;
 };
