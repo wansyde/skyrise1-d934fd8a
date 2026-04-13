@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, X, AlertTriangle, ArrowUpDown, DollarSign, MessageSquare } from "lucide-react";
+import { Check, X, AlertTriangle, ArrowUpDown, DollarSign, MessageSquare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -131,6 +131,20 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
       toast.error(e.message || "Failed to deposit.");
     } finally {
       setDepositing(false);
+    }
+  };
+
+  const handleDeletePending = async (recordId: string, userId: string) => {
+    if (!confirm("Delete this pending AAA record? This cannot be undone.")) return;
+    try {
+      // Delete the task record
+      const { error } = await supabase.from("task_records").delete().eq("id", recordId);
+      if (error) throw error;
+      toast.success("Pending AAA record deleted.");
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-aaa"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete.");
     }
   };
 
@@ -287,6 +301,14 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
                     onClick={() => { setDepositUserId(rec.user_id); setDepositAmount(rec.deficit > 0 ? String(rec.deficit) : ""); }}
                   >
                     <DollarSign className="h-3 w-3" /> Adjust Balance
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1 text-destructive border-destructive/30 hover:bg-destructive/10"
+                    onClick={() => handleDeletePending(rec.id, rec.user_id)}
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
                   </Button>
                 </>
               )}
