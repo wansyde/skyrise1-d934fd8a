@@ -1,6 +1,6 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
-import { Diamond, ChevronRight, Crown, Award, Star, Gem, CalendarCheck, Copy, Download, ArrowLeft, Share2, Clipboard } from "lucide-react";
+import { Diamond, ChevronRight, Crown, Award, Star, Gem, CalendarCheck, Copy, ArrowLeft, Share2, Clipboard, CheckCircle, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useRef, useCallback } from "react";
@@ -62,9 +62,17 @@ const salaryTiers = [
   { days: 30, reward: 5400 },
 ];
 
+const salaryRules = [
+  "To check in for one working day, you must reset 3 sets of assignments within the same day.",
+  "Upon completing your 5th check-in, you will receive a base salary of 900 USDC.",
+  "After the 5th check-in, your day count will reset to 0, and the cycle will restart.",
+  "Every additional 5 check-ins will grant another 900 USDC base salary.",
+];
+
 const Event = () => {
   const memberRef = useRef<HTMLDivElement>(null);
   const salaryRef = useRef<HTMLDivElement>(null);
+  const rulesRef = useRef<HTMLDivElement>(null);
 
   const copyAllText = useCallback(() => {
     const lines: string[] = ["=== SKYRISE MEMBERSHIP LEVELS ===\n"];
@@ -271,6 +279,65 @@ const Event = () => {
           <p className="mt-5 text-center text-[11px] text-muted-foreground/60">
             The final interpretation right belongs to Skyrise
           </p>
+        </motion.div>
+
+        {/* Base Salary Rules Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8"
+        >
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                <Info className="h-4.5 w-4.5 text-primary" strokeWidth={1.5} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold tracking-tight font-[Montserrat]">Salary Rules</h2>
+                <p className="text-sm text-muted-foreground">How the base salary system works</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => copyImage(rulesRef)} title="Copy as image" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <Clipboard className="h-4 w-4 text-muted-foreground" />
+              </button>
+              <button onClick={() => saveImage(rulesRef, "salary-rules")} title="Save / Share" className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <Share2 className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+          </div>
+
+          <div ref={rulesRef} className="flex flex-col gap-3 p-5 rounded-2xl border border-border/40">
+            {/* Branding header */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Diamond className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <span className="text-sm font-bold tracking-tight text-foreground font-[Montserrat]">Skyrise</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">Base Salary</span>
+            </div>
+
+            <h3 className="text-base font-bold text-center text-foreground font-[Montserrat] mb-1">Base Salary</h3>
+
+            {salaryRules.map((rule, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.55 + i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-start gap-3 rounded-xl bg-secondary/60 p-3.5 sm:p-4 ring-1 ring-white/[0.04]"
+              >
+                <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" strokeWidth={1.5} />
+                <p className="text-sm text-foreground font-medium leading-relaxed">{rule}</p>
+              </motion.div>
+            ))}
+
+            <p className="text-[10px] text-muted-foreground/60 text-center mt-2">
+              The final interpretation right belongs to Skyrise.
+            </p>
+            <p className="text-[9px] text-muted-foreground/50 text-center">Share this with friends</p>
+          </div>
         </motion.div>
       </div>
     </AppLayout>
