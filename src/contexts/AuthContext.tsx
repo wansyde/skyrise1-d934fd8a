@@ -176,6 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [fetchProfile, checkAdmin]);
 
   const signOut = useCallback(async () => {
+    sessionStorage.removeItem("hasSeenBonusPopup");
     await supabase.auth.signOut();
     setSession(null);
     setUser(null);

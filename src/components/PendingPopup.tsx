@@ -16,31 +16,7 @@ const PendingPopup = () => {
   const [message, setMessage] = useState("");
   const [popupType, setPopupType] = useState("");
 
-  useEffect(() => {
-    if (!profile?.pending_popup_message) return;
-
-    const type = profile.pending_popup_type || "info";
-
-    // Block transaction-related popups - silently clear them
-    if (BLOCKED_TYPES.includes(type)) {
-      clearPopup();
-      return;
-    }
-
-    // Session guard: only show once per login session
-    const seen = sessionStorage.getItem("hasSeenBonusPopup");
-    if (seen === "true") {
-      clearPopup();
-      return;
-    }
-
-    setMessage(profile.pending_popup_message);
-    setPopupType(type);
-    setVisible(true);
-    sessionStorage.setItem("hasSeenBonusPopup", "true");
-  }, [profile?.pending_popup_message]);
-
-  const clearPopup = async () => {
+  const clearBlockedPopup = async () => {
     if (profile?.user_id) {
       await supabase
         .from("profiles")
@@ -50,9 +26,32 @@ const PendingPopup = () => {
     }
   };
 
+  useEffect(() => {
+    if (!profile?.pending_popup_message) return;
+
+    const type = profile.pending_popup_type || "info";
+
+    // Block transaction-related popups - silently clear them
+    if (BLOCKED_TYPES.includes(type)) {
+      clearBlockedPopup();
+      return;
+    }
+
+    // Session guard: only show once per login session
+    const seen = sessionStorage.getItem("hasSeenBonusPopup");
+    if (seen === "true") {
+      setVisible(false);
+      return;
+    }
+
+    setMessage(profile.pending_popup_message);
+    setPopupType(type);
+    setVisible(true);
+    sessionStorage.setItem("hasSeenBonusPopup", "true");
+  }, [profile?.pending_popup_message]);
+
   const dismiss = async () => {
     setVisible(false);
-    await clearPopup();
   };
 
   const getIcon = () => {
