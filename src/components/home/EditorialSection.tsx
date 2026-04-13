@@ -77,26 +77,28 @@ const EditorialSection = () => (
           </motion.span>
 
           {/* Stats row at bottom of image */}
-          <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex items-center gap-6"
-            >
-              {block.stats.map((stat, i) => (
-                <div key={stat.label} className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-bold text-foreground tabular-nums">
-                    {stat.value}
-                  </span>
-                  <span className="text-[10px] font-medium text-muted-foreground tracking-wide uppercase">
-                    {stat.label}
-                  </span>
-                </div>
-              ))}
-            </motion.div>
-          </div>
+          {block.stats.length > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="flex items-center gap-6"
+              >
+                {block.stats.map((stat) => (
+                  <div key={stat.label} className="flex flex-col">
+                    <span className="text-lg sm:text-xl font-bold text-foreground tabular-nums">
+                      {stat.value}
+                    </span>
+                    <span className="text-[10px] font-medium text-muted-foreground tracking-wide uppercase">
+                      {stat.label}
+                    </span>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          )}
         </div>
 
         {/* Text content */}
