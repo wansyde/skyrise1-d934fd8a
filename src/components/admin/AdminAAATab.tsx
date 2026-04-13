@@ -42,8 +42,8 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
   const [setNumber, setSetNumber] = useState("1");
   const [taskPosition, setTaskPosition] = useState("");
   const [numberOfCars, setNumberOfCars] = useState("3");
-  const [totalAmount, setTotalAmount] = useState("");
-  const [selectedCars, setSelectedCars] = useState<string[]>([]);
+  const [profitPercentage, setProfitPercentage] = useState("5");
+  const [selectedCars, setSelectedCars] = useState<{ name: string; price: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const { data: assignments = [] } = useQuery({
@@ -63,28 +63,22 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     return p?.username || p?.email || userId.slice(0, 8);
   };
 
-  const handleAddCar = () => {
-    const maxCars = parseInt(numberOfCars) || 3;
-    if (selectedCars.length >= maxCars) {
-      toast.error(`Maximum ${maxCars} cars allowed`);
-      return;
-    }
-    // Add a random car not already selected
-    const available = CAR_NAMES.filter(c => !selectedCars.includes(c));
-    if (available.length === 0) return;
-    setSelectedCars([...selectedCars, available[0]]);
-  };
+  const totalAmount = selectedCars.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
 
   const handleCreate = async () => {
     const pos = parseInt(taskPosition);
-    const amt = parseFloat(totalAmount);
     const numCars = parseInt(numberOfCars);
     const setNum = parseInt(setNumber);
+    const profitPct = parseFloat(profitPercentage) / 100;
 
     if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
-    if (!amt || amt <= 0) { toast.error("Enter a valid total amount"); return; }
     if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
     if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
+    if (selectedCars.some(c => !c.price || parseFloat(c.price) <= 0)) { toast.error("All cars must have a valid price"); return; }
+    if (profitPct <= 0 || profitPct > 1) { toast.error("Enter a valid profit percentage (1–100)"); return; }
+
+    const carNames = selectedCars.map(c => c.name);
+    const carPrices = selectedCars.map(c => parseFloat(c.price));
 
     setSubmitting(true);
     try {
@@ -93,17 +87,19 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
         set_number: setNum,
         task_position: pos,
         number_of_cars: numCars,
-        total_assignment_amount: amt,
-        car_names: selectedCars,
+        total_assignment_amount: totalAmount,
+        car_names: carNames,
+        car_prices: carPrices,
+        profit_percentage: profitPct,
         status: "active",
       } as any);
       if (error) throw error;
       toast.success("AAA assignment created");
       setTaskPosition("");
-      setTotalAmount("");
       setSelectedCars([]);
       setTargetUserId("");
       setSetNumber("1");
+      setProfitPercentage("5");
       queryClient.invalidateQueries({ queryKey: ["admin-aaa-assignments"] });
     } catch (e: any) {
       toast.error(e.message || "Failed to create");
@@ -120,6 +116,23 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     } catch (e: any) {
       toast.error("Failed to delete");
     }
+  };
+
+  const handleAddCar = (carName: string) => {
+    const maxCars = parseInt(numberOfCars) || 3;
+    if (selectedCars.length >= maxCars) { toast.error(`Max ${maxCars} cars`); return; }
+    if (selectedCars.find(c => c.name === carName)) return;
+    setSelectedCars([...selectedCars, { name: carName, price: "" }]);
+  };
+
+  const handleRemoveCar = (index: number) => {
+    setSelectedCars(selectedCars.filter((_, i) => i !== index));
+  };
+
+  const handleCarPriceChange = (index: number, price: string) => {
+    const updated = [...selectedCars];
+    updated[index] = { ...updated[index], price };
+    setSelectedCars(updated);
   };
 
   const filteredAssignments = assignments.filter((a: any) => {
@@ -162,7 +175,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             </select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Position in Set (1–40)</label>
+            <label className="text-xs text-muted-foreground mb-1 block">Position (1–40)</label>
             <Input value={taskPosition} onChange={e => setTaskPosition(e.target.value)} placeholder="e.g. 15" className="h-9 text-xs" type="number" min={1} max={40} />
           </div>
           <div>
@@ -176,41 +189,50 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             </select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Total Amount (USDC)</label>
-            <Input value={totalAmount} onChange={e => setTotalAmount(e.target.value)} placeholder="e.g. 322" className="h-9 text-xs" type="number" />
+            <label className="text-xs text-muted-foreground mb-1 block">Profit %</label>
+            <Input value={profitPercentage} onChange={e => setProfitPercentage(e.target.value)} placeholder="e.g. 5" className="h-9 text-xs" type="number" min={1} max={100} />
           </div>
         </div>
 
-        {/* Car selection */}
+        {/* Car selection with individual prices */}
         <div className="mb-4">
-          <label className="text-xs text-muted-foreground mb-2 block">Select Cars ({selectedCars.length}/{numberOfCars})</label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {selectedCars.map((car, i) => (
-              <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
-                {car.split(" ").slice(0, 3).join(" ")}
-                <button onClick={() => setSelectedCars(selectedCars.filter((_, j) => j !== i))} className="ml-1 hover:text-destructive">×</button>
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2 items-center">
-            <select
-              className="flex-1 h-9 rounded-md border border-border bg-background px-3 text-xs"
-              onChange={e => {
-                if (e.target.value && !selectedCars.includes(e.target.value)) {
-                  const maxCars = parseInt(numberOfCars) || 3;
-                  if (selectedCars.length >= maxCars) { toast.error(`Max ${maxCars} cars`); return; }
-                  setSelectedCars([...selectedCars, e.target.value]);
-                }
-                e.target.value = "";
-              }}
-              defaultValue=""
-            >
-              <option value="">Add a car...</option>
-              {CAR_NAMES.filter(c => !selectedCars.includes(c)).map(c => (
-                <option key={c} value={c}>{c}</option>
+          <label className="text-xs text-muted-foreground mb-2 block">Cars & Prices ({selectedCars.length}/{numberOfCars})</label>
+          
+          {selectedCars.length > 0 && (
+            <div className="space-y-2 mb-3">
+              {selectedCars.map((car, i) => (
+                <div key={i} className="flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-2">
+                  <span className="text-xs font-medium flex-1 truncate">{car.name}</span>
+                  <Input
+                    value={car.price}
+                    onChange={e => handleCarPriceChange(i, e.target.value)}
+                    placeholder="Price (USDC)"
+                    className="h-7 text-xs w-28"
+                    type="number"
+                    min={1}
+                  />
+                  <button onClick={() => handleRemoveCar(i)} className="text-destructive hover:text-destructive/80">×</button>
+                </div>
               ))}
-            </select>
-          </div>
+              <div className="flex justify-end text-xs font-bold text-primary">
+                Total: {totalAmount.toFixed(2)} USDC
+              </div>
+            </div>
+          )}
+
+          <select
+            className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs"
+            onChange={e => {
+              if (e.target.value) handleAddCar(e.target.value);
+              e.target.value = "";
+            }}
+            defaultValue=""
+          >
+            <option value="">Add a car...</option>
+            {CAR_NAMES.filter(c => !selectedCars.find(s => s.name === c)).map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
 
         <Button onClick={handleCreate} disabled={submitting} size="sm" className="gap-2">
@@ -237,8 +259,9 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 <th className="px-4 py-3 text-center font-medium">Position</th>
                 <th className="px-4 py-3 text-center font-medium">Cars</th>
                 <th className="px-4 py-3 text-right font-medium">Amount</th>
+                <th className="px-4 py-3 text-center font-medium">Profit %</th>
                 <th className="px-4 py-3 text-center font-medium">Status</th>
-                <th className="px-4 py-3 text-left font-medium">Cars List</th>
+                <th className="px-4 py-3 text-left font-medium">Cars + Prices</th>
                 <th className="px-4 py-3 text-center font-medium">Actions</th>
               </tr>
             </thead>
@@ -250,6 +273,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
                   <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
+                  <td className="px-4 py-3 text-center text-xs font-semibold">{((a.profit_percentage || 0.05) * 100).toFixed(1)}%</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                       a.status === "active" ? "bg-emerald-100 text-emerald-700" :
@@ -260,9 +284,14 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-col gap-0.5">
                       {(a.car_names || []).map((c: string, i: number) => (
-                        <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded">{c.split(" ").slice(0, 2).join(" ")}</span>
+                        <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded flex items-center justify-between gap-2">
+                          <span className="truncate">{c.split(" ").slice(0, 2).join(" ")}</span>
+                          {a.car_prices?.[i] != null && (
+                            <span className="font-bold text-primary">{Number(a.car_prices[i]).toLocaleString()}</span>
+                          )}
+                        </span>
                       ))}
                     </div>
                   </td>
@@ -274,7 +303,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 </tr>
               ))}
               {filteredAssignments.length === 0 && (
-                <tr><td colSpan={8} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
+                <tr><td colSpan={9} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
               )}
             </tbody>
           </table>
