@@ -79,8 +79,9 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
     const pos = parseInt(taskPosition);
     const amt = parseFloat(totalAmount);
     const numCars = parseInt(numberOfCars);
+    const setNum = parseInt(setNumber);
 
-    if (!pos || pos < 1) { toast.error("Enter a valid task position (1+)"); return; }
+    if (!pos || pos < 1 || pos > 40) { toast.error("Enter a valid task position (1–40)"); return; }
     if (!amt || amt <= 0) { toast.error("Enter a valid total amount"); return; }
     if (selectedCars.length < 2) { toast.error("Select at least 2 cars"); return; }
     if (selectedCars.length !== numCars) { toast.error(`Select exactly ${numCars} cars`); return; }
