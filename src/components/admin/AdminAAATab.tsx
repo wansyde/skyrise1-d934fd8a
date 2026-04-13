@@ -300,16 +300,22 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
             <label className="text-xs text-muted-foreground mb-1 block">Target User</label>
             <select
               value={targetUserId}
-              onChange={e => setTargetUserId(e.target.value)}
+              onChange={e => handleUserChange(e.target.value)}
               className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs"
             >
               <option value="">Global (All Users)</option>
               {profiles.map((p: any) => (
                 <option key={p.user_id} value={p.user_id}>
-                  {p.username || p.email}
+                  {p.username || p.email} ({p.vip_level || "Junior"})
                 </option>
               ))}
             </select>
+            {getSelectedUserVip() && (
+              <p className="text-[10px] text-muted-foreground mt-1">
+                VIP: <span className="font-bold text-primary">{getSelectedUserVip()}</span>
+                {!commissionManuallyEdited.current && " · Commission auto-filled"}
+              </p>
+            )}
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Target Set</label>
