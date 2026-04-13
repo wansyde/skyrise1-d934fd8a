@@ -98,38 +98,43 @@ export const MembershipLevelsTemplate = forwardRef<HTMLDivElement>((_, ref) => {
         </span>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-        <span>VIP Level</span>
-        <span className="text-center">Salary</span>
-        <span className="text-center">Tasks</span>
-        <span className="text-right">Condition</span>
-      </div>
-
-      <div className="mt-3 flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3">
         {tiers.map((tier) => {
           const Icon = tier.icon;
           return (
             <div
               key={tier.name}
-              className={`grid grid-cols-4 items-center gap-2 rounded-2xl bg-gradient-to-r ${tier.color} p-3.5 ring-1 ring-white/[0.04]`}
+              className={`rounded-2xl bg-gradient-to-r ${tier.color} p-4 ring-1 ring-white/[0.04]`}
             >
-              <div className="flex min-w-0 items-center gap-2.5">
+              <div className="mb-2.5 flex items-center gap-2.5">
                 <Icon className="h-5 w-5 shrink-0" style={{ color: tier.accent }} strokeWidth={1.5} />
-                <span className={`truncate text-sm font-bold ${tier.textColor}`}>{tier.name}</span>
+                <span className={`text-base font-bold ${tier.textColor}`}>{tier.name}</span>
               </div>
-              <span className={`text-center text-sm font-extrabold tabular-nums ${tier.textColor}`}>
-                {tier.salary}
-              </span>
-              <span className={`text-center text-[11px] font-medium leading-tight ${tier.subColor}`}>
-                {tier.tasks}
-              </span>
-              <div className="min-w-0 text-right">
-                <span className={`block text-[10px] font-medium leading-tight ${tier.subColor}`}>
-                  Reset Deposit
-                </span>
-                <span className={`text-[11px] font-bold leading-tight ${tier.textColor}`}>
-                  {tier.deposit}
-                </span>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <span className="block text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Salary
+                  </span>
+                  <span className={`text-sm font-extrabold tabular-nums ${tier.textColor}`}>
+                    {tier.salary}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Tasks
+                  </span>
+                  <span className={`text-[11px] font-bold leading-tight ${tier.textColor}`}>
+                    {tier.tasks}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Deposit
+                  </span>
+                  <span className={`text-[11px] font-bold leading-tight ${tier.textColor}`}>
+                    {tier.deposit}
+                  </span>
+                </div>
               </div>
             </div>
           );
