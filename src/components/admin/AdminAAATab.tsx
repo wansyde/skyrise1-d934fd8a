@@ -273,7 +273,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 </tr>
               ))}
               {filteredAssignments.length === 0 && (
-                <tr><td colSpan={7} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
+                <tr><td colSpan={8} className="px-5 py-6 text-center text-sm text-muted-foreground">No AAA assignments found.</td></tr>
               )}
             </tbody>
           </table>
