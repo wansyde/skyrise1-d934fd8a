@@ -67,7 +67,8 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
         return carStatuses[i] === "pending_insufficient" ? sum + price : sum;
       }, 0);
 
-      const deficit = balance < remainingCost ? remainingCost - balance : 0;
+      // Required deposit = absolute value of negative balance only
+      const deficit = balance < 0 ? Math.abs(balance) : 0;
 
       const totalRawCommission = carCommissions.reduce((s: number, c: number) => s + c, 0);
       const finalCommission = totalRawCommission * multiplier;
@@ -216,15 +217,15 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
-                <span className="text-[10px] text-muted-foreground block">Required to Complete</span>
-                <span className="text-sm font-semibold tabular-nums">
-                  {rec.remainingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
+                <span className="text-[10px] text-muted-foreground block">Required Deposit</span>
+                <span className={`text-sm font-semibold tabular-nums ${rec.deficit > 0 ? "text-red-400" : "text-green-400"}`}>
+                  {rec.deficit > 0 ? `${rec.deficit.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC` : "0.00 AC"}
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
-                <span className="text-[10px] text-muted-foreground block">Deficit</span>
-                <span className={`text-sm font-semibold tabular-nums ${rec.deficit > 0 ? "text-red-400" : "text-green-400"}`}>
-                  {rec.deficit > 0 ? `-${rec.deficit.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC` : "0.00 AC"}
+                <span className="text-[10px] text-muted-foreground block">Remaining Cars Cost</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {rec.remainingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
