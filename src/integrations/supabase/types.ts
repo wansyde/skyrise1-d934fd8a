@@ -225,6 +225,7 @@ export type Database = {
           user_id: string
           username: string | null
           vip_level: string
+          vpn_score: string | null
           withdraw_password: string | null
         }
         Insert: {
@@ -275,6 +276,7 @@ export type Database = {
           user_id: string
           username?: string | null
           vip_level?: string
+          vpn_score?: string | null
           withdraw_password?: string | null
         }
         Update: {
@@ -325,6 +327,7 @@ export type Database = {
           user_id?: string
           username?: string | null
           vip_level?: string
+          vpn_score?: string | null
           withdraw_password?: string | null
         }
         Relationships: []
