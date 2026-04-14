@@ -678,6 +678,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      preview_task: { Args: { _total_amount: number }; Returns: Json }
       submit_kyc: {
         Args: {
           _kyc_back_url: string
