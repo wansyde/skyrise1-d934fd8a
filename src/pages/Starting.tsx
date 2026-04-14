@@ -295,10 +295,32 @@ const Starting = () => {
     const car = pool[Math.floor(Math.random() * pool.length)];
 
     setMatchedCar(car);
-    setMatchedTaskValue(generateRandomTaskValue(currentBalance, profile?.vip_level));
     setAssignmentCode(generateAssignmentCode());
     setMatchProgress(0);
     setMatchState("matching");
+    setMatchedTaskValue(null);
+    setPreviewReward(null);
+
+    // Call preview_task to get exact backend reward
+    const fetchPreview = async () => {
+      try {
+        const dummyAmount = generateRandomTaskValue(currentBalance, profile?.vip_level);
+        const { data: previewData } = await supabase.rpc("preview_task" as any, { _total_amount: dummyAmount });
+        if (previewData && !previewData.error) {
+          setMatchedTaskValue(Number(previewData.task_value));
+          setPreviewReward(Number(previewData.reward));
+        } else {
+          // Fallback to frontend estimate
+          setMatchedTaskValue(dummyAmount);
+          setPreviewReward(getTaskProfit(dummyAmount, vipTier));
+        }
+      } catch {
+        const fallback = generateRandomTaskValue(currentBalance, profile?.vip_level);
+        setMatchedTaskValue(fallback);
+        setPreviewReward(getTaskProfit(fallback, vipTier));
+      }
+    };
+    fetchPreview();
 
     let progress = 0;
     const interval = setInterval(() => {
