@@ -101,7 +101,7 @@ export const generateRandomTaskValue = (
       ? Math.max(300, 0.30 * balance)
       : isPro
         ? Math.max(100, 0.35 * balance)
-        : Math.max(30, 0.4 * balance);
+        : Math.max(50, 0.35 * balance);
   const rangeMax = (isPro || isExpert || isElite) ? 0.95 * balance : 0.98 * balance;
 
   if (rangeMax <= rangeMin) {
@@ -123,9 +123,10 @@ export const generateRandomTaskValue = (
     midMin = 0.55 * balance; midMax = 0.75 * balance;
     highMin = 0.75 * balance; highMax = rangeMax;
   } else {
-    lowMin = rangeMin; lowMax = 0.55 * balance;
-    midMin = 0.55 * balance; midMax = 0.75 * balance;
-    highMin = 0.75 * balance; highMax = rangeMax;
+    // Junior: wider spread with guaranteed high-value zone
+    lowMin = rangeMin; lowMax = 0.50 * balance;
+    midMin = 0.50 * balance; midMax = 0.70 * balance;
+    highMin = 0.70 * balance; highMax = rangeMax;
   }
 
   // Weighted zone selection – 30/40/30
