@@ -74,23 +74,26 @@ export const generateRandomTaskValue = (
     return Math.round(rangeMin * 100) / 100;
   }
 
-  const range = rangeMax - rangeMin;
+  // Zone boundaries based on balance
+  const lowMin = rangeMin;           // 0.4B
+  const lowMax = 0.55 * balance;
+  const midMin = 0.55 * balance;
+  const midMax = 0.75 * balance;
+  const highMin = 0.75 * balance;
+  const highMax = rangeMax;          // 0.98B
 
-  // Weighted band selection: LOW 30%, MID 40%, HIGH 30%
+  // Weighted zone selection: LOW 30%, MID 40%, HIGH 30%
   const roll = Math.random();
   let bandMin: number, bandMax: number;
   if (roll < 0.3) {
-    // LOW band (bottom 33%)
-    bandMin = rangeMin;
-    bandMax = rangeMin + range * 0.33;
+    bandMin = lowMin;
+    bandMax = lowMax;
   } else if (roll < 0.7) {
-    // MID band (middle 34%)
-    bandMin = rangeMin + range * 0.33;
-    bandMax = rangeMin + range * 0.67;
+    bandMin = midMin;
+    bandMax = midMax;
   } else {
-    // HIGH band (top 33%)
-    bandMin = rangeMin + range * 0.67;
-    bandMax = rangeMax;
+    bandMin = highMin;
+    bandMax = highMax;
   }
 
   // Generate with jitter (two random sources for non-uniform spread)
