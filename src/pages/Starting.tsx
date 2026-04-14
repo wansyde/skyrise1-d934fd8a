@@ -474,9 +474,9 @@ const Starting = () => {
           >
             <motion.div
               className="flex absolute"
-              style={{ gap: CARD_GAP, top: 0 }}
+              style={{ gap: CARD_GAP, top: 0, willChange: "transform" }}
               animate={{ x: stripOffset }}
-              transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
             >
               {carCampaigns.map((car, i) => {
                 const visibleCenter = activeIndex + (visibleCount - 1) / 2;
@@ -485,21 +485,35 @@ const Starting = () => {
                 const normalizedDist = Math.min(distFromCenter / maxDist, 1);
                 const curveY = (1 - normalizedDist * normalizedDist) * 14;
                 const rotateY = (i - visibleCenter) * 3;
+                const scale = 1 - normalizedDist * 0.06;
 
                 return (
                   <div
                     key={i}
-                    className="flex-shrink-0 rounded-lg overflow-hidden cursor-pointer"
+                    className="flex-shrink-0 rounded-xl overflow-hidden cursor-pointer"
                     style={{
                       width: cardWidth,
                       height: cardWidth * 1.3,
-                      boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-                      transform: `perspective(800px) translateY(${curveY}px) rotateY(${rotateY}deg)`,
-                      transition: "transform 0.7s ease",
+                      boxShadow: i === showcaseIndex
+                        ? "0 8px 28px rgba(0,0,0,0.15)"
+                        : "0 4px 16px rgba(0,0,0,0.08)",
+                      transform: `perspective(800px) translateY(${curveY}px) rotateY(${rotateY}deg) scale(${scale})`,
+                      transition: "transform 0.5s cubic-bezier(0.32,0.72,0,1), box-shadow 0.5s ease",
+                      willChange: "transform",
                     }}
                     onClick={() => goTo(i)}
                   >
-                    <img src={car.image} alt={car.brand} loading="lazy" className="w-full h-full object-cover" />
+                    <img
+                      src={car.featured}
+                      alt={car.brand}
+                      loading="eager"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                      style={{
+                        imageRendering: "auto",
+                        filter: "brightness(1.02) contrast(1.02) saturate(1.05)",
+                      }}
+                    />
                   </div>
                 );
               })}
