@@ -192,7 +192,8 @@ Deno.serve(async (req: Request) => {
         if (ipqsResult.isVpn) vpn_score++;
         if (proxyCheckResult.isVpn) vpn_score++;
 
-        console.log(`VPN score for ${clientIp}: ${vpn_score}/3 (ip-api:${ipApiResult.isVpn}, ipqs:${ipqsResult.isVpn}, proxycheck:${proxyCheckResult.isVpn})`);
+        vpn_score_label = `${vpn_score}/3`;
+        console.log(`VPN score for ${clientIp}: ${vpn_score_label} (ip-api:${ipApiResult.isVpn}, ipqs:${ipqsResult.isVpn}, proxycheck:${proxyCheckResult.isVpn})`);
 
         is_vpn = vpn_score >= 2;
         connection_type = is_vpn ? "VPN/Proxy" : "Residential";
