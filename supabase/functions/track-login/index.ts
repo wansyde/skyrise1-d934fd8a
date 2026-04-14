@@ -159,6 +159,8 @@ Deno.serve(async (req: Request) => {
     let is_vpn = false;
     let connection_type = "unknown";
 
+    let vpn_score_label = "0/3";
+
     if (clientIp && clientIp !== "unknown" && clientIp !== "127.0.0.1") {
       // Run all 3 checks in parallel
       const [ipApiResult, ipqsResult, proxyCheckResult] = await Promise.all([
