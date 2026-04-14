@@ -188,10 +188,8 @@ const Starting = () => {
     handleInteraction();
   }, [handleInteraction]);
 
-  // Showcase = rightmost visible card
-  const half = Math.floor(visibleCount / 2);
-  const showcaseIndex = ((activeIndex + half) % total + total) % total;
-  const featuredCar = carCampaigns[showcaseIndex];
+  // Showcase matches the active carousel card exactly
+  const featuredCar = carCampaigns[activeIndex];
 
   const stripOffset = -(activeIndex * cardStep);
 
@@ -555,12 +553,6 @@ const Starting = () => {
               </AnimatePresence>
             </div>
 
-            <button onClick={goFeaturedPrev} className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95">
-              <ChevronLeft className="h-3.5 w-3.5 text-foreground/50" />
-            </button>
-            <button onClick={goFeaturedNext} className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95">
-              <ChevronRight className="h-3.5 w-3.5 text-foreground/50" />
-            </button>
           </div>
         </div>
 
