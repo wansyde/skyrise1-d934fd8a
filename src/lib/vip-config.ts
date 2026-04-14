@@ -12,9 +12,9 @@ export interface VipTier {
 
 export const VIP_TIERS: Record<string, VipTier> = {
   Junior:       { level: "Junior",       tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.004, minBalance: 100,  targetProfitMin: 8,   targetProfitMax: 10   },
-  Professional: { level: "Professional", tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.006, minBalance: 500,  targetProfitMin: 25,  targetProfitMax: 35   },
+  Professional: { level: "Professional", tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.006, minBalance: 500,  targetProfitMin: 25,  targetProfitMax: 30   },
   Expert:       { level: "Expert",       tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.008, minBalance: 1500, targetProfitMin: 60,  targetProfitMax: 80   },
-  Elite:        { level: "Elite",        tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.010, minBalance: 5000, targetProfitMin: 150, targetProfitMax: 200  },
+  Elite:        { level: "Elite",        tasksPerSet: 40, totalSets: 3, totalTasks: 120, rewardPercent: 0.010, minBalance: 5000, targetProfitMin: 150, targetProfitMax: 250  },
 };
 
 export const getVipTier = (level: string): VipTier => {
@@ -29,37 +29,41 @@ export const getTaskProfit = (taskValue: number, tier: VipTier): number => {
 };
 
 /**
- * Generate a highly-random task value by first picking a random per-task profit
- * within the tier's target range, then reverse-engineering the task amount.
- * 
- * profit_i = random(minProfit, maxProfit)
- * task_amount = profit_i / tier_percentage
- * 
- * This ensures total earnings over 40 tasks stay within the defined target range
- * while individual values appear highly random with no visible pattern.
+ * Generate a wide-range random task value.
+ *
+ * Range: MIN = max(30, 0.4 × B) … MAX = 0.98 × B
+ * Uses stratified sampling across low/mid/high bands to prevent clustering,
+ * then derives profit from tier percentage. The caller is responsible for
+ * tracking cumulative profit and adjusting the final task if needed.
  */
 export const generateRandomTaskValue = (balance: number, tierLevel?: string): number => {
   const tier = getVipTier(tierLevel || 'Junior');
-  const tasksPerSet = tier.tasksPerSet; // 40
 
-  // Per-task profit bounds derived from set targets
-  const minProfit = tier.targetProfitMin / tasksPerSet;
-  const maxProfit = tier.targetProfitMax / tasksPerSet;
+  // Wide range based on balance
+  const rangeMin = Math.max(30, 0.4 * balance);
+  const rangeMax = 0.98 * balance;
 
-  // Generate random profit with extra variation (non-uniform distribution)
-  // Use a slight bias toward the middle for natural feel
+  // If balance too low for meaningful range, just use what we can
+  if (rangeMax <= rangeMin) {
+    return Math.round(rangeMin * 100) / 100;
+  }
+
+  // Stratified random: pick a random band (low/mid/high) then random within it
+  const bandCount = 3;
+  const band = Math.floor(Math.random() * bandCount);
+  const bandSize = (rangeMax - rangeMin) / bandCount;
+  const bandMin = rangeMin + band * bandSize;
+  const bandMax = bandMin + bandSize;
+
+  // Add jitter with two random sources for non-uniform spread
   const r1 = Math.random();
   const r2 = Math.random();
-  const blended = (r1 + r2) / 2; // triangular-ish distribution, clusters toward center
-  const profit = minProfit + blended * (maxProfit - minProfit);
+  const pick = r1 * 0.7 + r2 * 0.3; // slight bias variation
+  let taskValue = bandMin + pick * (bandMax - bandMin);
 
-  // Derive task value from profit
-  let taskValue = profit / tier.rewardPercent;
+  // Hard cap: never exceed balance
+  taskValue = Math.min(taskValue, balance);
 
-  // Safety: never exceed user balance
-  taskValue = Math.min(taskValue, balance * 0.95);
-
-  // Round to 2 decimals for realism
   return Math.round(taskValue * 100) / 100;
 };
 
