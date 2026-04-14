@@ -1430,6 +1430,86 @@ const AdminPanel = () => {
         </TabsContent>
       </Tabs>
       </main>
+
+      {/* Password Reset / Generate Modal */}
+      <AnimatePresence>
+        {passwordResetUser && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={() => { setPasswordResetUser(null); setGeneratedPassword(null); }}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              onClick={(e) => e.target === e.currentTarget && (() => { setPasswordResetUser(null); setGeneratedPassword(null); })()}
+            >
+              <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <KeyRound className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1 text-center">Account Control</h3>
+                <p className="text-sm text-muted-foreground mb-5 text-center">{getUserName(passwordResetUser)}</p>
+
+                {generatedPassword && (
+                  <div className="mb-4 p-3 rounded-lg bg-muted border border-border">
+                    <p className="text-xs text-muted-foreground mb-1">Generated Password:</p>
+                    <p className="text-sm font-mono font-semibold break-all select-all">{generatedPassword}</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(generatedPassword); toast.success("Copied to clipboard"); }}
+                      className="mt-2 text-xs text-primary hover:underline"
+                    >
+                      Copy to clipboard
+                    </button>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Set New Password</label>
+                    <Input
+                      type="text"
+                      placeholder="Enter new password (min 6 chars)"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    onClick={() => handleResetPassword(passwordResetUser)}
+                    disabled={accountControlLoading || !newPassword}
+                    className="w-full"
+                  >
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    {accountControlLoading ? "Processing..." : "Reset Password"}
+                  </Button>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">or</span></div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleGeneratePassword(passwordResetUser)}
+                    disabled={accountControlLoading}
+                    className="w-full"
+                  >
+                    <Shuffle className="h-4 w-4 mr-2" />
+                    {accountControlLoading ? "Generating..." : "Generate Secure Password"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => { setPasswordResetUser(null); setGeneratedPassword(null); }}
+                    className="w-full"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
