@@ -698,13 +698,7 @@ const AdminPanel = () => {
             </div>
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">VPN Score</span>
-              <div className="mt-1">
-                {(selectedUser as any).is_vpn ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-destructive/15 text-destructive">⚠️ {(selectedUser as any).vpn_score || "VPN"} — Detected</span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-green-500/15 text-green-400">✅ {(selectedUser as any).vpn_score || "0/3"} — Normal</span>
-                )}
-              </div>
+              <div className="text-sm mt-1">{(selectedUser as any).vpn_score || "0/3"}</div>
             </div>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
@@ -795,13 +789,7 @@ const AdminPanel = () => {
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.ip_address || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">{u.country || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">{u.region || "—"}</td>
-                      <td className="px-5 py-3">
-                        {u.is_vpn ? (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">⚠️ {u.vpn_score || "VPN"}</span>
-                        ) : (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">✅ {u.vpn_score || "0/3"}</span>
-                        )}
-                      </td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{u.vpn_score || "0/3"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">
                         {u.referred_by ? (() => { const r = (profiles || []).find((p: any) => p.user_id === u.referred_by); return r ? r.username || r.email : u.referred_by; })() : "—"}
