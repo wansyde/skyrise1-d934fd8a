@@ -370,7 +370,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
               <div className="mt-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
                 <p className="text-[10px] text-muted-foreground">Current Balance</p>
                 <p className={`text-lg font-bold ${liveBalance < 0 ? 'text-destructive' : 'text-primary'}`}>
-                  {liveBalance < 0 ? '-' : ''}{Math.abs(liveBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AC
+                  {liveBalance < 0 ? '-' : ''}{Math.abs(liveBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC
                 </p>
                 {balanceUpdatedAt && (
                   <p className="text-[9px] text-muted-foreground">
@@ -538,7 +538,7 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                   <td className="px-4 py-3 text-center font-mono text-xs">Set {a.set_number || 1}</td>
                   <td className="px-4 py-3 text-center font-mono text-xs">#{a.task_position}</td>
                   <td className="px-4 py-3 text-center text-xs">{a.number_of_cars}</td>
-                  <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} AC</td>
+                  <td className="px-4 py-3 text-right font-bold text-xs">{Number(a.total_assignment_amount).toLocaleString()} USDC</td>
                   <td className="px-4 py-3 text-center font-mono text-xs font-bold">{Number(a.commission_multiplier || 1) > 1 ? `×${a.commission_multiplier}` : '—'}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${

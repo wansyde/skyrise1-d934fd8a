@@ -68,9 +68,9 @@ const salaryTiers = [
 
 const salaryRules = [
   "To check in for one working day, you must reset 3 sets of assignments within the same day.",
-  "Upon completing your 5th check-in, you will receive a base salary of 900 AC.",
+  "Upon completing your 5th check-in, you will receive a base salary of 900 USDC.",
   "After the 5th check-in, your day count will reset to 0, and the cycle will restart.",
-  "Every additional 5 check-ins will grant another 900 AC base salary.",
+  "Every additional 5 check-ins will grant another 900 USDC base salary.",
 ];
 
 export const MembershipLevelsTemplate = forwardRef<HTMLDivElement>((_, ref) => {

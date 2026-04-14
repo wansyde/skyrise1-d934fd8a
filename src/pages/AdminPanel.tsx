@@ -180,7 +180,7 @@ const AdminPanel = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Deposited ${amt.toLocaleString()} AC successfully.`);
+      toast.success(`Deposited ${amt.toLocaleString()} USDC successfully.`);
       setDepAmount(""); setDepNote(""); setDepUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-deposits"] });
@@ -205,7 +205,7 @@ const AdminPanel = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Withdrew ${amt.toLocaleString()} AC successfully.`);
+      toast.success(`Withdrew ${amt.toLocaleString()} USDC successfully.`);
       setWdAmount(""); setWdNote(""); setWdUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
@@ -267,10 +267,10 @@ const AdminPanel = () => {
           .eq("user_id", userId)
           .gte("created_at", oldUser.last_task_reset || "1970-01-01");
       } else if (tasksReset) {
-        popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from 1 to 1,000 AC.`;
+        popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from 1 to 1,000 USDC.`;
         popupType = "reset";
       } else if (balanceIncreased) {
-        popupMessage = `Your wallet has been credited with ${(newBalance - Number(oldUser.balance)).toFixed(2)} AC. Your new balance is ${newBalance.toFixed(2)} AC.`;
+        popupMessage = `Your wallet has been credited with ${(newBalance - Number(oldUser.balance)).toFixed(2)} USDC. Your new balance is ${newBalance.toFixed(2)} USDC.`;
         popupType = "deposit";
       }
     }
@@ -538,7 +538,7 @@ const AdminPanel = () => {
     <select value={value} onChange={(e) => onChange(e.target.value)} className="h-9 w-full rounded border border-border bg-background px-3 text-sm">
       <option value="">Select a user...</option>
       {(profiles || []).sort((a: any, b: any) => (a.username || "").localeCompare(b.username || "")).map((p: any) => (
-        <option key={p.user_id} value={p.user_id}>{p.username || p.email} — {Number(p.balance).toLocaleString()} AC</option>
+        <option key={p.user_id} value={p.user_id}>{p.username || p.email} — {Number(p.balance).toLocaleString()} USDC</option>
       ))}
     </select>
   );
@@ -649,15 +649,15 @@ const AdminPanel = () => {
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Total Deposits</span>
-              <div className="text-lg font-semibold text-green-400 tabular-nums">{userTotalDeposits.toLocaleString()} AC</div>
+              <div className="text-lg font-semibold text-green-400 tabular-nums">{userTotalDeposits.toLocaleString()} USDC</div>
             </div>
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Total Withdrawals</span>
-              <div className="text-lg font-semibold text-red-400 tabular-nums">{userTotalWithdrawals.toLocaleString()} AC</div>
+              <div className="text-lg font-semibold text-red-400 tabular-nums">{userTotalWithdrawals.toLocaleString()} USDC</div>
             </div>
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Current Balance</span>
-              <div className="text-lg font-semibold tabular-nums">{Number((selectedUser as any).balance).toLocaleString()} AC</div>
+              <div className="text-lg font-semibold tabular-nums">{Number((selectedUser as any).balance).toLocaleString()} USDC</div>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -947,7 +947,7 @@ const AdminPanel = () => {
                     {filteredDeposits.map((d: any) => (
                       <tr key={d.id} className="border-t border-border">
                         <td className="px-5 py-3 text-sm font-medium">{getUserName(d.user_id)}</td>
-                        <td className="px-5 py-3 text-sm tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} AC</td>
+                        <td className="px-5 py-3 text-sm tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} USDC</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{d.admin_note || "—"}</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{formatUSTime(d.created_at)}</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{getAdminName(d.wallet_address)}</td>
@@ -1034,7 +1034,7 @@ const AdminPanel = () => {
                       {filteredWithdrawals.map((w: any) => (
                         <tr key={w.id} className="border-t border-border">
                           <td className="px-5 py-3 text-sm font-medium">{getUserName(w.user_id)}</td>
-                          <td className="px-5 py-3 text-sm tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} AC</td>
+                          <td className="px-5 py-3 text-sm tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} USDC</td>
                           <td className="px-5 py-3 text-xs text-muted-foreground font-mono max-w-[180px] truncate" title={w.wallet_address || ""}>
                             {w.wallet_address && !w.wallet_address.match(/^[0-9a-f]{8}-/) ? w.wallet_address : "—"}
                           </td>
@@ -1294,7 +1294,7 @@ const AdminPanel = () => {
           </div>
         </TabsContent>
 
-        {/* ACTIVITY LOGS TAB */}
+        {/* USDCTIVITY LOGS TAB */}
         <TabsContent value="logs">
           <div className="glass-card overflow-hidden">
             <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

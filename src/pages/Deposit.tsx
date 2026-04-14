@@ -81,7 +81,7 @@ const Deposit = () => {
                   onClick={() => setAmount(String(a))}
                   className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-foreground/20 transition-colors"
                 >
-                  {a.toLocaleString()} AC
+                  {a.toLocaleString()} USDC
                 </button>
               ))}
             </div>

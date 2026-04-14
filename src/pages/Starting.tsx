@@ -248,7 +248,7 @@ const Starting = () => {
     if (isRestricted) { toast.error("Account restricted"); return; }
     if (isCycleCompleted) { toast.error("Task cycle completed"); return; }
     const currentBalance = Number(profile?.balance ?? 0);
-    if (currentBalance < MIN_BALANCE) { toast.error("Minimum 100 AC required"); return; }
+    if (currentBalance < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); return; }
     if (completedCount >= DAILY_LIMIT) { toast.error("Daily limit reached"); return; }
     if (isSetLocked) { toast.error("Set completed. Contact support to unlock next set."); return; }
 
@@ -374,13 +374,13 @@ const Starting = () => {
         } else {
           const multiplierText = result.multiplier > 1 ? ` (×${result.multiplier})` : '';
           console.log("AAA completed — raw:", result.raw_commission, "multiplier:", result.multiplier, "final:", result.total_commission, "new_balance:", result.new_balance);
-          toast.success(`AAA assignment completed${multiplierText}. Earnings of ${result.total_commission} AC added to your balance.`);
+          toast.success(`AAA assignment completed${multiplierText}. Earnings of ${result.total_commission} USDC added to your balance.`);
           setMatchState("submitted");
           setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); setIsAAATask(false); }, 1000);
         }
       } else {
         // Regular task
-        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 AC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return; }
+        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 USDC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return; }
         const { data, error } = await supabase.rpc("complete_task", {
           _car_brand: matchedCar.brand,
           _car_name: matchedCar.name,

@@ -124,7 +124,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Deposited ${amt.toLocaleString()} AC successfully.`);
+      toast.success(`Deposited ${amt.toLocaleString()} USDC successfully.`);
       setDepositUserId(null);
       setDepositAmount("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
@@ -214,7 +214,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Balance</span>
                 <span className={`text-sm font-semibold tabular-nums ${rec.balance < 0 ? "text-red-400" : ""}`}>
-                  {rec.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
+                  {rec.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
@@ -226,13 +226,13 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Remaining Cars Cost</span>
                 <span className="text-sm font-semibold tabular-nums">
-                  {rec.remainingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
+                  {rec.remainingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Pending Earnings</span>
                 <span className="text-sm font-semibold tabular-nums text-amber-400">
-                  {rec.escrow.toLocaleString(undefined, { minimumFractionDigits: 2 })} AC
+                  {rec.escrow.toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC
                 </span>
               </div>
             </div>
@@ -268,7 +268,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
                         <span className="font-medium truncate">{name}</span>
                       </div>
                       <div className="text-muted-foreground">
-                        {price.toLocaleString()} AC · +{commission.toLocaleString()} AC
+                        {price.toLocaleString()} USDC · +{commission.toLocaleString()} USDC
                       </div>
                     </div>
                   );

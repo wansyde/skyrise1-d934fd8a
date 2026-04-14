@@ -16,8 +16,8 @@ const TermsConditions = () => (
         {/* I */}
         <Section title="I. Start of Promotion Assignment">
           <ol className="list-decimal pl-5 space-y-2">
-            <li>Users must have an account balance of at least 100 AC before starting a new set of promotion assignments.</li>
-            <li>100 AC will be used to reset the counter for the new set of promotion assignments to ensure the system can properly match assignments.</li>
+            <li>Users must have an account balance of at least 100 USDC before starting a new set of promotion assignments.</li>
+            <li>100 USDC will be used to reset the counter for the new set of promotion assignments to ensure the system can properly match assignments.</li>
             <li>After completing all 3 sets of promotion assignments for the day, users must apply for a full withdrawal and ensure they have received the withdrawal amount before requesting an account reset.</li>
           </ol>
         </Section>
@@ -26,12 +26,12 @@ const TermsConditions = () => (
         <Section title="II. Withdrawal Rules">
           <ol className="list-decimal pl-5 space-y-2">
             <li>
-              For withdrawal amounts of 10,000 AC or above, users must contact customer service for manual review.
+              For withdrawal amounts of 10,000 USDC or above, users must contact customer service for manual review.
               <ul className="list-disc pl-5 mt-1 space-y-1">
-                <li>Junior Promoter: Maximum withdrawal per transaction: 5,000 AC</li>
-                <li>Professional Promoter: Maximum withdrawal per transaction: 10,000 AC</li>
-                <li>Expert Promoter: Maximum withdrawal per transaction: 60,000 AC</li>
-                <li>Elite Promoter: Maximum withdrawal per transaction: 100,000 AC</li>
+                <li>Junior Promoter: Maximum withdrawal per transaction: 5,000 USDC</li>
+                <li>Professional Promoter: Maximum withdrawal per transaction: 10,000 USDC</li>
+                <li>Expert Promoter: Maximum withdrawal per transaction: 60,000 USDC</li>
+                <li>Elite Promoter: Maximum withdrawal per transaction: 100,000 USDC</li>
               </ul>
             </li>
             <li>After account reset, users must complete a full set of promotion assignments before they can apply for a withdrawal.</li>
@@ -112,7 +112,7 @@ const TermsConditions = () => (
                 <li>If the user applies for an assignment extension, they may need to pay a 50% delay fee, and all promotion assignments in that set must be completed before a withdrawal can be made.</li>
               </ul>
             </li>
-            <li>Users must complete 3 sets of promotion assignments daily. After meeting the check-in requirements, they can receive a 900 AC base salary every 5 days.</li>
+            <li>Users must complete 3 sets of promotion assignments daily. After meeting the check-in requirements, they can receive a 900 USDC base salary every 5 days.</li>
             <li>
               Automobile Alliance assignments are randomly allocated by the system. Users must understand and accept the platform rules and select their deposit amounts based on their financial capacity.
               <ul className="list-disc pl-5 mt-1 space-y-1">

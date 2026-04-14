@@ -22,7 +22,7 @@ const faqs: FaqEntry[] = [
       <>
         <p className="mb-2">Users are responsible for promoting designated car brands by completing promotional assignments to increase brand exposure and awareness. Assignments are automatically matched by the system, and users must follow instructions to ensure the brand's advertisement reaches the target audience.</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>Keep your account AC balance sufficient to qualify for assignment matching</li>
+          <li>Keep your account USDC balance sufficient to qualify for assignment matching</li>
           <li>Complete assignments promptly and submit orders to ensure smooth Advertising Salary and base salary settlement</li>
           <li>Follow the platform's assignment mechanism to ensure successful completion and brand compliance</li>
         </ul>
@@ -33,9 +33,9 @@ const faqs: FaqEntry[] = [
     q: "Why is a deposit required to start a new assignment?",
     a: (
       <>
-        <p className="mb-2">A deposit is required because the platform's assignment matching system is based on the user's real-time AC balance. The deposit ensures sufficient balance to match assignments of the corresponding level.</p>
+        <p className="mb-2">A deposit is required because the platform's assignment matching system is based on the user's real-time USDC balance. The deposit ensures sufficient balance to match assignments of the corresponding level.</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>High-value assignments typically require a higher AC balance. Once completed, all principal and Advertising Salary will be fully returned to the account</li>
+          <li>High-value assignments typically require a higher USDC balance. Once completed, all principal and Advertising Salary will be fully returned to the account</li>
           <li>Brand partners require data from real users, and the deposit proves users are real participants, ensuring assignment authenticity and compliance</li>
           <li>The deposit ensures the smooth execution of assignments and allows users to earn the corresponding Advertising Salary rewards</li>
         </ul>
@@ -48,10 +48,10 @@ const faqs: FaqEntry[] = [
       <>
         <p className="mb-2">Minimum balance requirements vary by promoter level:</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>Junior Promoter: Minimum deposit 100 AC – 499 AC, suitable for basic assignments with relatively lower Advertising Salary</li>
-          <li>Professional Promoter: Minimum deposit 501 AC – 2,999 AC, eligible for higher-level assignments with better Advertising Salary returns</li>
-          <li>Expert Promoter: Minimum deposit 3,000 AC – 4,999 AC, matches with high-value assignments and higher Advertising Salary rewards</li>
-          <li>Elite Promoter: Minimum deposit 5,000 AC and above, eligible for the highest-value assignments with the highest Advertising Salary returns</li>
+          <li>Junior Promoter: Minimum deposit 100 USDC – 499 USDC, suitable for basic assignments with relatively lower Advertising Salary</li>
+          <li>Professional Promoter: Minimum deposit 501 USDC – 2,999 USDC, eligible for higher-level assignments with better Advertising Salary returns</li>
+          <li>Expert Promoter: Minimum deposit 3,000 USDC – 4,999 USDC, matches with high-value assignments and higher Advertising Salary rewards</li>
+          <li>Elite Promoter: Minimum deposit 5,000 USDC and above, eligible for the highest-value assignments with the highest Advertising Salary returns</li>
         </ul>
         <p className="mt-2">The deposit amount determines the level of assignments that can be matched. The higher the deposit, the greater the value of assignments and the higher the Advertising Salary. All principal and Advertising Salary will be fully refunded upon completion to ensure fund security.</p>
       </>
@@ -63,8 +63,8 @@ const faqs: FaqEntry[] = [
       <>
         <p className="mb-2">Users can complete up to 3 sets of assignments per day, regardless of promoter level.</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>Assignments are matched based on the user's real-time AC balance, assignment completion status, and brand demand</li>
-          <li>After completing each set, ensure that the AC balance is sufficient for the next set</li>
+          <li>Assignments are matched based on the user's real-time USDC balance, assignment completion status, and brand demand</li>
+          <li>After completing each set, ensure that the USDC balance is sufficient for the next set</li>
           <li>The daily limit is 3 sets to maintain assignment quality and meet brand demand</li>
         </ul>
       </>
@@ -80,7 +80,7 @@ const faqs: FaqEntry[] = [
           <li>Maintain account activity: Stay active and avoid long periods of inactivity to ensure stable promotion</li>
           <li>Follow platform rules: No violations like fraud, assignment interruption, or misconduct</li>
         </ul>
-        <p className="mt-2">After meeting these conditions, a base salary of 900 AC will be settled every 5 days based on assignment completion.</p>
+        <p className="mt-2">After meeting these conditions, a base salary of 900 USDC will be settled every 5 days based on assignment completion.</p>
       </>
     ),
   },
@@ -154,8 +154,8 @@ const faqs: FaqEntry[] = [
       <>
         <p className="mb-2">Auto Alliance assignments are high-value promotional tasks consisting of 1–3 car brands. Users must complete each brand's promotion as per the system's requirements.</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>These assignments have a higher AC value and offer greater Advertising Salary upon completion</li>
-          <li>Matching is based on the user's AC balance. The higher the balance, the higher-value assignments they can match</li>
+          <li>These assignments have a higher USDC value and offer greater Advertising Salary upon completion</li>
+          <li>Matching is based on the user's USDC balance. The higher the balance, the higher-value assignments they can match</li>
         </ul>
       </>
     ),
