@@ -1294,7 +1294,7 @@ const AdminPanel = () => {
           </div>
         </TabsContent>
 
-        {/* USDCTIVITY LOGS TAB */}
+        {/* ACTIVITY LOGS TAB */}
         <TabsContent value="logs">
           <div className="glass-card overflow-hidden">
             <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
