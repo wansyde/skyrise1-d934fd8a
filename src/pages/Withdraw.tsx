@@ -20,7 +20,7 @@ const Withdraw = () => {
     e.preventDefault();
     const num = Number(amount);
     if (num < 100) {
-      toast.error("Minimum withdrawal amount is 100 AC");
+      toast.error("Minimum withdrawal amount is 100} USDC");
       return;
     }
     if (num <= 0 || num > balance) {

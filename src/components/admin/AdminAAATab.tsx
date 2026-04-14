@@ -468,10 +468,10 @@ const AdminAAATab = ({ profiles }: AdminAAATabProps) => {
                 </div>
               ))}
               <div className="flex justify-between text-xs font-bold">
-                <span className="text-primary">Total: {totalAmount.toFixed(2)} AC</span>
+                <span className="text-primary">Total: {totalAmount.toFixed(2)} USDC</span>
                 <span className="text-muted-foreground">Commission: {totalCommission.toFixed(2)}</span>
                 {multiplierVal > 1 && <span className="text-muted-foreground">×{multiplierVal}</span>}
-                <span className="text-emerald-600">Final Earnings: {finalEarnings.toFixed(2)} AC</span>
+                <span className="text-emerald-600">Final Earnings: {finalEarnings.toFixed(2)} USDC</span>
               </div>
             </div>
           )}

@@ -74,7 +74,7 @@ const AppWithdraw = () => {
     if (!user) return;
     const num = Number(amount);
     if (num < 100) {
-      toast.error("Minimum withdrawal amount is 100 AC");
+      toast.error("Minimum withdrawal amount is 100} USDC");
       return;
     }
     if (num <= 0 || num > balance) {
@@ -82,7 +82,7 @@ const AppWithdraw = () => {
       return;
     }
     if (num > userTierMax) {
-      toast.error(`Maximum withdrawal for your level is ${userTierMax.toLocaleString()} AC`);
+      toast.error(`Maximum withdrawal for your level is ${userTierMax.toLocaleString()} USDC`);
       return;
     }
     if (!password) {
@@ -252,7 +252,7 @@ const AppWithdraw = () => {
                           <span className="text-3xl font-semibold tabular-nums">
                             {balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                           </span>
-                          <span className="text-sm text-white/50 font-medium">AC</span>
+                          <span className="text-sm text-white/50 font-medium">USDC</span>
                         </div>
                         <p className="text-xs text-white/40 mt-2">You will receive your withdrawal within an hour</p>
                       </div>

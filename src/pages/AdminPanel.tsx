@@ -294,8 +294,8 @@ const AdminPanel = () => {
 
     // Log changes
     const changes: string[] = [];
-    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: ${oldUser.balance} → ${newBalance} AC`);
-    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: ${oldUser.advertising_salary} → ${newSalary} AC`);
+    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: ${oldUser.balance} → ${newBalance} USDC`);
+    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: ${oldUser.advertising_salary} → ${newSalary} USDC`);
     if (oldUser && oldUser.vip_level !== editVipLevel) changes.push(`VIP: ${oldUser.vip_level} → ${editVipLevel}`);
     if (oldUser && oldUser.tasks_completed_today !== newTasks) changes.push(`Tasks: ${oldUser.tasks_completed_today} → ${newTasks}`);
     if (oldUser && Number((oldUser as any).credit_score ?? 100) !== newCreditScore) changes.push(`Credit: ${(oldUser as any).credit_score ?? 100}% → ${newCreditScore}%`);
@@ -704,7 +704,7 @@ const AdminPanel = () => {
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {userDeposits.slice(0, 10).map((d: any) => (
                   <div key={d.id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                    <span className="tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} AC</span>
+                    <span className="tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} USDC</span>
                     <span className="text-muted-foreground">{formatUSTime(d.created_at)}</span>
                   </div>
                 ))}
@@ -716,7 +716,7 @@ const AdminPanel = () => {
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {userWithdrawals.slice(0, 10).map((w: any) => (
                   <div key={w.id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                    <span className="tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} AC</span>
+                    <span className="tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} USDC</span>
                     <span className="text-muted-foreground">{formatUSTime(w.created_at)}</span>
                   </div>
                 ))}
@@ -802,14 +802,14 @@ const AdminPanel = () => {
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editBalance} onChange={(e) => setEditBalance(e.target.value)} className="h-7 w-28 text-xs" min={0} />
                         ) : (
-                          <span className="text-sm tabular-nums">{Number(u.balance).toLocaleString()} AC</span>
+                          <span className="text-sm tabular-nums">{Number(u.balance).toLocaleString()} USDC</span>
                         )}
                       </td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editSalary} onChange={(e) => setEditSalary(e.target.value)} className="h-7 w-28 text-xs" min={0} />
                         ) : (
-                          <span className="text-sm tabular-nums">{Number(u.advertising_salary ?? 0).toLocaleString()} AC</span>
+                          <span className="text-sm tabular-nums">{Number(u.advertising_salary ?? 0).toLocaleString()} USDC</span>
                         )}
                       </td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
@@ -1058,7 +1058,7 @@ const AdminPanel = () => {
                                     const { error } = await supabase.from("withdrawals").update({ status: "completed", admin_note: w.admin_note || "Processed by admin", updated_at: new Date().toISOString() }).eq("id", w.id);
                                     if (error) throw error;
                                     await supabase.from("transactions").update({ status: "approved" } as any).eq("user_id", w.user_id).eq("type", "withdrawal").eq("status", "pending").eq("amount", -Number(w.amount));
-                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of ${Number(w.amount).toLocaleString()} AC`);
+                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of ${Number(w.amount).toLocaleString()} USDC`);
                                     toast.success("Withdrawal marked as completed.");
                                     queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
                                     queryClient.invalidateQueries({ queryKey: ["admin-logs"] });

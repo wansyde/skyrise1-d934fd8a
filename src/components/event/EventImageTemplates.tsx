@@ -195,7 +195,7 @@ export const BaseSalaryTemplate = forwardRef<HTMLDivElement>((_, ref) => {
                 Receive
               </span>
               <p className="font-[Montserrat] text-xl font-extrabold tabular-nums text-foreground">
-                {tier.reward.toLocaleString()} <span className="text-sm font-semibold text-muted-foreground">AC</span>
+                {tier.reward.toLocaleString()} <span className="text-sm font-semibold text-muted-foreground">USDC</span>
               </p>
             </div>
           </div>

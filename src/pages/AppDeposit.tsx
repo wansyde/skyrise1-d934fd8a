@@ -78,7 +78,7 @@ const AppDeposit = () => {
                     <span className="text-3xl font-semibold tabular-nums">
                       {balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </span>
-                    <span className="text-sm text-white/50 font-medium">AC</span>
+                    <span className="text-sm text-white/50 font-medium">USDC</span>
                   </div>
                 </div>
 

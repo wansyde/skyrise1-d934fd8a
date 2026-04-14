@@ -8,9 +8,9 @@ const referralCode = "SKY-JD2026X";
 const referralLink = "https://skyrise.com/ref/SKY-JD2026X";
 
 const teamMembers = [
-   { name: "Alice M.", joined: "Mar 10, 2026", status: "Active", earned: "50.00 AC" },
-   { name: "Bob K.", joined: "Feb 28, 2026", status: "Active", earned: "120.00 AC" },
-   { name: "Carol S.", joined: "Feb 15, 2026", status: "Inactive", earned: "30.00 AC" },
+   { name: "Alice M.", joined: "Mar 10, 2026", status: "Active", earned: "50.00} USDC" },
+   { name: "Bob K.", joined: "Feb 28, 2026", status: "Active", earned: "120.00} USDC" },
+   { name: "Carol S.", joined: "Feb 15, 2026", status: "Inactive", earned: "30.00} USDC" },
 ];
 
 const Team = () => {

@@ -58,7 +58,7 @@ const Transactions = () => {
               <div>
                 <p className="text-xs text-muted-foreground">Total Earned</p>
                 <p className="text-lg font-bold tabular-nums text-primary">
-                  +{totalProfit.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">AC</span>
+                  +{totalProfit.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">USDC</span>
                 </p>
               </div>
             </div>
@@ -94,7 +94,7 @@ const Transactions = () => {
                   <span className="text-sm font-semibold tabular-nums text-primary">
                     +{Number(r.advertising_salary).toFixed(2)}
                   </span>
-                  <span className="block text-[10px] text-muted-foreground">AC</span>
+                  <span className="block text-[10px] text-muted-foreground">USDC</span>
                 </div>
               </div>
             ))}

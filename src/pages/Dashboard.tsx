@@ -10,18 +10,18 @@ const chartData = [
 ];
 
 const stats = [
-   { label: "Total Balance", value: "15,200.00 AC", icon: Wallet, change: "+12.4%" },
-   { label: "Active Investment", value: "10,000.00 AC", icon: TrendingUp, change: "+8.2%" },
-   { label: "Total Deposited", value: "18,500.00 AC", icon: ArrowDownToLine },
-   { label: "Total Withdrawn", value: "3,300.00 AC", icon: ArrowUpFromLine },
+   { label: "Total Balance", value: "15,200.00} USDC", icon: Wallet, change: "+12.4%" },
+   { label: "Active Investment", value: "10,000.00} USDC", icon: TrendingUp, change: "+8.2%" },
+   { label: "Total Deposited", value: "18,500.00} USDC", icon: ArrowDownToLine },
+   { label: "Total Withdrawn", value: "3,300.00} USDC", icon: ArrowUpFromLine },
 ];
 
 const transactions = [
-   { id: "TXN-0041", type: "Deposit", amount: "+5,000.00 AC", status: "Approved", date: "Mar 12, 2026" },
-   { id: "TXN-0040", type: "ROI", amount: "+120.00 AC", status: "Approved", date: "Mar 11, 2026" },
-   { id: "TXN-0039", type: "Withdrawal", amount: "-1,000.00 AC", status: "Pending", date: "Mar 10, 2026" },
-   { id: "TXN-0038", type: "Deposit", amount: "+3,500.00 AC", status: "Approved", date: "Mar 8, 2026" },
-   { id: "TXN-0037", type: "ROI", amount: "+95.00 AC", status: "Approved", date: "Mar 7, 2026" },
+   { id: "TXN-0041", type: "Deposit", amount: "+5,000.00} USDC", status: "Approved", date: "Mar 12, 2026" },
+   { id: "TXN-0040", type: "ROI", amount: "+120.00} USDC", status: "Approved", date: "Mar 11, 2026" },
+   { id: "TXN-0039", type: "Withdrawal", amount: "-1,000.00} USDC", status: "Pending", date: "Mar 10, 2026" },
+   { id: "TXN-0038", type: "Deposit", amount: "+3,500.00} USDC", status: "Approved", date: "Mar 8, 2026" },
+   { id: "TXN-0037", type: "ROI", amount: "+95.00} USDC", status: "Approved", date: "Mar 7, 2026" },
 ];
 
 const Dashboard = () => (
@@ -60,7 +60,7 @@ const Dashboard = () => (
               </linearGradient>
             </defs>
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k AC`} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k USDC`} />
             <Tooltip
               contentStyle={{
                 background: "hsl(240, 10%, 6%)",
@@ -69,7 +69,7 @@ const Dashboard = () => (
                 fontSize: "12px",
                 color: "#f2f2f2",
               }}
-              formatter={(value: number) => [`${value.toLocaleString()} AC`, "Balance"]}
+              formatter={(value: number) => [`${value.toLocaleString()} USDC`, "Balance"]}
             />
             <Area
               type="monotone"
