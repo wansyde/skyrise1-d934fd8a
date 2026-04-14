@@ -252,7 +252,6 @@ const Records = () => {
             const isPending = card.status === "pending";
             const isAAAred = card.isAAA && card.carStatus === "pending_insufficient";
             const isAAAgreen = card.isAAA && card.carStatus === "completed_partial";
-            const canAfford = userBalance >= 0;
             const isSubmitting = submittingId === card.parentRecordId;
 
             return (
