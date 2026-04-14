@@ -69,8 +69,10 @@ export const generateRandomTaskValue = (
 ): number => {
   const isElite = tierLevel === 'Elite';
 
-  // Elite: floor at 100; others: floor at 30
-  const rangeMin = Math.max(isElite ? 100 : 30, 0.4 * balance);
+  // Elite: MIN = 0.6 × B; others: floor at 30 or 0.4 × B
+  const rangeMin = isElite
+    ? Math.max(100, 0.6 * balance)
+    : Math.max(30, 0.4 * balance);
   const rangeMax = 0.98 * balance;
 
   if (rangeMax <= rangeMin) {
@@ -79,7 +81,7 @@ export const generateRandomTaskValue = (
 
   // Zone boundaries – Elite uses wider spread
   const lowMin = rangeMin;
-  const lowMax = isElite ? 0.6 * balance : 0.55 * balance;
+  const lowMax = isElite ? 0.7 * balance : 0.55 * balance;
   const midMin = isElite ? 0.6 * balance : 0.55 * balance;
   const midMax = isElite ? 0.8 * balance : 0.75 * balance;
   const highMin = isElite ? 0.8 * balance : 0.75 * balance;
