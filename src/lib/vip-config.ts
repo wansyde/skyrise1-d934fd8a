@@ -116,22 +116,36 @@ export const generateRandomTaskValue = (
     bandMin = highMin; bandMax = highMax;
   }
 
-  // Generate with jitter
+  // Generate with jitter + enhanced randomness
   let taskValue: number;
   let attempts = 0;
-  const antiRepeatThreshold = isElite ? 100 : isExpert ? 50 : isPro ? 20 : 5;
+  // Tier-scaled duplicate threshold: small % of balance ensures no near-duplicates
+  const antiRepeatThreshold = isElite
+    ? Math.max(100, balance * 0.02)
+    : isExpert
+      ? Math.max(50, balance * 0.015)
+      : isPro
+        ? Math.max(20, balance * 0.01)
+        : Math.max(5, balance * 0.005);
+
   do {
     const r1 = Math.random();
     const r2 = Math.random();
     const pick = r1 * 0.6 + r2 * 0.4;
     taskValue = bandMin + pick * (bandMax - bandMin);
 
-    // Add decimal variation per tier
+    // Layer 1: Tier-scaled jitter
     taskValue += (Math.random() - 0.5) * (isElite ? 15 : isExpert ? 8 : isPro ? 4 : 2);
+
+    // Layer 2: Decimal injection (0.11 → 0.97)
+    taskValue += 0.11 + Math.random() * 0.86;
+
+    // Layer 3: Micro variation (×0.985 → ×1.015)
+    taskValue *= 0.985 + Math.random() * 0.03;
 
     attempts++;
   } while (
-    attempts < 10 &&
+    attempts < 15 &&
     lastValues.some((v) => Math.abs(v - taskValue) < antiRepeatThreshold)
   );
 
@@ -140,9 +154,9 @@ export const generateRandomTaskValue = (
   taskValue = Math.max(taskValue, rangeMin);
   taskValue = Math.round(taskValue * 100) / 100;
 
-  // Track last 5 values for anti-repeat
+  // Track last 8 values for stronger anti-repeat
   lastValues.push(taskValue);
-  if (lastValues.length > 5) lastValues.shift();
+  if (lastValues.length > 8) lastValues.shift();
 
   return taskValue;
 };
