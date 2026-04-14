@@ -149,16 +149,10 @@ const Starting = () => {
   const isSetLocked = completedCount >= maxAllowedTasks && completedCount < DAILY_LIMIT;
 
   const userBalance = Number(profile?.balance ?? 0);
-  const tierPercent = vipTier.rewardPercent;
   const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
-  const taskValue = matchedTaskValue ?? generateRandomTaskValue(userBalance);
-  const estimatedProfit = useMemo(() => {
-    if (isAAATask && aaaAssignment) {
-      const profitPct = aaaAssignment.profit_percentage || 0.05;
-      return Math.round(taskValue * profitPct * 100) / 100;
-    }
-    return getTaskProfit(taskValue, vipTier);
-  }, [taskValue, vipTier, isAAATask, aaaAssignment]);
+  const [previewReward, setPreviewReward] = useState<number | null>(null);
+  const taskValue = matchedTaskValue ?? 0;
+  const estimatedProfit = previewReward ?? 0;
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
@@ -272,6 +266,8 @@ const Starting = () => {
       setAaaCars(matchingAAA.car_names || []);
       setMatchedCar(carCampaigns[0]); // placeholder
       setMatchedTaskValue(matchingAAA.total_assignment_amount);
+      const profitPct = matchingAAA.profit_percentage || 0.05;
+      setPreviewReward(Math.round(matchingAAA.total_assignment_amount * profitPct * 100) / 100);
       setAssignmentCode(generateAssignmentCode());
       setMatchProgress(0);
       setMatchState("matching");
@@ -301,10 +297,32 @@ const Starting = () => {
     const car = pool[Math.floor(Math.random() * pool.length)];
 
     setMatchedCar(car);
-    setMatchedTaskValue(generateRandomTaskValue(currentBalance, profile?.vip_level));
     setAssignmentCode(generateAssignmentCode());
     setMatchProgress(0);
     setMatchState("matching");
+    setMatchedTaskValue(null); setPreviewReward(null);
+    setPreviewReward(null);
+
+    // Call preview_task to get exact backend reward
+    const fetchPreview = async () => {
+      try {
+        const dummyAmount = generateRandomTaskValue(currentBalance, profile?.vip_level);
+        const { data: previewData } = await supabase.rpc("preview_task" as any, { _total_amount: dummyAmount });
+        if (previewData && !previewData.error) {
+          setMatchedTaskValue(Number(previewData.task_value));
+          setPreviewReward(Number(previewData.reward));
+        } else {
+          // Fallback to frontend estimate
+          setMatchedTaskValue(dummyAmount);
+          setPreviewReward(getTaskProfit(dummyAmount, vipTier));
+        }
+      } catch {
+        const fallback = generateRandomTaskValue(currentBalance, profile?.vip_level);
+        setMatchedTaskValue(fallback);
+        setPreviewReward(getTaskProfit(fallback, vipTier));
+      }
+    };
+    fetchPreview();
 
     let progress = 0;
     const interval = setInterval(() => {
@@ -324,7 +342,7 @@ const Starting = () => {
 
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
-    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return; }
 
     isProcessingRef.current = true;
     setSubmitting(true);
@@ -340,24 +358,24 @@ const Starting = () => {
         const result = data as any;
         if (result?.error) {
           toast.error(result.error);
-          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); return;
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); setIsAAATask(false); return;
         }
         setCompletedCount(prev => prev + 1);
         await refreshProfile();
         if (!result.all_completed) {
           toast.error("Some cars could not be completed due to insufficient balance. Check Records → Pending for details.");
-          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false);
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); setIsAAATask(false);
           setTimeout(() => navigate("/app/records", { state: { tab: "pending" } }), 1500);
         } else {
           const multiplierText = result.multiplier > 1 ? ` (×${result.multiplier})` : '';
           console.log("AAA completed — raw:", result.raw_commission, "multiplier:", result.multiplier, "final:", result.total_commission, "new_balance:", result.new_balance);
           toast.success(`AAA assignment completed${multiplierText}. Earnings of ${result.total_commission} AC added to your balance.`);
           setMatchState("submitted");
-          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1000);
+          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); setIsAAATask(false); }, 1000);
         }
       } else {
         // Regular task
-        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 AC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 AC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return; }
         const { data, error } = await supabase.rpc("complete_task", {
           _car_brand: matchedCar.brand,
           _car_name: matchedCar.name,
@@ -369,12 +387,12 @@ const Starting = () => {
         const result = data as any;
         if (result?.error) {
           toast.error(result.error);
-          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return;
         }
         setCompletedCount(prev => prev + 1);
         await refreshProfile();
         setMatchState("submitted");
-        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1000);
+        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); }, 1000);
       }
     } catch (e: any) {
       console.error("Task submission error:", e);
