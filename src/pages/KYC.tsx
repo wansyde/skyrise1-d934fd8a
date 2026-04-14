@@ -33,9 +33,11 @@ const KYC = () => {
   const backRef = useRef<HTMLInputElement>(null);
   const selfieRef = useRef<HTMLInputElement>(null);
 
+  const [justSubmitted, setJustSubmitted] = useState(false);
+
   const kycStatus = (profile as any)?.kyc_status || "pending";
   const isVerified = kycStatus === "verified";
-  const isSubmitted = kycStatus === "submitted";
+  const isSubmitted = kycStatus === "submitted" || justSubmitted;
 
   // Full-screen status for submitted/verified states
   if (isSubmitted) {
@@ -283,7 +285,7 @@ const KYC = () => {
 
       if (error) throw error;
       toast.success("Submitted");
-      navigate("/app/profile");
+      setJustSubmitted(true);
     } catch (err: any) {
       toast.error("Submission failed");
     } finally {
