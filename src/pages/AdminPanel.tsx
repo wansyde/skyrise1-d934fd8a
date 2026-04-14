@@ -226,9 +226,9 @@ const AdminPanel = () => {
   };
 
   const saveBalances = async (userId: string) => {
-    const newBalance = parseFloat(editBalance);
-    const newSalary = parseFloat(editSalary);
-    const newTasks = parseInt(editTasksCompleted);
+    let newBalance = parseFloat(editBalance);
+    let newSalary = parseFloat(editSalary);
+    let newTasks = parseInt(editTasksCompleted);
     const newCreditScore = parseInt(editCreditScore);
     if (isNaN(newBalance) || newBalance < 0) { toast.error("Invalid wallet balance value."); return; }
     if (isNaN(newSalary) || newSalary < 0) { toast.error("Invalid advertising salary value."); return; }
