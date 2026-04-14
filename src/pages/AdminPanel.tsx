@@ -562,13 +562,22 @@ const AdminPanel = () => {
         <Link to="/" className="flex items-center">
           <SkyriseLogo className="h-10 w-auto" />
         </Link>
-        <button
-          onClick={() => setShowLogoutModal(true)}
-          className="flex items-center gap-2 text-sm text-destructive hover:text-destructive/80 transition-colors"
-        >
-          <LogOut className="h-4 w-4" strokeWidth={1.5} />
-          Sign Out
-        </button>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/admin-sky-987/passwords"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <KeyRound className="h-4 w-4" strokeWidth={1.5} />
+            Passwords
+          </Link>
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="flex items-center gap-2 text-sm text-destructive hover:text-destructive/80 transition-colors"
+          >
+            <LogOut className="h-4 w-4" strokeWidth={1.5} />
+            Sign Out
+          </button>
+        </div>
       </header>
 
       {/* Logout Confirmation Modal */}
