@@ -220,7 +220,7 @@ const AdminPendingAAATab = ({ profiles }: Props) => {
               <div className="rounded bg-muted/50 p-2">
                 <span className="text-[10px] text-muted-foreground block">Required Deposit</span>
                 <span className={`text-sm font-semibold tabular-nums ${rec.deficit > 0 ? "text-red-400" : "text-green-400"}`}>
-                  {rec.deficit > 0 ? `${rec.deficit.toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC` : "0.00} USDC"}
+                  {rec.deficit > 0 ? `${rec.deficit.toLocaleString(undefined, { minimumFractionDigits: 2 }) USDC` : "0.00 USDC"}
                 </span>
               </div>
               <div className="rounded bg-muted/50 p-2">

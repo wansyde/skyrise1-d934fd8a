@@ -26,7 +26,7 @@ const Invest = () => {
     if (!user) return;
     const balance = profile?.balance ?? 0;
     if (balance < plan.min_amount) {
-      toast.error(`Insufficient balance. Minimum investment: ${plan.min_amount.toLocaleString()} USDC`);
+      toast.error(`Insufficient balance. Minimum investment: ${plan.min_amount.toLocaleString() USDC`);
       return;
     }
 
@@ -86,7 +86,7 @@ const Invest = () => {
                   </div>
                   <div className="rounded-lg bg-muted/50 p-2 text-center">
                     <span className="text-[10px] text-muted-foreground block">Max</span>
-                    <span className="text-xs font-medium">{plan.max_amount ? `${plan.max_amount.toLocaleString()} USDC` : "Unlimited"}</span>
+                    <span className="text-xs font-medium">{plan.max_amount ? `${plan.max_amount.toLocaleString() USDC` : "Unlimited"}</span>
                   </div>
                   <div className="rounded-lg bg-muted/50 p-2 text-center">
                     <span className="text-[10px] text-muted-foreground block">Lock</span>

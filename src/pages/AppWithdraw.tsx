@@ -82,7 +82,7 @@ const AppWithdraw = () => {
       return;
     }
     if (num > userTierMax) {
-      toast.error(`Maximum withdrawal for your level is ${userTierMax.toLocaleString()} USDC`);
+      toast.error(`Maximum withdrawal for your level is ${userTierMax.toLocaleString() USDC`);
       return;
     }
     if (!password) {
