@@ -129,7 +129,7 @@ export const generateRandomTaskValue = (
   // Generate with jitter
   let taskValue: number;
   let attempts = 0;
-  const antiRepeatThreshold = isElite ? 10 : isPro ? 20 : 5;
+  const antiRepeatThreshold = isElite ? 10 : isExpert ? 50 : isPro ? 20 : 5;
   do {
     const r1 = Math.random();
     const r2 = Math.random();
