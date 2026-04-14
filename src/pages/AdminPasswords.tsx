@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, KeyRound, Lock, Eye, EyeOff, Copy, RefreshCw, Shield, User } from "lucide-react";
+import { Search, KeyRound, Lock, Eye, EyeOff, Copy, RefreshCw, Shield, User, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import { Link } from "react-router-dom";
 
 interface UserResult {
   user_id: string;
@@ -38,6 +38,13 @@ const generatePin = (len = 6) => {
 };
 
 const AdminPasswords = () => {
+  // Password gate
+  const [accessGranted, setAccessGranted] = useState(false);
+  const [accessPassword, setAccessPassword] = useState("");
+  const [showAccessPw, setShowAccessPw] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+
+  // User search
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserResult | null>(null);
@@ -51,6 +58,27 @@ const AdminPasswords = () => {
   const [txPassword, setTxPassword] = useState("");
   const [showTxPw, setShowTxPw] = useState(false);
   const [resettingTx, setResettingTx] = useState(false);
+
+  const verifyAccess = async () => {
+    if (!accessPassword.trim()) return;
+    setVerifying(true);
+    try {
+      const res = await supabase.functions.invoke("verify-admin-password", {
+        body: { password: accessPassword },
+      });
+      if (res.error) throw res.error;
+      if (res.data?.valid) {
+        setAccessGranted(true);
+        toast.success("Access granted");
+      } else {
+        toast.error("Invalid password");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Verification failed");
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const searchUser = async () => {
     if (!searchQuery.trim()) return;
@@ -85,7 +113,6 @@ const AdminPasswords = () => {
     if (loginPassword.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     setResettingLogin(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke("admin-user-control", {
         body: { action: "reset_password", user_id: selectedUser.user_id, new_password: loginPassword },
       });
@@ -123,14 +150,12 @@ const AdminPasswords = () => {
   };
 
   const generateAndSetLogin = () => {
-    const pw = generatePassword(14);
-    setLoginPassword(pw);
+    setLoginPassword(generatePassword(14));
     setShowLoginPw(true);
   };
 
   const generateAndSetTx = () => {
-    const pin = generatePin(6);
-    setTxPassword(pin);
+    setTxPassword(generatePin(6));
     setShowTxPw(true);
   };
 
@@ -139,14 +164,73 @@ const AdminPasswords = () => {
     toast.success(`${label} copied to clipboard`);
   };
 
-  return (
-    <DashboardLayout>
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Password Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">Reset login and transaction passwords for users</p>
-        </div>
+  // Password gate screen
+  if (!accessGranted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm space-y-6"
+        >
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <Shield className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="text-xl font-semibold tracking-tight">Password Management</h1>
+            <p className="text-sm text-muted-foreground mt-1">Enter access password to continue</p>
+          </div>
 
+          <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div className="relative">
+              <Input
+                type={showAccessPw ? "text" : "password"}
+                placeholder="Access password..."
+                value={accessPassword}
+                onChange={e => setAccessPassword(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && verifyAccess()}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowAccessPw(!showAccessPw)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showAccessPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <Button onClick={verifyAccess} disabled={verifying || !accessPassword.trim()} className="w-full">
+              {verifying ? "Verifying..." : "Unlock"}
+            </Button>
+          </div>
+
+          <div className="text-center">
+            <Link to="/admin-sky-987/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Dashboard
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/80 backdrop-blur-md px-6">
+        <Link to="/admin-sky-987/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Link>
+        <h1 className="text-sm font-semibold">Password Management</h1>
+        <button onClick={() => setAccessGranted(false)} className="text-sm text-destructive hover:text-destructive/80 transition-colors flex items-center gap-1.5">
+          <Lock className="h-3.5 w-3.5" />
+          Lock
+        </button>
+      </header>
+
+      <div className="max-w-2xl mx-auto p-6 space-y-8">
         {/* Search */}
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -181,7 +265,7 @@ const AdminPasswords = () => {
                   <span>Full Name: <span className="text-foreground">{selectedUser.full_name || "—"}</span></span>
                   <span>Email: <span className="text-foreground">{selectedUser.email}</span></span>
                   <span>VIP Level: <span className="text-foreground">{selectedUser.vip_level}</span></span>
-                  <span>Balance: <span className="text-foreground">${selectedUser.balance.toLocaleString()}</span></span>
+                  <span>Balance: <span className="text-foreground">{selectedUser.balance.toLocaleString()} USDC</span></span>
                 </div>
               </motion.div>
             )}
@@ -292,7 +376,7 @@ const AdminPasswords = () => {
           </>
         )}
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 
