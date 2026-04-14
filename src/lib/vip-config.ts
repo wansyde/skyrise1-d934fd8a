@@ -68,24 +68,35 @@ export const generateRandomTaskValue = (
   _setIndex?: number,
 ): number => {
   const isElite = tierLevel === 'Elite';
+  const isPro = tierLevel === 'Professional';
 
-  // Elite: MIN = 0.6 × B; others: floor at 30 or 0.4 × B
+  // Tier-specific range floors
   const rangeMin = isElite
     ? Math.max(100, 0.6 * balance)
-    : Math.max(30, 0.4 * balance);
-  const rangeMax = 0.98 * balance;
+    : isPro
+      ? Math.max(100, 0.35 * balance)
+      : Math.max(30, 0.4 * balance);
+  const rangeMax = isPro ? 0.95 * balance : 0.98 * balance;
 
   if (rangeMax <= rangeMin) {
     return Math.round(rangeMin * 100) / 100;
   }
 
-  // Zone boundaries – Elite uses wider spread
-  const lowMin = rangeMin;
-  const lowMax = isElite ? 0.7 * balance : 0.55 * balance;
-  const midMin = isElite ? 0.6 * balance : 0.55 * balance;
-  const midMax = isElite ? 0.8 * balance : 0.75 * balance;
-  const highMin = isElite ? 0.8 * balance : 0.75 * balance;
-  const highMax = rangeMax;
+  // Zone boundaries per tier
+  let lowMin: number, lowMax: number, midMin: number, midMax: number, highMin: number, highMax: number;
+  if (isElite) {
+    lowMin = rangeMin; lowMax = 0.7 * balance;
+    midMin = 0.6 * balance; midMax = 0.8 * balance;
+    highMin = 0.8 * balance; highMax = rangeMax;
+  } else if (isPro) {
+    lowMin = rangeMin; lowMax = 0.55 * balance;
+    midMin = 0.55 * balance; midMax = 0.75 * balance;
+    highMin = 0.75 * balance; highMax = rangeMax;
+  } else {
+    lowMin = rangeMin; lowMax = 0.55 * balance;
+    midMin = 0.55 * balance; midMax = 0.75 * balance;
+    highMin = 0.75 * balance; highMax = rangeMax;
+  }
 
   // Weighted zone selection – Elite: 25/45/30, others: 30/40/30
   const roll = Math.random();
@@ -108,10 +119,10 @@ export const generateRandomTaskValue = (
     }
   }
 
-  // Generate with jitter (two random sources for non-uniform spread)
+  // Generate with jitter
   let taskValue: number;
   let attempts = 0;
-  const antiRepeatThreshold = isElite ? 10 : 5;
+  const antiRepeatThreshold = isElite ? 10 : isPro ? 20 : 5;
   do {
     const r1 = Math.random();
     const r2 = Math.random();
