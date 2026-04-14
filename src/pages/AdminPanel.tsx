@@ -876,8 +876,10 @@ const AdminPanel = () => {
                             <Button size="sm" variant="outline" className="h-7 w-7 p-0" onClick={cancelEditing}><X className="h-3.5 w-3.5 text-destructive" /></Button>
                           </div>
                         ) : (
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-1.5 flex-wrap">
                             <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => startEditing(u)}><Pencil className="h-3 w-3" /> Edit</Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => { setPasswordResetUser(u.user_id); setNewPassword(""); setGeneratedPassword(null); }}><KeyRound className="h-3 w-3" /> Password</Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => handleLoginAsUser(u.user_id)} disabled={accountControlLoading}><LogIn className="h-3 w-3" /> Login As</Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button size="sm" variant="outline" className="h-7 w-7 p-0 text-destructive border-destructive/30 hover:bg-destructive/10" disabled={deletingUser === u.user_id}><Trash2 className="h-3 w-3" /></Button>
