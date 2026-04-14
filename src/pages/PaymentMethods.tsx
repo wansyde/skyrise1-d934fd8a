@@ -205,8 +205,8 @@ const PaymentMethods = () => {
                       <SelectContent className="rounded-xl shadow-lg border border-border/50">
                         <SelectItem value="Cash">Cash</SelectItem>
                         <SelectItem value="BTC">BTC</SelectItem>
-                        <SelectItem value="TRC20">TRC20</SelectItem>
-                        <SelectItem value="ERC20">ERC20</SelectItem>
+                        <SelectItem value="TRC-20">TRC-20</SelectItem>
+                        <SelectItem value="ERC-20">ERC-20</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
