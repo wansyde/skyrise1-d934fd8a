@@ -213,6 +213,7 @@ Deno.serve(async (req: Request) => {
         ...(city && { city }),
         isp,
         is_vpn,
+        vpn_score: vpn_score_label,
         connection_type,
       })
       .eq("user_id", userId);
