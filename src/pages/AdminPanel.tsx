@@ -379,6 +379,76 @@ const AdminPanel = () => {
     }
   };
 
+  const callAdminUserControl = async (action: string, userId: string, password?: string) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) { toast.error("Not authenticated."); return null; }
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-user-control`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+      body: JSON.stringify({ action, user_id: userId, new_password: password }),
+    });
+    return res.json();
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    if (!newPassword || newPassword.length < 6) { toast.error("Password must be at least 6 characters."); return; }
+    setAccountControlLoading(true);
+    try {
+      const result = await callAdminUserControl("reset_password", userId, newPassword);
+      if (result?.error) { toast.error(result.error); return; }
+      await logAdminAction("password_reset", userId, "Password reset by admin");
+      toast.success("Password reset successfully.");
+      setPasswordResetUser(null);
+      setNewPassword("");
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reset password.");
+    } finally {
+      setAccountControlLoading(false);
+    }
+  };
+
+  const handleGeneratePassword = async (userId: string) => {
+    setAccountControlLoading(true);
+    try {
+      const result = await callAdminUserControl("generate_password", userId);
+      if (result?.error) { toast.error(result.error); return; }
+      setGeneratedPassword(result.generated_password);
+      await logAdminAction("password_generate", userId, "Generated new password for user");
+      toast.success("New password generated and set.");
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to generate password.");
+    } finally {
+      setAccountControlLoading(false);
+    }
+  };
+
+  const handleLoginAsUser = async (userId: string) => {
+    setAccountControlLoading(true);
+    try {
+      const result = await callAdminUserControl("login_as_user", userId);
+      if (result?.error) { toast.error(result.error); return; }
+      if (result?.token_hash && result?.email) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: result.token_hash,
+          type: "magiclink",
+        });
+        if (error) { toast.error("Login failed: " + error.message); return; }
+        await logAdminAction("login_as_user", userId, `Admin logged in as ${getUserName(userId)}`);
+        toast.success(`Logged in as ${getUserName(userId)}`);
+        queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+        navigate("/app/dashboard");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to login as user.");
+    } finally {
+      setAccountControlLoading(false);
+    }
+  };
+
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir(sortDir === "asc" ? "desc" : "asc");
     else { setSortField(field); setSortDir("asc"); }
