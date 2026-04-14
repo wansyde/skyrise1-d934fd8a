@@ -81,7 +81,7 @@ const Deposit = () => {
                   onClick={() => setAmount(String(a))}
                   className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-foreground/20 transition-colors"
                 >
-                  {a.toLocaleString()} AC
+                  {a.toLocaleString()} USDC
                 </button>
               ))}
             </div>
@@ -99,7 +99,7 @@ const Deposit = () => {
           <div className="glass-card p-8">
             <h2 className="text-sm font-medium mb-4">Send Payment</h2>
             <p className="text-xs text-muted-foreground mb-4">
-              Send exactly <span className="text-foreground font-medium tabular-nums">{Number(amount).toLocaleString()} AC</span> via {method} to the address below.
+              Send exactly <span className="text-foreground font-medium tabular-nums">{Number(amount).toLocaleString()} USDC</span> via {method} to the address below.
             </p>
             <div className="rounded-lg bg-background p-4 flex items-center gap-3">
               <code className="flex-1 text-xs font-mono text-muted-foreground break-all">{walletAddress}</code>

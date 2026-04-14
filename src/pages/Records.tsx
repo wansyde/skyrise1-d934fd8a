@@ -295,7 +295,7 @@ const Records = () => {
                         <div>
                           <p className="text-[9px] text-muted-foreground">Total Amount</p>
                           <p className="text-xs font-bold text-primary">
-                            {card.total_amount.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                            {card.total_amount.toFixed(0)} <span className="text-[9px] font-normal text-muted-foreground">USDC</span>
                           </p>
                         </div>
                         <div>
@@ -303,7 +303,7 @@ const Records = () => {
                           <p className={`text-xs font-bold ${
                             card.status === "completed" ? "text-emerald-600" : "text-muted-foreground"
                           }`}>
-                            +{card.advertising_salary.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">AC</span>
+                            +{card.advertising_salary.toFixed(2)} <span className="text-[9px] font-normal text-muted-foreground">USDC</span>
                           </p>
                         </div>
                       </div>

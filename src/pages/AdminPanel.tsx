@@ -180,7 +180,7 @@ const AdminPanel = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Deposited ${amt.toLocaleString()} AC successfully.`);
+      toast.success(`Deposited ${amt.toLocaleString()} USDC successfully.`);
       setDepAmount(""); setDepNote(""); setDepUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-deposits"] });
@@ -205,7 +205,7 @@ const AdminPanel = () => {
       if (error) throw error;
       const result = data as any;
       if (result?.error) { toast.error(result.error); return; }
-      toast.success(`Withdrew ${amt.toLocaleString()} AC successfully.`);
+      toast.success(`Withdrew ${amt.toLocaleString()} USDC successfully.`);
       setWdAmount(""); setWdNote(""); setWdUserId("");
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
@@ -267,10 +267,10 @@ const AdminPanel = () => {
           .eq("user_id", userId)
           .gte("created_at", oldUser.last_task_reset || "1970-01-01");
       } else if (tasksReset) {
-        popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from 1 to 1,000 AC.`;
+        popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from 1 to 1,000 USDC.`;
         popupType = "reset";
       } else if (balanceIncreased) {
-        popupMessage = `Your wallet has been credited with ${(newBalance - Number(oldUser.balance)).toFixed(2)} AC. Your new balance is ${newBalance.toFixed(2)} AC.`;
+        popupMessage = `Your wallet has been credited with ${(newBalance - Number(oldUser.balance)).toFixed(2)} USDC. Your new balance is ${newBalance.toFixed(2)} USDC.`;
         popupType = "deposit";
       }
     }
@@ -294,8 +294,8 @@ const AdminPanel = () => {
 
     // Log changes
     const changes: string[] = [];
-    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: ${oldUser.balance} → ${newBalance} AC`);
-    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: ${oldUser.advertising_salary} → ${newSalary} AC`);
+    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: ${oldUser.balance} → ${newBalance USDC`);
+    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: ${oldUser.advertising_salary} → ${newSalary USDC`);
     if (oldUser && oldUser.vip_level !== editVipLevel) changes.push(`VIP: ${oldUser.vip_level} → ${editVipLevel}`);
     if (oldUser && oldUser.tasks_completed_today !== newTasks) changes.push(`Tasks: ${oldUser.tasks_completed_today} → ${newTasks}`);
     if (oldUser && Number((oldUser as any).credit_score ?? 100) !== newCreditScore) changes.push(`Credit: ${(oldUser as any).credit_score ?? 100}% → ${newCreditScore}%`);
@@ -538,7 +538,7 @@ const AdminPanel = () => {
     <select value={value} onChange={(e) => onChange(e.target.value)} className="h-9 w-full rounded border border-border bg-background px-3 text-sm">
       <option value="">Select a user...</option>
       {(profiles || []).sort((a: any, b: any) => (a.username || "").localeCompare(b.username || "")).map((p: any) => (
-        <option key={p.user_id} value={p.user_id}>{p.username || p.email} — {Number(p.balance).toLocaleString()} AC</option>
+        <option key={p.user_id} value={p.user_id}>{p.username || p.email} — {Number(p.balance).toLocaleString()} USDC</option>
       ))}
     </select>
   );
@@ -649,15 +649,15 @@ const AdminPanel = () => {
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Total Deposits</span>
-              <div className="text-lg font-semibold text-green-400 tabular-nums">{userTotalDeposits.toLocaleString()} AC</div>
+              <div className="text-lg font-semibold text-green-400 tabular-nums">{userTotalDeposits.toLocaleString()} USDC</div>
             </div>
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Total Withdrawals</span>
-              <div className="text-lg font-semibold text-red-400 tabular-nums">{userTotalWithdrawals.toLocaleString()} AC</div>
+              <div className="text-lg font-semibold text-red-400 tabular-nums">{userTotalWithdrawals.toLocaleString()} USDC</div>
             </div>
             <div className="vault-card p-4">
               <span className="text-xs text-muted-foreground">Current Balance</span>
-              <div className="text-lg font-semibold tabular-nums">{Number((selectedUser as any).balance).toLocaleString()} AC</div>
+              <div className="text-lg font-semibold tabular-nums">{Number((selectedUser as any).balance).toLocaleString()} USDC</div>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -704,7 +704,7 @@ const AdminPanel = () => {
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {userDeposits.slice(0, 10).map((d: any) => (
                   <div key={d.id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                    <span className="tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} AC</span>
+                    <span className="tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} USDC</span>
                     <span className="text-muted-foreground">{formatUSTime(d.created_at)}</span>
                   </div>
                 ))}
@@ -716,7 +716,7 @@ const AdminPanel = () => {
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {userWithdrawals.slice(0, 10).map((w: any) => (
                   <div key={w.id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                    <span className="tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} AC</span>
+                    <span className="tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} USDC</span>
                     <span className="text-muted-foreground">{formatUSTime(w.created_at)}</span>
                   </div>
                 ))}
@@ -802,14 +802,14 @@ const AdminPanel = () => {
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editBalance} onChange={(e) => setEditBalance(e.target.value)} className="h-7 w-28 text-xs" min={0} />
                         ) : (
-                          <span className="text-sm tabular-nums">{Number(u.balance).toLocaleString()} AC</span>
+                          <span className="text-sm tabular-nums">{Number(u.balance).toLocaleString()} USDC</span>
                         )}
                       </td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editSalary} onChange={(e) => setEditSalary(e.target.value)} className="h-7 w-28 text-xs" min={0} />
                         ) : (
-                          <span className="text-sm tabular-nums">{Number(u.advertising_salary ?? 0).toLocaleString()} AC</span>
+                          <span className="text-sm tabular-nums">{Number(u.advertising_salary ?? 0).toLocaleString()} USDC</span>
                         )}
                       </td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
@@ -947,7 +947,7 @@ const AdminPanel = () => {
                     {filteredDeposits.map((d: any) => (
                       <tr key={d.id} className="border-t border-border">
                         <td className="px-5 py-3 text-sm font-medium">{getUserName(d.user_id)}</td>
-                        <td className="px-5 py-3 text-sm tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} AC</td>
+                        <td className="px-5 py-3 text-sm tabular-nums text-green-400">+{Number(d.amount).toLocaleString()} USDC</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{d.admin_note || "—"}</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{formatUSTime(d.created_at)}</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground">{getAdminName(d.wallet_address)}</td>
@@ -1034,7 +1034,7 @@ const AdminPanel = () => {
                       {filteredWithdrawals.map((w: any) => (
                         <tr key={w.id} className="border-t border-border">
                           <td className="px-5 py-3 text-sm font-medium">{getUserName(w.user_id)}</td>
-                          <td className="px-5 py-3 text-sm tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} AC</td>
+                          <td className="px-5 py-3 text-sm tabular-nums text-red-400">-{Number(w.amount).toLocaleString()} USDC</td>
                           <td className="px-5 py-3 text-xs text-muted-foreground font-mono max-w-[180px] truncate" title={w.wallet_address || ""}>
                             {w.wallet_address && !w.wallet_address.match(/^[0-9a-f]{8}-/) ? w.wallet_address : "—"}
                           </td>
@@ -1058,7 +1058,7 @@ const AdminPanel = () => {
                                     const { error } = await supabase.from("withdrawals").update({ status: "completed", admin_note: w.admin_note || "Processed by admin", updated_at: new Date().toISOString() }).eq("id", w.id);
                                     if (error) throw error;
                                     await supabase.from("transactions").update({ status: "approved" } as any).eq("user_id", w.user_id).eq("type", "withdrawal").eq("status", "pending").eq("amount", -Number(w.amount));
-                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of ${Number(w.amount).toLocaleString()} AC`);
+                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of ${Number(w.amount).toLocaleString() USDC`);
                                     toast.success("Withdrawal marked as completed.");
                                     queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
                                     queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
