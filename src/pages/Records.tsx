@@ -252,7 +252,6 @@ const Records = () => {
             const isPending = card.status === "pending";
             const isAAAred = card.isAAA && card.carStatus === "pending_insufficient";
             const isAAAgreen = card.isAAA && card.carStatus === "completed_partial";
-            const canAfford = userBalance >= 0;
             const isSubmitting = submittingId === card.parentRecordId;
 
             return (
@@ -310,13 +309,13 @@ const Records = () => {
                       </div>
                     </div>
 
-                    {isAAAred && (
+                    {isAAAgreen && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (!canAfford) {
-                            toast("Deposit Required", {
-                              description: "Top up your balance to continue this assignment",
+                          if (userBalance < 0) {
+                            toast("Insufficient balance", {
+                              description: "Please deposit to continue.",
                               duration: 3000,
                             });
                             navigate("/app/wallet/deposit");
@@ -324,9 +323,9 @@ const Records = () => {
                           }
                           handleSubmitPending(card.parentRecordId);
                         }}
-                        disabled={isSubmitting || !canAfford}
+                        disabled={isSubmitting || userBalance < 0}
                         className={`flex-shrink-0 px-3 py-1.5 rounded-full font-semibold text-[10px] transition-all ${
-                          canAfford
+                          userBalance >= 0
                             ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
                             : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
                         } disabled:opacity-50`}
