@@ -67,52 +67,62 @@ export const generateRandomTaskValue = (
   tierLevel?: string,
   _setIndex?: number,
 ): number => {
-  const rangeMin = Math.max(30, 0.4 * balance);
+  const isElite = tierLevel === 'Elite';
+
+  // Elite: floor at 100; others: floor at 30
+  const rangeMin = Math.max(isElite ? 100 : 30, 0.4 * balance);
   const rangeMax = 0.98 * balance;
 
   if (rangeMax <= rangeMin) {
     return Math.round(rangeMin * 100) / 100;
   }
 
-  // Zone boundaries based on balance
-  const lowMin = rangeMin;           // 0.4B
-  const lowMax = 0.55 * balance;
-  const midMin = 0.55 * balance;
-  const midMax = 0.75 * balance;
-  const highMin = 0.75 * balance;
-  const highMax = rangeMax;          // 0.98B
+  // Zone boundaries – Elite uses wider spread
+  const lowMin = rangeMin;
+  const lowMax = isElite ? 0.6 * balance : 0.55 * balance;
+  const midMin = isElite ? 0.6 * balance : 0.55 * balance;
+  const midMax = isElite ? 0.8 * balance : 0.75 * balance;
+  const highMin = isElite ? 0.8 * balance : 0.75 * balance;
+  const highMax = rangeMax;
 
-  // Weighted zone selection: LOW 30%, MID 40%, HIGH 30%
+  // Weighted zone selection – Elite: 25/45/30, others: 30/40/30
   const roll = Math.random();
   let bandMin: number, bandMax: number;
-  if (roll < 0.3) {
-    bandMin = lowMin;
-    bandMax = lowMax;
-  } else if (roll < 0.7) {
-    bandMin = midMin;
-    bandMax = midMax;
+  if (isElite) {
+    if (roll < 0.25) {
+      bandMin = lowMin; bandMax = lowMax;
+    } else if (roll < 0.70) {
+      bandMin = midMin; bandMax = midMax;
+    } else {
+      bandMin = highMin; bandMax = highMax;
+    }
   } else {
-    bandMin = highMin;
-    bandMax = highMax;
+    if (roll < 0.3) {
+      bandMin = lowMin; bandMax = lowMax;
+    } else if (roll < 0.7) {
+      bandMin = midMin; bandMax = midMax;
+    } else {
+      bandMin = highMin; bandMax = highMax;
+    }
   }
 
   // Generate with jitter (two random sources for non-uniform spread)
   let taskValue: number;
   let attempts = 0;
+  const antiRepeatThreshold = isElite ? 10 : 5;
   do {
     const r1 = Math.random();
     const r2 = Math.random();
     const pick = r1 * 0.6 + r2 * 0.4;
     taskValue = bandMin + pick * (bandMax - bandMin);
 
-    // Add decimal variation
-    taskValue += (Math.random() - 0.5) * 2;
+    // Add decimal variation – Elite gets wider jitter
+    taskValue += (Math.random() - 0.5) * (isElite ? 5 : 2);
 
     attempts++;
-    // Check not too similar to recent values (±5)
   } while (
     attempts < 10 &&
-    lastValues.some((v) => Math.abs(v - taskValue) < 5)
+    lastValues.some((v) => Math.abs(v - taskValue) < antiRepeatThreshold)
   );
 
   // Hard cap: never exceed balance
