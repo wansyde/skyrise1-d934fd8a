@@ -522,30 +522,31 @@ const Starting = () => {
             onTouchStart={handleFeaturedTouchStart}
             onTouchEnd={handleFeaturedTouchEnd}
           >
-            <div className="relative flex items-center justify-center py-4 overflow-hidden">
+            <div className="relative flex items-center justify-center py-3 overflow-hidden">
               <AnimatePresence initial={false} mode="popLayout">
                 <motion.div
                   key={`showcase-${activeIndex}`}
                   className="relative w-full flex items-center justify-center"
                   style={{ willChange: "transform, opacity" }}
-                  initial={{ opacity: 0, x: "30%", scale: 0.92, rotateY: -8 }}
-                  animate={{ opacity: 1, x: 0, scale: 1, rotateY: 0 }}
-                  exit={{ opacity: 0, x: "-25%", scale: 0.95, rotateY: 6 }}
+                  initial={{ opacity: 0, x: "20%", scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: "-15%", scale: 0.97 }}
                   transition={{
-                    duration: 0.5,
+                    duration: 0.35,
                     ease: [0.32, 0.72, 0, 1],
-                    opacity: { duration: 0.35 },
+                    opacity: { duration: 0.25 },
                   }}
                 >
                   <img
                     src={featuredCar.featured}
                     alt={featuredCar.name}
-                    className="w-[70%] md:w-[55%] lg:w-[45%] aspect-[2/1] object-contain"
+                    className="w-[85%] md:w-[65%] lg:w-[55%] aspect-[2/1] object-contain"
                     style={{
                       filter: "brightness(1.03) contrast(1.03) saturate(1.08)",
-                      imageRendering: "auto",
                     }}
                     draggable={false}
+                    loading="eager"
+                    decoding="async"
                     width={1536}
                     height={768}
                   />
