@@ -149,16 +149,10 @@ const Starting = () => {
   const isSetLocked = completedCount >= maxAllowedTasks && completedCount < DAILY_LIMIT;
 
   const userBalance = Number(profile?.balance ?? 0);
-  const tierPercent = vipTier.rewardPercent;
   const [matchedTaskValue, setMatchedTaskValue] = useState<number | null>(null);
-  const taskValue = matchedTaskValue ?? generateRandomTaskValue(userBalance);
-  const estimatedProfit = useMemo(() => {
-    if (isAAATask && aaaAssignment) {
-      const profitPct = aaaAssignment.profit_percentage || 0.05;
-      return Math.round(taskValue * profitPct * 100) / 100;
-    }
-    return getTaskProfit(taskValue, vipTier);
-  }, [taskValue, vipTier, isAAATask, aaaAssignment]);
+  const [previewReward, setPreviewReward] = useState<number | null>(null);
+  const taskValue = matchedTaskValue ?? 0;
+  const estimatedProfit = previewReward ?? 0;
 
   const userName = profile?.full_name || profile?.username || "User";
   const total = carCampaigns.length;
