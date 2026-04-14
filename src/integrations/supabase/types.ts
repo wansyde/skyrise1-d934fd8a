@@ -639,6 +639,10 @@ export type Database = {
         Args: { _amount: number; _note?: string; _user_id: string }
         Returns: Json
       }
+      admin_reset_withdraw_password: {
+        Args: { _new_password: string; _user_id: string }
+        Returns: Json
+      }
       admin_withdraw: {
         Args: { _amount: number; _note?: string; _user_id: string }
         Returns: Json
