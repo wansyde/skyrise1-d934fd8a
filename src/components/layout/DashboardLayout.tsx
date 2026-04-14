@@ -3,12 +3,13 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, ArrowDownToLine, ArrowUpFromLine,
-  Clock, Settings, LogOut, Menu, X, ChevronRight, PanelLeftClose, PanelLeft
+  Clock, Settings, LogOut, Menu, X, ChevronRight, PanelLeftClose, PanelLeft, KeyRound
 } from "lucide-react";
 import SkyriseLogo from "@/components/SkyriseLogo";
 
 const navItems = [
   { href: "/admin-sky-987/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin-sky-987/passwords", label: "Passwords", icon: KeyRound },
 ];
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
