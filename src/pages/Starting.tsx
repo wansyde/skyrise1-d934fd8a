@@ -266,6 +266,8 @@ const Starting = () => {
       setAaaCars(matchingAAA.car_names || []);
       setMatchedCar(carCampaigns[0]); // placeholder
       setMatchedTaskValue(matchingAAA.total_assignment_amount);
+      const profitPct = matchingAAA.profit_percentage || 0.05;
+      setPreviewReward(Math.round(matchingAAA.total_assignment_amount * profitPct * 100) / 100);
       setAssignmentCode(generateAssignmentCode());
       setMatchProgress(0);
       setMatchState("matching");
