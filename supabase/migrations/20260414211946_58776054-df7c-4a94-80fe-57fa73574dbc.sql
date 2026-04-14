@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN vpn_score text DEFAULT '0/3';

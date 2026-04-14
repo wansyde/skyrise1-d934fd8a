@@ -697,12 +697,12 @@ const AdminPanel = () => {
               <div className="text-sm mt-1">{(selectedUser as any).connection_type || "—"}</div>
             </div>
             <div className="vault-card p-4">
-              <span className="text-xs text-muted-foreground">VPN Status</span>
+              <span className="text-xs text-muted-foreground">VPN Score</span>
               <div className="mt-1">
                 {(selectedUser as any).is_vpn ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-destructive/15 text-destructive">⚠️ VPN/Proxy Detected</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-destructive/15 text-destructive">⚠️ {(selectedUser as any).vpn_score || "VPN"} — Detected</span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-green-500/15 text-green-400">✅ Normal</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-green-500/15 text-green-400">✅ {(selectedUser as any).vpn_score || "0/3"} — Normal</span>
                 )}
               </div>
             </div>
@@ -771,7 +771,7 @@ const AdminPanel = () => {
                     <th className="px-5 py-3 font-medium">IP Address</th>
                     <th className="px-5 py-3 font-medium">Country</th>
                     <th className="px-5 py-3 font-medium">Region</th>
-                    <th className="px-5 py-3 font-medium">VPN</th>
+                    <th className="px-5 py-3 font-medium">VPN Score</th>
                     <th className="px-5 py-3 font-medium">Referral Code</th>
                     <th className="px-5 py-3 font-medium">Referred By</th>
                     <th className="px-5 py-3 font-medium">Referrals</th>
@@ -797,9 +797,9 @@ const AdminPanel = () => {
                       <td className="px-5 py-3 text-xs text-muted-foreground">{u.region || "—"}</td>
                       <td className="px-5 py-3">
                         {u.is_vpn ? (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">⚠️ VPN</span>
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">⚠️ {u.vpn_score || "VPN"}</span>
                         ) : (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">✅</span>
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">✅ {u.vpn_score || "0/3"}</span>
                         )}
                       </td>
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
