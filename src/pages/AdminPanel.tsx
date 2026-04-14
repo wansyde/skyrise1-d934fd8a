@@ -226,9 +226,9 @@ const AdminPanel = () => {
   };
 
   const saveBalances = async (userId: string) => {
-    const newBalance = parseFloat(editBalance);
-    const newSalary = parseFloat(editSalary);
-    const newTasks = parseInt(editTasksCompleted);
+    let newBalance = parseFloat(editBalance);
+    let newSalary = parseFloat(editSalary);
+    let newTasks = parseInt(editTasksCompleted);
     const newCreditScore = parseInt(editCreditScore);
     if (isNaN(newBalance) || newBalance < 0) { toast.error("Invalid wallet balance value."); return; }
     if (isNaN(newSalary) || newSalary < 0) { toast.error("Invalid advertising salary value."); return; }
@@ -248,8 +248,18 @@ const AdminPanel = () => {
       const balanceIncreased = newBalance > Number(oldUser.balance);
 
       if (vipChanged) {
+        // Force reset tasks and salary on tier change
+        newTasks = 0;
+        newSalary = 0;
         popupMessage = `Congratulations! You have been upgraded to ${editVipLevel} Promoter. You now have access to enhanced rewards and exclusive promotional campaigns.`;
         popupType = "upgrade";
+
+        // Delete old task records for this cycle
+        await supabase
+          .from("task_records")
+          .delete()
+          .eq("user_id", userId)
+          .gte("created_at", oldUser.last_task_reset || "1970-01-01");
       } else if (tasksReset) {
         popupMessage = `Every time users complete three sets of promotional assignments, can instantly contact the platform's customer service to claim a random bonus ranging from 1 to 1,000 AC.`;
         popupType = "reset";
@@ -259,7 +269,12 @@ const AdminPanel = () => {
       }
     }
 
-    const updatePayload: any = { balance: newBalance, advertising_salary: newSalary, vip_level: editVipLevel, tasks_completed_today: newTasks, credit_score: newCreditScore };
+    const updatePayload: any = {
+      balance: newBalance, advertising_salary: newSalary, vip_level: editVipLevel,
+      tasks_completed_today: newTasks, credit_score: newCreditScore,
+      current_unlocked_set: 1, last_task_reset: new Date().toISOString(),
+      task_cycle_completed: false,
+    };
     if (popupMessage) {
       updatePayload.pending_popup_message = popupMessage;
       updatePayload.pending_popup_type = popupType;
