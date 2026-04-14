@@ -69,7 +69,7 @@ const Dashboard = () => (
                 fontSize: "12px",
                 color: "#f2f2f2",
               }}
-              formatter={(value: number) => [`${value.toLocaleString() USDC`, "Balance"]}
+              formatter={(value: number) => [`${value.toLocaleString()} USDC`, "Balance"]}
             />
             <Area
               type="monotone"
