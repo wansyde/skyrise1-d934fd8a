@@ -52,15 +52,13 @@ export const getTaskProfit = (taskValue: number, tier: VipTier): number => {
 // Track last generated values to avoid repetition
 let lastValues: number[] = [];
 
+/** Spike tracking: how many high-value spikes have been injected in the current set */
+let spikeCount = 0;
+let taskIndexInSet = 0;
+
 /**
- * Generate a wide-range random task value with anti-clustering.
- *
- * Range: MIN = max(30, 0.4 × B) … MAX = 0.98 × B
- * Weighted band distribution: LOW 30%, MID 40%, HIGH 30%
- * Avoids repeating values within ±5 of recent tasks.
- *
- * The caller should use getSetProfitTarget() and adjust the final task(s)
- * to keep total profit within the per-set target range.
+ * Generate a wide-range random task value with anti-clustering,
+ * natural decimals, micro-variation, and occasional high-value spikes.
  */
 export const generateRandomTaskValue = (
   balance: number,
@@ -71,6 +69,31 @@ export const generateRandomTaskValue = (
   const isExpert = tierLevel === 'Expert';
   const isPro = tierLevel === 'Professional';
 
+  taskIndexInSet++;
+
+  // --- Spike logic: 1–3 high-value tasks per set ---
+  const tasksPerSet = isElite ? 55 : isExpert ? 50 : isPro ? 45 : 40;
+  const maxSpikes = 1 + Math.floor(Math.random() * 3); // 1–3
+  const shouldSpike =
+    spikeCount < maxSpikes &&
+    taskIndexInSet > 3 && // not the very first tasks
+    Math.random() < (maxSpikes - spikeCount) / (tasksPerSet - taskIndexInSet + 1);
+
+  if (shouldSpike) {
+    spikeCount++;
+    const spikeRaw = balance * (0.85 + Math.random() * 0.13); // 0.85–0.98 × balance
+    // Apply natural decimal
+    let spike = Math.floor(spikeRaw) + 0.01 + Math.random() * 0.98;
+    // Micro variation
+    spike *= 0.985 + Math.random() * 0.03;
+    spike = Math.min(spike, balance);
+    spike = Math.round(spike * 100) / 100;
+    lastValues.push(spike);
+    if (lastValues.length > 12) lastValues.shift();
+    return spike;
+  }
+
+  // --- Normal generation ---
   // Tier-specific range floors
   const rangeMin = isElite
     ? Math.max(500, 0.25 * balance)
@@ -105,7 +128,7 @@ export const generateRandomTaskValue = (
     highMin = 0.75 * balance; highMax = rangeMax;
   }
 
-  // Weighted zone selection – all tiers: 30/40/30
+  // Weighted zone selection – 30/40/30
   const roll = Math.random();
   let bandMin: number, bandMax: number;
   if (roll < 0.3) {
@@ -116,17 +139,17 @@ export const generateRandomTaskValue = (
     bandMin = highMin; bandMax = highMax;
   }
 
-  // Generate with jitter + enhanced randomness
+  // Strict anti-repeat thresholds per tier
+  const antiRepeatThreshold = isElite
+    ? Math.max(50, Math.min(150, balance * 0.02))
+    : isExpert
+      ? Math.max(20, Math.min(50, balance * 0.015))
+      : isPro
+        ? Math.max(5, Math.min(15, balance * 0.01))
+        : Math.max(2, Math.min(5, balance * 0.005));
+
   let taskValue: number;
   let attempts = 0;
-  // Tier-scaled duplicate threshold: small % of balance ensures no near-duplicates
-  const antiRepeatThreshold = isElite
-    ? Math.max(100, balance * 0.02)
-    : isExpert
-      ? Math.max(50, balance * 0.015)
-      : isPro
-        ? Math.max(20, balance * 0.01)
-        : Math.max(5, balance * 0.005);
 
   do {
     const r1 = Math.random();
@@ -137,15 +160,15 @@ export const generateRandomTaskValue = (
     // Layer 1: Tier-scaled jitter
     taskValue += (Math.random() - 0.5) * (isElite ? 15 : isExpert ? 8 : isPro ? 4 : 2);
 
-    // Layer 2: Decimal injection (0.11 → 0.97)
-    taskValue += 0.11 + Math.random() * 0.86;
+    // Layer 2: Natural decimal (replace any .00/.50 pattern)
+    taskValue = Math.floor(taskValue) + 0.01 + Math.random() * 0.98;
 
     // Layer 3: Micro variation (×0.985 → ×1.015)
     taskValue *= 0.985 + Math.random() * 0.03;
 
     attempts++;
   } while (
-    attempts < 15 &&
+    attempts < 20 &&
     lastValues.some((v) => Math.abs(v - taskValue) < antiRepeatThreshold)
   );
 
@@ -154,9 +177,9 @@ export const generateRandomTaskValue = (
   taskValue = Math.max(taskValue, rangeMin);
   taskValue = Math.round(taskValue * 100) / 100;
 
-  // Track last 8 values for stronger anti-repeat
+  // Track last 12 values for stronger anti-repeat
   lastValues.push(taskValue);
-  if (lastValues.length > 8) lastValues.shift();
+  if (lastValues.length > 12) lastValues.shift();
 
   return taskValue;
 };
@@ -164,6 +187,8 @@ export const generateRandomTaskValue = (
 /** Reset the anti-repeat tracker (call on new set / new session) */
 export const resetTaskValueHistory = () => {
   lastValues = [];
+  spikeCount = 0;
+  taskIndexInSet = 0;
 };
 
 /** Given tasks completed today, return current set (1-based) and tasks done in current set */
