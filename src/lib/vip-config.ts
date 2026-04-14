@@ -73,13 +73,13 @@ export const generateRandomTaskValue = (
 
   // Tier-specific range floors
   const rangeMin = isElite
-    ? Math.max(100, 0.6 * balance)
+    ? Math.max(500, 0.25 * balance)
     : isExpert
       ? Math.max(300, 0.30 * balance)
       : isPro
         ? Math.max(100, 0.35 * balance)
         : Math.max(30, 0.4 * balance);
-  const rangeMax = (isPro || isExpert) ? 0.95 * balance : 0.98 * balance;
+  const rangeMax = (isPro || isExpert || isElite) ? 0.95 * balance : 0.98 * balance;
 
   if (rangeMax <= rangeMin) {
     return Math.round(rangeMin * 100) / 100;
@@ -88,9 +88,9 @@ export const generateRandomTaskValue = (
   // Zone boundaries per tier
   let lowMin: number, lowMax: number, midMin: number, midMax: number, highMin: number, highMax: number;
   if (isElite) {
-    lowMin = rangeMin; lowMax = 0.7 * balance;
-    midMin = 0.6 * balance; midMax = 0.8 * balance;
-    highMin = 0.8 * balance; highMax = rangeMax;
+    lowMin = rangeMin; lowMax = 0.45 * balance;
+    midMin = 0.45 * balance; midMax = 0.70 * balance;
+    highMin = 0.70 * balance; highMax = rangeMax;
   } else if (isExpert) {
     lowMin = rangeMin; lowMax = 0.50 * balance;
     midMin = 0.50 * balance; midMax = 0.75 * balance;
