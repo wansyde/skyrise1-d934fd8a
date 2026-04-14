@@ -312,14 +312,14 @@ const Starting = () => {
           setMatchedTaskValue(Number(previewData.task_value));
           setPreviewReward(Number(previewData.reward));
         } else {
-          // Fallback to frontend estimate
+          // No fallback — show 0 until server responds
           setMatchedTaskValue(dummyAmount);
-          setPreviewReward(getTaskProfit(dummyAmount, vipTier));
+          setPreviewReward(0);
         }
       } catch {
         const fallback = generateRandomTaskValue(currentBalance, profile?.vip_level);
         setMatchedTaskValue(fallback);
-        setPreviewReward(getTaskProfit(fallback, vipTier));
+        setPreviewReward(0);
       }
     };
     fetchPreview();
