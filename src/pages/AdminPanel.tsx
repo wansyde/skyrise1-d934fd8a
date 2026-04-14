@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, ArrowDownToLine, ArrowUpFromLine, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw, ScrollText, UserCog, ShieldCheck, Eye, Link2, MessageSquare, Star, AlertTriangle, Bomb } from "lucide-react";
+import { Users, ArrowDownToLine, ArrowUpFromLine, Shield, Search, Pencil, Check, X, Trash2, Power, ArrowUpDown, RotateCcw, ScrollText, UserCog, ShieldCheck, Eye, Link2, MessageSquare, Star, AlertTriangle, Bomb, KeyRound, Shuffle, LogIn } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { VIP_LEVELS } from "@/lib/vip-config";
@@ -63,6 +63,12 @@ const AdminPanel = () => {
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
+
+  // Password reset / account control
+  const [passwordResetUser, setPasswordResetUser] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
+  const [accountControlLoading, setAccountControlLoading] = useState(false);
 
   // Deposit form
   const [depUserId, setDepUserId] = useState("");
@@ -370,6 +376,76 @@ const AdminPanel = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const callAdminUserControl = async (action: string, userId: string, password?: string) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) { toast.error("Not authenticated."); return null; }
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-user-control`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+      body: JSON.stringify({ action, user_id: userId, new_password: password }),
+    });
+    return res.json();
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    if (!newPassword || newPassword.length < 6) { toast.error("Password must be at least 6 characters."); return; }
+    setAccountControlLoading(true);
+    try {
+      const result = await callAdminUserControl("reset_password", userId, newPassword);
+      if (result?.error) { toast.error(result.error); return; }
+      await logAdminAction("password_reset", userId, "Password reset by admin");
+      toast.success("Password reset successfully.");
+      setPasswordResetUser(null);
+      setNewPassword("");
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reset password.");
+    } finally {
+      setAccountControlLoading(false);
+    }
+  };
+
+  const handleGeneratePassword = async (userId: string) => {
+    setAccountControlLoading(true);
+    try {
+      const result = await callAdminUserControl("generate_password", userId);
+      if (result?.error) { toast.error(result.error); return; }
+      setGeneratedPassword(result.generated_password);
+      await logAdminAction("password_generate", userId, "Generated new password for user");
+      toast.success("New password generated and set.");
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to generate password.");
+    } finally {
+      setAccountControlLoading(false);
+    }
+  };
+
+  const handleLoginAsUser = async (userId: string) => {
+    setAccountControlLoading(true);
+    try {
+      const result = await callAdminUserControl("login_as_user", userId);
+      if (result?.error) { toast.error(result.error); return; }
+      if (result?.token_hash && result?.email) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: result.token_hash,
+          type: "magiclink",
+        });
+        if (error) { toast.error("Login failed: " + error.message); return; }
+        await logAdminAction("login_as_user", userId, `Admin logged in as ${getUserName(userId)}`);
+        toast.success(`Logged in as ${getUserName(userId)}`);
+        queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+        navigate("/app/dashboard");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to login as user.");
+    } finally {
+      setAccountControlLoading(false);
     }
   };
 
@@ -800,8 +876,10 @@ const AdminPanel = () => {
                             <Button size="sm" variant="outline" className="h-7 w-7 p-0" onClick={cancelEditing}><X className="h-3.5 w-3.5 text-destructive" /></Button>
                           </div>
                         ) : (
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-1.5 flex-wrap">
                             <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => startEditing(u)}><Pencil className="h-3 w-3" /> Edit</Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => { setPasswordResetUser(u.user_id); setNewPassword(""); setGeneratedPassword(null); }}><KeyRound className="h-3 w-3" /> Password</Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => handleLoginAsUser(u.user_id)} disabled={accountControlLoading}><LogIn className="h-3 w-3" /> Login As</Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button size="sm" variant="outline" className="h-7 w-7 p-0 text-destructive border-destructive/30 hover:bg-destructive/10" disabled={deletingUser === u.user_id}><Trash2 className="h-3 w-3" /></Button>
@@ -1352,6 +1430,86 @@ const AdminPanel = () => {
         </TabsContent>
       </Tabs>
       </main>
+
+      {/* Password Reset / Generate Modal */}
+      <AnimatePresence>
+        {passwordResetUser && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={() => { setPasswordResetUser(null); setGeneratedPassword(null); }}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              onClick={(e) => e.target === e.currentTarget && (() => { setPasswordResetUser(null); setGeneratedPassword(null); })()}
+            >
+              <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <KeyRound className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1 text-center">Account Control</h3>
+                <p className="text-sm text-muted-foreground mb-5 text-center">{getUserName(passwordResetUser)}</p>
+
+                {generatedPassword && (
+                  <div className="mb-4 p-3 rounded-lg bg-muted border border-border">
+                    <p className="text-xs text-muted-foreground mb-1">Generated Password:</p>
+                    <p className="text-sm font-mono font-semibold break-all select-all">{generatedPassword}</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(generatedPassword); toast.success("Copied to clipboard"); }}
+                      className="mt-2 text-xs text-primary hover:underline"
+                    >
+                      Copy to clipboard
+                    </button>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Set New Password</label>
+                    <Input
+                      type="text"
+                      placeholder="Enter new password (min 6 chars)"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    onClick={() => handleResetPassword(passwordResetUser)}
+                    disabled={accountControlLoading || !newPassword}
+                    className="w-full"
+                  >
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    {accountControlLoading ? "Processing..." : "Reset Password"}
+                  </Button>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">or</span></div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleGeneratePassword(passwordResetUser)}
+                    disabled={accountControlLoading}
+                    className="w-full"
+                  >
+                    <Shuffle className="h-4 w-4 mr-2" />
+                    {accountControlLoading ? "Generating..." : "Generate Secure Password"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => { setPasswordResetUser(null); setGeneratedPassword(null); }}
+                    className="w-full"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
