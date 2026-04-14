@@ -68,15 +68,18 @@ export const generateRandomTaskValue = (
   _setIndex?: number,
 ): number => {
   const isElite = tierLevel === 'Elite';
+  const isExpert = tierLevel === 'Expert';
   const isPro = tierLevel === 'Professional';
 
   // Tier-specific range floors
   const rangeMin = isElite
     ? Math.max(100, 0.6 * balance)
-    : isPro
-      ? Math.max(100, 0.35 * balance)
-      : Math.max(30, 0.4 * balance);
-  const rangeMax = isPro ? 0.95 * balance : 0.98 * balance;
+    : isExpert
+      ? Math.max(300, 0.30 * balance)
+      : isPro
+        ? Math.max(100, 0.35 * balance)
+        : Math.max(30, 0.4 * balance);
+  const rangeMax = (isPro || isExpert) ? 0.95 * balance : 0.98 * balance;
 
   if (rangeMax <= rangeMin) {
     return Math.round(rangeMin * 100) / 100;
@@ -88,6 +91,10 @@ export const generateRandomTaskValue = (
     lowMin = rangeMin; lowMax = 0.7 * balance;
     midMin = 0.6 * balance; midMax = 0.8 * balance;
     highMin = 0.8 * balance; highMax = rangeMax;
+  } else if (isExpert) {
+    lowMin = rangeMin; lowMax = 0.50 * balance;
+    midMin = 0.50 * balance; midMax = 0.75 * balance;
+    highMin = 0.75 * balance; highMax = rangeMax;
   } else if (isPro) {
     lowMin = rangeMin; lowMax = 0.55 * balance;
     midMin = 0.55 * balance; midMax = 0.75 * balance;
@@ -122,7 +129,7 @@ export const generateRandomTaskValue = (
   // Generate with jitter
   let taskValue: number;
   let attempts = 0;
-  const antiRepeatThreshold = isElite ? 10 : isPro ? 20 : 5;
+  const antiRepeatThreshold = isElite ? 10 : isExpert ? 50 : isPro ? 20 : 5;
   do {
     const r1 = Math.random();
     const r2 = Math.random();
@@ -130,7 +137,7 @@ export const generateRandomTaskValue = (
     taskValue = bandMin + pick * (bandMax - bandMin);
 
     // Add decimal variation – Elite gets wider jitter
-    taskValue += (Math.random() - 0.5) * (isElite ? 5 : isPro ? 4 : 2);
+    taskValue += (Math.random() - 0.5) * (isElite ? 5 : isExpert ? 8 : isPro ? 4 : 2);
 
     attempts++;
   } while (
