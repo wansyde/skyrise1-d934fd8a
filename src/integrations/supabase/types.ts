@@ -655,27 +655,16 @@ export type Database = {
         }
         Returns: Json
       }
-      complete_task:
-        | {
-            Args: {
-              _assignment_code: string
-              _car_brand: string
-              _car_image_url: string
-              _car_name: string
-              _total_amount: number
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              _assignment_code: string
-              _car_brand: string
-              _car_image_url: string
-              _car_name: string
-              _total_amount: number
-            }
-            Returns: Json
-          }
+      complete_task: {
+        Args: {
+          _assignment_code: string
+          _car_brand: string
+          _car_image_url: string
+          _car_name: string
+          _total_amount: number
+        }
+        Returns: Json
+      }
       get_email_by_username: { Args: { _username: string }; Returns: string }
       has_role: {
         Args: {

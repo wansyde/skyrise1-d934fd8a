@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.complete_task(text, text, text, numeric, text);
