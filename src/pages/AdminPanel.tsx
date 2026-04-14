@@ -887,23 +887,6 @@ const AdminPanel = () => {
                         ) : (
                           <div className="flex gap-1.5 flex-wrap">
                             <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => startEditing(u)}><Pencil className="h-3 w-3" /> Edit</Button>
-                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => { setPasswordResetUser(u.user_id); setNewPassword(""); setGeneratedPassword(null); }}><KeyRound className="h-3 w-3" /> Password</Button>
-                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => handleLoginAsUser(u.user_id)} disabled={accountControlLoading}><LogIn className="h-3 w-3" /> Login As</Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="outline" className="h-7 w-7 p-0 text-destructive border-destructive/30 hover:bg-destructive/10" disabled={deletingUser === u.user_id}><Trash2 className="h-3 w-3" /></Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete User</AlertDialogTitle>
-                                  <AlertDialogDescription>Are you sure you want to delete <strong>{u.username || u.email}</strong>? This action is irreversible.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteUser(u.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete Permanently</AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
                           </div>
                         )}
                       </td>
