@@ -492,7 +492,7 @@ const Starting = () => {
                     style={{
                       width: cardWidth,
                       height: cardWidth * 1.3,
-                      boxShadow: i === showcaseIndex
+                      boxShadow: i === activeIndex
                         ? "0 8px 28px rgba(0,0,0,0.15)"
                         : "0 4px 16px rgba(0,0,0,0.08)",
                       transform: `perspective(800px) translateY(${curveY}px) rotateY(${rotateY}deg) scale(${scale})`,
