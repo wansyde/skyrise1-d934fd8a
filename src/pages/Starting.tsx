@@ -163,6 +163,11 @@ const Starting = () => {
     }
   }, [profile]);
 
+  // Reset anti-repeat tracker when balance or VIP level changes
+  useEffect(() => {
+    resetTaskValueHistory();
+  }, [userBalance, profile?.vip_level]);
+
   // Auto-scroll
   useEffect(() => {
     if (isPaused) return;
