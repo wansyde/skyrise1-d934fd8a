@@ -520,26 +520,35 @@ const Starting = () => {
                   key={`showcase-${activeIndex}`}
                   className="relative w-full flex items-center justify-center"
                   style={{ willChange: "transform, opacity" }}
-                  initial={{ opacity: 0, x: "25%", scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: "-20%", scale: 0.97 }}
-                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  initial={{ opacity: 0, x: "30%", scale: 0.92, rotateY: -8 }}
+                  animate={{ opacity: 1, x: 0, scale: 1, rotateY: 0 }}
+                  exit={{ opacity: 0, x: "-25%", scale: 0.95, rotateY: 6 }}
+                  transition={{
+                    duration: 0.5,
+                    ease: [0.32, 0.72, 0, 1],
+                    opacity: { duration: 0.35 },
+                  }}
                 >
                   <img
                     src={featuredCar.featured}
                     alt={featuredCar.name}
-                    className="w-[85%] aspect-[2/1] object-contain drop-shadow-lg"
-                    style={{ filter: "brightness(1.02) contrast(1.02) saturate(1.05)" }}
+                    className="w-[70%] md:w-[55%] lg:w-[45%] aspect-[2/1] object-contain"
+                    style={{
+                      filter: "brightness(1.03) contrast(1.03) saturate(1.08)",
+                      imageRendering: "auto",
+                    }}
                     draggable={false}
+                    width={1536}
+                    height={768}
                   />
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            <button onClick={goFeaturedPrev} className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center">
+            <button onClick={goFeaturedPrev} className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95">
               <ChevronLeft className="h-3.5 w-3.5 text-foreground/50" />
             </button>
-            <button onClick={goFeaturedNext} className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center">
+            <button onClick={goFeaturedNext} className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95">
               <ChevronRight className="h-3.5 w-3.5 text-foreground/50" />
             </button>
           </div>
