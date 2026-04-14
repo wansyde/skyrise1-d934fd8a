@@ -1300,6 +1300,10 @@ const AdminPanel = () => {
         <TabsContent value="support">
           <AdminSupportTab />
         </TabsContent>
+        {/* Danger Zone Tab */}
+        <TabsContent value="danger">
+          <DangerZoneTab />
+        </TabsContent>
       </Tabs>
       </main>
     </div>
