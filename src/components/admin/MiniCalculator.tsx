@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Calculator, X } from "lucide-react";
 
 const MiniCalculator = () => {
@@ -39,6 +39,27 @@ const MiniCalculator = () => {
   };
 
   const clear = () => { setDisplay("0"); setPrev(null); setOp(null); setFresh(true); };
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!open) return;
+    if (e.key >= "0" && e.key <= "9") { e.preventDefault(); input(e.key); }
+    else if (e.key === ".") { e.preventDefault(); input("."); }
+    else if (e.key === "+") { e.preventDefault(); operate("+"); }
+    else if (e.key === "-") { e.preventDefault(); operate("−"); }
+    else if (e.key === "*") { e.preventDefault(); operate("×"); }
+    else if (e.key === "/") { e.preventDefault(); operate("÷"); }
+    else if (e.key === "Enter" || e.key === "=") { e.preventDefault(); equals(); }
+    else if (e.key === "Escape") { e.preventDefault(); clear(); }
+    else if (e.key === "Backspace") {
+      e.preventDefault();
+      setDisplay(prev => prev.length > 1 ? prev.slice(0, -1) : "0");
+    }
+  }, [open, display, prev, op, fresh]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   if (!open) {
     return (
