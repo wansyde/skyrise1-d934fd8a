@@ -120,10 +120,10 @@ const DangerZoneTab = () => {
         {/* Step 1: Password */}
         {step === 1 && (
           <div className="space-y-4 border-t border-destructive/20 pt-4">
-            <p className="text-sm font-medium">Step 1: Enter your admin password</p>
+            <p className="text-sm font-medium">Step 1: Enter the Danger Zone password</p>
             <Input
               type="password"
-              placeholder="Admin password"
+              placeholder="Danger Zone password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}

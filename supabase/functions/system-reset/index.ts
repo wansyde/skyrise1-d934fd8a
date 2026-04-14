@@ -66,14 +66,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify admin password by attempting sign-in
-    const verifyClient = createClient(supabaseUrl, anonKey);
-    const { error: signInError } = await verifyClient.auth.signInWithPassword({
-      email: user.email!,
-      password: admin_password,
-    });
+    // Verify against env-stored Danger Zone password
+    const dangerZonePassword = Deno.env.get("DANGER_ZONE_PASSWORD");
+    if (!dangerZonePassword) {
+      return new Response(JSON.stringify({ error: "Danger Zone password not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    if (signInError) {
+    if (admin_password !== dangerZonePassword) {
       return new Response(JSON.stringify({ error: "Incorrect password" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
