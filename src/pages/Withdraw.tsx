@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 const methods = ["USDT (TRC-20)", "USDT (ERC-20)", "Bitcoin", "Bank Transfer"];
-const networks = ["Cash", "BTC", "TRC20", "ERC20"];
+const networks = ["Cash", "BTC", "TRC-20", "ERC-20"];
 const balance = 15200;
 
 const Withdraw = () => {
