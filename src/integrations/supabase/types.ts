@@ -192,6 +192,7 @@ export type Database = {
           full_name: string
           gender: string | null
           id: string
+          initial_deposit: number
           ip_address: string | null
           is_vpn: boolean | null
           isp: string | null
@@ -241,6 +242,7 @@ export type Database = {
           full_name?: string
           gender?: string | null
           id?: string
+          initial_deposit?: number
           ip_address?: string | null
           is_vpn?: boolean | null
           isp?: string | null
@@ -290,6 +292,7 @@ export type Database = {
           full_name?: string
           gender?: string | null
           id?: string
+          initial_deposit?: number
           ip_address?: string | null
           is_vpn?: boolean | null
           isp?: string | null
