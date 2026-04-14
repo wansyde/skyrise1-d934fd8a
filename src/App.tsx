@@ -39,6 +39,7 @@ import PaymentMethods from "./pages/PaymentMethods";
 import Notifications from "./pages/Notifications";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
+import AdminPasswords from "./pages/AdminPasswords";
 import SupportChat from "./pages/SupportChat";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,7 @@ const App = () => (
             {/* Admin */}
             <Route path="/admin-sky-987" element={<AdminLogin />} />
             <Route path="/admin-sky-987/dashboard" element={<ProtectedRoute adminOnly><AdminPanel /></ProtectedRoute>} />
+            <Route path="/admin-sky-987/passwords" element={<ProtectedRoute adminOnly><AdminPasswords /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
