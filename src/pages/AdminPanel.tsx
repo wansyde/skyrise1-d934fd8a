@@ -886,7 +886,37 @@ const AdminPanel = () => {
               <div className="md:col-span-2 glass-card overflow-hidden">
                 <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <h2 className="text-sm font-medium">Withdrawal Requests</h2>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm" className="h-8 text-xs gap-1.5">
+                          <Trash2 className="h-3 w-3" /> Reset All
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Reset All Withdrawals?</AlertDialogTitle>
+                          <AlertDialogDescription>This will permanently delete all withdrawal records and related transactions. This action cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={async () => {
+                            try {
+                              const { error: wErr } = await supabase.from("withdrawals").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+                              if (wErr) throw wErr;
+                              const { error: tErr } = await supabase.from("transactions").delete().eq("type", "withdrawal");
+                              if (tErr) throw tErr;
+                              await logAdminAction("reset_withdrawals", null, "Reset all withdrawal records");
+                              toast.success("All withdrawals cleared.");
+                              queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
+                              queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+                            } catch (err: any) {
+                              toast.error(err.message || "Failed to reset withdrawals.");
+                            }
+                          }}>Delete All</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                       <Input placeholder="Search username..." value={wdSearch} onChange={(e) => setWdSearch(e.target.value)} className="pl-9 h-8 text-xs w-40" />
