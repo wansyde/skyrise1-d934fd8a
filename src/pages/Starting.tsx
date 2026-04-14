@@ -301,7 +301,7 @@ const Starting = () => {
     const car = pool[Math.floor(Math.random() * pool.length)];
 
     setMatchedCar(car);
-    setMatchedTaskValue(generateRandomTaskValue(currentBalance));
+    setMatchedTaskValue(generateRandomTaskValue(currentBalance, profile?.vip_level));
     setAssignmentCode(generateAssignmentCode());
     setMatchProgress(0);
     setMatchState("matching");
