@@ -64,6 +64,12 @@ const AdminPanel = () => {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
+  // Password reset / account control
+  const [passwordResetUser, setPasswordResetUser] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
+  const [accountControlLoading, setAccountControlLoading] = useState(false);
+
   // Deposit form
   const [depUserId, setDepUserId] = useState("");
   const [depAmount, setDepAmount] = useState("");
