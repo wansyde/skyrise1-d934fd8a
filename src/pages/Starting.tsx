@@ -300,7 +300,7 @@ const Starting = () => {
     setAssignmentCode(generateAssignmentCode());
     setMatchProgress(0);
     setMatchState("matching");
-    setMatchedTaskValue(null);
+    setMatchedTaskValue(null); setPreviewReward(null);
     setPreviewReward(null);
 
     // Call preview_task to get exact backend reward
@@ -342,7 +342,7 @@ const Starting = () => {
 
   const handlePromote = async () => {
     if (!user || !matchedCar || !profile || submitting || isProcessingRef.current) return;
-    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+    if (isRestricted) { toast.error("Account restricted"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return; }
 
     isProcessingRef.current = true;
     setSubmitting(true);
@@ -358,24 +358,24 @@ const Starting = () => {
         const result = data as any;
         if (result?.error) {
           toast.error(result.error);
-          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); return;
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); setIsAAATask(false); return;
         }
         setCompletedCount(prev => prev + 1);
         await refreshProfile();
         if (!result.all_completed) {
           toast.error("Some cars could not be completed due to insufficient balance. Check Records → Pending for details.");
-          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false);
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); setIsAAATask(false);
           setTimeout(() => navigate("/app/records", { state: { tab: "pending" } }), 1500);
         } else {
           const multiplierText = result.multiplier > 1 ? ` (×${result.multiplier})` : '';
           console.log("AAA completed — raw:", result.raw_commission, "multiplier:", result.multiplier, "final:", result.total_commission, "new_balance:", result.new_balance);
           toast.success(`AAA assignment completed${multiplierText}. Earnings of ${result.total_commission} AC added to your balance.`);
           setMatchState("submitted");
-          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setIsAAATask(false); }, 1000);
+          setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); setIsAAATask(false); }, 1000);
         }
       } else {
         // Regular task
-        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 AC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return; }
+        if (Number(profile.balance) < MIN_BALANCE) { toast.error("Minimum 100 AC required"); setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return; }
         const { data, error } = await supabase.rpc("complete_task", {
           _car_brand: matchedCar.brand,
           _car_name: matchedCar.name,
@@ -387,12 +387,12 @@ const Starting = () => {
         const result = data as any;
         if (result?.error) {
           toast.error(result.error);
-          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); return;
+          setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); return;
         }
         setCompletedCount(prev => prev + 1);
         await refreshProfile();
         setMatchState("submitted");
-        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); }, 1000);
+        setTimeout(() => { setMatchState("idle"); setMatchedCar(null); setMatchedTaskValue(null); setPreviewReward(null); }, 1000);
       }
     } catch (e: any) {
       console.error("Task submission error:", e);
