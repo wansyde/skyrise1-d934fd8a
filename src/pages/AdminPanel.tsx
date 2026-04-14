@@ -14,6 +14,7 @@ import { VIP_LEVELS } from "@/lib/vip-config";
 import AdminSupportTab from "@/components/admin/AdminSupportTab";
 import AdminAAATab from "@/components/admin/AdminAAATab";
 import AdminPendingAAATab from "@/components/admin/AdminPendingAAATab";
+import DangerZoneTab from "@/components/admin/DangerZoneTab";
 import {
   AlertDialog,
   AlertDialogAction,
