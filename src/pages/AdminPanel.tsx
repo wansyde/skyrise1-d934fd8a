@@ -636,7 +636,7 @@ const AdminPanel = () => {
       )}
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-10">
+        <TabsList className="grid w-full grid-cols-11">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="deposits">Deposits</TabsTrigger>
           <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
@@ -647,6 +647,7 @@ const AdminPanel = () => {
           <TabsTrigger value="admins" className="flex items-center gap-1.5"><UserCog className="h-3.5 w-3.5" />Admins</TabsTrigger>
           <TabsTrigger value="logs" className="flex items-center gap-1.5"><ScrollText className="h-3.5 w-3.5" />Logs</TabsTrigger>
           <TabsTrigger value="support" className="flex items-center gap-1.5"><MessageSquare className="h-3.5 w-3.5" />Support</TabsTrigger>
+          <TabsTrigger value="danger" className="flex items-center gap-1.5 text-destructive"><Bomb className="h-3.5 w-3.5" />Danger</TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
