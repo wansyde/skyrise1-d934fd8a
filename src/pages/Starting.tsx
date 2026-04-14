@@ -236,6 +236,8 @@ const Starting = () => {
   const isCycleCompleted = (profile as any)?.task_cycle_completed === true;
 
   const isWithinWorkingHours = () => {
+    // Steve is exempt from time restrictions
+    if (user?.id === '4c1d14e8-45a6-416b-866c-6b6fd8aab39e') return true;
     const now = new Date();
     const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
     const hour = et.getHours();
