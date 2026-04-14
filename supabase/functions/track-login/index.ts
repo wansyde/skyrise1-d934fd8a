@@ -5,6 +5,114 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Known residential / mobile ISP keywords — never flag these
+const RESIDENTIAL_ISP_KEYWORDS = [
+  "comcast", "xfinity", "at&t", "verizon", "t-mobile", "tmobile",
+  "sprint", "spectrum", "cox", "centurylink", "frontier", "mediacom",
+  "optimum", "altice", "windstream", "charter", "cablevision",
+  "rogers", "bell", "telus", "shaw", "videotron",
+  "bt ", "virgin media", "sky broadband", "talktalk", "ee ",
+  "vodafone", "orange", "movistar", "telefonica",
+  "airtel", "jio", "bsnl", "idea", "reliance",
+  "mtn", "safaricom", "glo ", "etisalat", "du ",
+  "claro", "tigo", "entel", "personal", "movilnet",
+];
+
+function isResidentialOrMobile(isp: string | null): boolean {
+  if (!isp) return false;
+  const lower = isp.toLowerCase();
+  return RESIDENTIAL_ISP_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
+interface VpnCheckResult {
+  source: string;
+  isVpn: boolean;
+  isp?: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  isMobile?: boolean;
+}
+
+// ---------- API 1: ip-api.com (free, no key) ----------
+async function checkIpApi(ip: string): Promise<VpnCheckResult> {
+  try {
+    const res = await fetch(
+      `http://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,proxy,mobile,hosting`
+    );
+    if (!res.ok) { await res.text(); return { source: "ip-api", isVpn: false }; }
+    const geo = await res.json();
+    if (geo.status !== "success") return { source: "ip-api", isVpn: false };
+
+    return {
+      source: "ip-api",
+      isVpn: geo.proxy === true,
+      isp: geo.isp || null,
+      country: geo.country,
+      region: geo.regionName,
+      city: geo.city,
+      isMobile: geo.mobile === true,
+    };
+  } catch (e) {
+    console.error("ip-api error:", e);
+    return { source: "ip-api", isVpn: false };
+  }
+}
+
+// ---------- API 2: IPQualityScore ----------
+async function checkIpQualityScore(ip: string): Promise<VpnCheckResult> {
+  const key = Deno.env.get("IPQUALITYSCORE_API_KEY");
+  if (!key) return { source: "ipqualityscore", isVpn: false };
+  try {
+    const res = await fetch(
+      `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=0&allow_public_access_points=true`
+    );
+    if (!res.ok) { await res.text(); return { source: "ipqualityscore", isVpn: false }; }
+    const data = await res.json();
+    if (!data.success) return { source: "ipqualityscore", isVpn: false };
+
+    // VPN/proxy/tor but NOT mobile or residential
+    const flagged = (data.vpn === true || data.proxy === true || data.tor === true)
+      && data.is_crawler !== true;
+
+    return {
+      source: "ipqualityscore",
+      isVpn: flagged,
+      isp: data.ISP || null,
+      isMobile: data.mobile === true,
+    };
+  } catch (e) {
+    console.error("ipqualityscore error:", e);
+    return { source: "ipqualityscore", isVpn: false };
+  }
+}
+
+// ---------- API 3: proxycheck.io ----------
+async function checkProxyCheck(ip: string): Promise<VpnCheckResult> {
+  const key = Deno.env.get("PROXYCHECK_API_KEY");
+  if (!key) return { source: "proxycheck", isVpn: false };
+  try {
+    const res = await fetch(
+      `https://proxycheck.io/v2/${ip}?key=${key}&vpn=1&asn=1`
+    );
+    if (!res.ok) { await res.text(); return { source: "proxycheck", isVpn: false }; }
+    const data = await res.json();
+    const entry = data[ip];
+    if (!entry) return { source: "proxycheck", isVpn: false };
+
+    const flagged = entry.proxy === "yes" || entry.type === "VPN";
+
+    return {
+      source: "proxycheck",
+      isVpn: flagged,
+      isp: entry.provider || null,
+    };
+  } catch (e) {
+    console.error("proxycheck error:", e);
+    return { source: "proxycheck", isVpn: false };
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -44,44 +152,52 @@ Deno.serve(async (req: Request) => {
       req.headers.get("x-real-ip") ||
       "unknown";
 
-    let country = null;
-    let region = null;
-    let city = null;
-    let isp = null;
+    let country: string | null = null;
+    let region: string | null = null;
+    let city: string | null = null;
+    let isp: string | null = null;
     let is_vpn = false;
     let connection_type = "unknown";
 
     if (clientIp && clientIp !== "unknown" && clientIp !== "127.0.0.1") {
-      try {
-        const geoRes = await fetch(
-          `http://ip-api.com/json/${clientIp}?fields=status,country,regionName,city,isp,proxy,mobile`
-        );
-        if (geoRes.ok) {
-          const geo = await geoRes.json();
-          if (geo.status === "success") {
-            country = geo.country;
-            region = geo.regionName;
-            city = geo.city;
-            isp = geo.isp || null;
+      // Run all 3 checks in parallel
+      const [ipApiResult, ipqsResult, proxyCheckResult] = await Promise.all([
+        checkIpApi(clientIp),
+        checkIpQualityScore(clientIp),
+        checkProxyCheck(clientIp),
+      ]);
 
-            // Only flag VPN when proxy field is explicitly true
-            // The 'hosting' field from ip-api is too aggressive and causes false positives
-            // with mobile carriers, CDNs, and shared IPs — so we no longer use it
-            if (geo.proxy === true) {
-              is_vpn = true;
-              connection_type = "VPN/Proxy";
-            } else if (geo.mobile) {
-              connection_type = "Mobile";
-            } else {
-              connection_type = "Residential";
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Geolocation lookup failed:", e);
+      // Use ip-api for geo data (it's the most complete free source)
+      country = ipApiResult.country || null;
+      region = ipApiResult.region || null;
+      city = ipApiResult.city || null;
+      isp = ipApiResult.isp || ipqsResult.isp || proxyCheckResult.isp || null;
+
+      // Determine if mobile
+      const isMobile = ipApiResult.isMobile === true || ipqsResult.isMobile === true;
+
+      // ISP safety check — residential/mobile ISPs are never VPN
+      const ispSafe = isResidentialOrMobile(isp);
+
+      if (isMobile || ispSafe) {
+        // Known mobile/residential — never flag
+        is_vpn = false;
+        connection_type = isMobile ? "Mobile" : "Residential";
+      } else {
+        // Multi-API scoring: need >= 2 APIs to agree
+        let vpn_score = 0;
+        if (ipApiResult.isVpn) vpn_score++;
+        if (ipqsResult.isVpn) vpn_score++;
+        if (proxyCheckResult.isVpn) vpn_score++;
+
+        console.log(`VPN score for ${clientIp}: ${vpn_score}/3 (ip-api:${ipApiResult.isVpn}, ipqs:${ipqsResult.isVpn}, proxycheck:${proxyCheckResult.isVpn})`);
+
+        is_vpn = vpn_score >= 2;
+        connection_type = is_vpn ? "VPN/Proxy" : "Residential";
       }
     }
 
+    // Never block login — just store the detection result
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
