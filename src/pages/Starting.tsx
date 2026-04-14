@@ -195,15 +195,15 @@ const Starting = () => {
 
   const stripOffset = -(activeIndex * cardStep);
 
-  // Preload adjacent featured images
+  // Preload ALL car images upfront so nothing lags
   useEffect(() => {
-    const nextIdx = (activeIndex + 1) % total;
-    const prevIdx = (activeIndex - 1 + total) % total;
-    [nextIdx, prevIdx].forEach((i) => {
-      const img = new Image();
-      img.src = carCampaigns[i].featured;
+    carCampaigns.forEach((car) => {
+      const img1 = new Image();
+      img1.src = car.image;
+      const img2 = new Image();
+      img2.src = car.featured;
     });
-  }, [activeIndex, total]);
+  }, []);
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
@@ -504,15 +504,11 @@ const Starting = () => {
                     onClick={() => goTo(i)}
                   >
                     <img
-                      src={car.featured}
+                      src={car.image}
                       alt={car.brand}
                       loading="eager"
                       decoding="async"
                       className="w-full h-full object-cover"
-                      style={{
-                        imageRendering: "auto",
-                        filter: "brightness(1.02) contrast(1.02) saturate(1.05)",
-                      }}
                     />
                   </div>
                 );
