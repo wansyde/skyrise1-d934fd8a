@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getVipTier, getSetProgress, getTaskProfit, generateRandomTaskValue } from "@/lib/vip-config";
+import { getVipTier, getSetProgress, getTaskProfit, generateRandomTaskValue, resetTaskValueHistory } from "@/lib/vip-config";
 import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
 import { useQuery } from "@tanstack/react-query";
 import { getCarImage } from "@/lib/car-images";
@@ -162,6 +162,11 @@ const Starting = () => {
       setCompletedCount(profile.tasks_completed_today || 0);
     }
   }, [profile]);
+
+  // Reset anti-repeat tracker when balance or VIP level changes
+  useEffect(() => {
+    resetTaskValueHistory();
+  }, [userBalance, profile?.vip_level]);
 
   // Auto-scroll
   useEffect(() => {
