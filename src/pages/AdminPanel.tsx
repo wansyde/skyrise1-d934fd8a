@@ -294,8 +294,8 @@ const AdminPanel = () => {
 
     // Log changes
     const changes: string[] = [];
-    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: ${oldUser.balance} → ${newBalance USDC`);
-    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: ${oldUser.advertising_salary} → ${newSalary USDC`);
+    if (oldUser && Number(oldUser.balance) !== newBalance) changes.push(`Balance: ${oldUser.balance} → ${newBalance} USDC`);
+    if (oldUser && Number(oldUser.advertising_salary) !== newSalary) changes.push(`Salary: ${oldUser.advertising_salary} → ${newSalary} USDC`);
     if (oldUser && oldUser.vip_level !== editVipLevel) changes.push(`VIP: ${oldUser.vip_level} → ${editVipLevel}`);
     if (oldUser && oldUser.tasks_completed_today !== newTasks) changes.push(`Tasks: ${oldUser.tasks_completed_today} → ${newTasks}`);
     if (oldUser && Number((oldUser as any).credit_score ?? 100) !== newCreditScore) changes.push(`Credit: ${(oldUser as any).credit_score ?? 100}% → ${newCreditScore}%`);
@@ -1058,7 +1058,7 @@ const AdminPanel = () => {
                                     const { error } = await supabase.from("withdrawals").update({ status: "completed", admin_note: w.admin_note || "Processed by admin", updated_at: new Date().toISOString() }).eq("id", w.id);
                                     if (error) throw error;
                                     await supabase.from("transactions").update({ status: "approved" } as any).eq("user_id", w.user_id).eq("type", "withdrawal").eq("status", "pending").eq("amount", -Number(w.amount));
-                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of ${Number(w.amount).toLocaleString() USDC`);
+                                    await logAdminAction("withdrawal_complete", w.user_id, `Completed withdrawal of ${Number(w.amount).toLocaleString()} USDC`);
                                     toast.success("Withdrawal marked as completed.");
                                     queryClient.invalidateQueries({ queryKey: ["admin-all-withdrawals"] });
                                     queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
