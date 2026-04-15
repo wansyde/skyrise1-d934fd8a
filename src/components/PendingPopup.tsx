@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Gift } from "lucide-react";
+import { X, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,7 +28,6 @@ const PendingPopup = () => {
 
   const handleClose = async () => {
     setVisible(false);
-    // Clear the popup from the backend
     if (profile?.user_id) {
       await supabase
         .from("profiles")
@@ -45,33 +44,46 @@ const PendingPopup = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)" }}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-sm rounded-2xl bg-gradient-to-b from-violet-600 to-purple-800 p-6 text-white shadow-2xl"
+            initial={{ scale: 0.92, opacity: 0, y: 16 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 8 }}
+            transition={{ type: "spring", damping: 28, stiffness: 320 }}
+            className="relative w-full max-w-[340px] rounded-3xl border border-border/40 bg-card p-7 shadow-xl"
           >
+            {/* Close */}
             <button
               onClick={handleClose}
-              className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              className="absolute top-4 right-4 p-1 rounded-full text-muted-foreground hover:text-foreground transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" strokeWidth={1.5} />
             </button>
 
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="flex items-center justify-center w-14 h-14 rounded-full bg-white/15">
-                <Gift className="h-7 w-7 text-yellow-300" />
+            <div className="flex flex-col items-center text-center gap-5">
+              {/* Icon */}
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" strokeWidth={1.5} />
               </div>
-              <h3 className="text-lg font-bold tracking-tight">🎉 Bonus Reward</h3>
-              <p className="text-sm leading-relaxed text-white/90">{message}</p>
+
+              {/* Title */}
+              <h3 className="text-base font-semibold tracking-tight text-foreground font-[Montserrat]">
+                Bonus Reward
+              </h3>
+
+              {/* Message */}
+              <p className="text-[13px] leading-relaxed text-muted-foreground">
+                {message}
+              </p>
+
+              {/* CTA */}
               <button
                 onClick={handleClose}
-                className="mt-2 w-full py-2.5 rounded-xl bg-white text-purple-700 font-semibold text-sm hover:bg-white/90 transition-colors"
+                className="mt-1 w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm tracking-wide hover:opacity-90 transition-opacity"
               >
-                Got it!
+                Dismiss
               </button>
             </div>
           </motion.div>
