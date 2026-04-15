@@ -137,7 +137,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 bottom-nav safe-bottom">
-        <div className="flex items-end justify-around h-16 px-2 pb-1">
+        <div className="flex items-center justify-around h-16 px-2">
           {bottomTabs.map((tab) => {
             const active = isActive(tab.href);
             return (
