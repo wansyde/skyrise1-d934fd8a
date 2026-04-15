@@ -13,10 +13,10 @@ import FloatingSupportButton from "@/components/FloatingSupportButton";
 
 
 const bottomTabs = [
-  { href: "/app", label: "Home", icon: Home },
-  { href: "/app/starting", label: "Starting", icon: Car },
-  { href: "/app/records", label: "Records", icon: ClipboardList },
-  { href: "/app/profile", label: "Profile", icon: User },
+  { href: "/app", label: "Home", icon: Home, gradient: "from-violet-500 to-purple-600", bgGlow: "bg-violet-500/10" },
+  { href: "/app/starting", label: "Starting", icon: Car, gradient: "from-purple-500 to-indigo-600", bgGlow: "bg-purple-500/10" },
+  { href: "/app/records", label: "Records", icon: ClipboardList, gradient: "from-indigo-500 to-violet-600", bgGlow: "bg-indigo-500/10" },
+  { href: "/app/profile", label: "Profile", icon: User, gradient: "from-fuchsia-500 to-purple-600", bgGlow: "bg-fuchsia-500/10" },
 ];
 
 const slideMenuItems = [
@@ -137,20 +137,36 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 bottom-nav safe-bottom">
-        <div className="flex items-center justify-around h-16">
+        <div className="flex items-center justify-around h-[4.5rem] px-2">
           {bottomTabs.map((tab) => {
             const active = isActive(tab.href);
             return (
               <Link
                 key={tab.href}
                 to={tab.href}
-                className={`bottom-nav-item ${active ? "active" : ""}`}
+                className="flex flex-col items-center gap-1 py-2 px-4 transition-all duration-300 relative group"
               >
-                <tab.icon className="h-5 w-5" strokeWidth={active ? 2 : 1.5} />
-                <span>{tab.label}</span>
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${
+                    active
+                      ? `bg-gradient-to-br ${tab.gradient} shadow-lg shadow-purple-500/20`
+                      : `${tab.bgGlow} group-hover:bg-purple-100/60`
+                  }`}
+                >
+                  <tab.icon
+                    className={`h-[1.15rem] w-[1.15rem] transition-colors duration-300 ${
+                      active ? "text-white" : "text-muted-foreground group-hover:text-purple-600"
+                    }`}
+                    strokeWidth={active ? 2 : 1.5}
+                  />
+                </div>
                 <span
-                  className={`nav-dot h-1 w-1 rounded-full bg-primary transition-all duration-200 ${active ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
-                />
+                  className={`text-[10.5px] font-semibold tracking-wide transition-colors duration-300 ${
+                    active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </span>
               </Link>
             );
           })}
