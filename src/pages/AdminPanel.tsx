@@ -278,9 +278,16 @@ const AdminPanel = () => {
     const updatePayload: any = {
       balance: newBalance, advertising_salary: newSalary, vip_level: editVipLevel,
       tasks_completed_today: newTasks, credit_score: newCreditScore,
-      current_unlocked_set: 1, last_task_reset: new Date().toISOString(),
+      current_unlocked_set: 1,
       task_cycle_completed: false,
+      initial_deposit: newBalance,
     };
+
+    // Only reset last_task_reset when tasks are actually being reset or VIP changed
+    if (oldUser && (newTasks === 0 || oldUser.vip_level !== editVipLevel)) {
+      updatePayload.last_task_reset = new Date().toISOString();
+    }
+
     if (popupMessage) {
       updatePayload.pending_popup_message = popupMessage;
       updatePayload.pending_popup_type = popupType;
