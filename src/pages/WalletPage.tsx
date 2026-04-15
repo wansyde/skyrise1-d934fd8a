@@ -34,7 +34,7 @@ const WalletPage = () => {
 
         <div className="balance-card p-5 mb-5">
           <span className="text-sm text-white/70">Available Balance</span>
-          <div className="text-3xl font-semibold tabular-nums mt-1">
+          <div className="text-3xl font-semibold tabular-nums mt-1 text-success">
             {balance.toLocaleString("en-US", { minimumFractionDigits: 2 })} USDC
           </div>
         </div>

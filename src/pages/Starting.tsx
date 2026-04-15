@@ -447,7 +447,7 @@ const Starting = () => {
               <p className="text-[11px] text-muted-foreground leading-snug">Advertising salary</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-primary">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
+              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-success">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
               <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
             </div>
           </div>
@@ -456,7 +456,7 @@ const Starting = () => {
         {/* Start Promoting Header with task count */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold font-[Montserrat] tracking-tight text-foreground">Start Promoting</h2>
-          <span className="text-base font-bold font-[Montserrat] tabular-nums text-primary">
+          <span className="text-base font-bold font-[Montserrat] tabular-nums text-success">
             {isSetLocked || isCycleCompleted ? vipTier.tasksPerSet : setProgress.tasksInCurrentSet}/{vipTier.tasksPerSet}
           </span>
         </div>
