@@ -433,7 +433,7 @@ const Starting = () => {
               <p className="text-[11px] text-muted-foreground leading-snug">The total balance reflects both the deposited amount and profits earned</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className={`text-lg font-bold font-[Montserrat] tabular-nums ${Number(profile?.balance ?? 0) < 0 ? 'text-destructive' : 'text-primary'}`}>{Number(profile?.balance ?? 0).toFixed(2)}</p>
+              <p className={`text-lg font-bold font-[Montserrat] tabular-nums ${Number(profile?.balance ?? 0) < 0 ? 'text-destructive' : 'text-success'}`}>+{Number(profile?.balance ?? 0).toFixed(2)}</p>
               <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
             </div>
           </div>
@@ -447,7 +447,7 @@ const Starting = () => {
               <p className="text-[11px] text-muted-foreground leading-snug">Advertising salary</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-success">{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
+              <p className="text-lg font-bold font-[Montserrat] tabular-nums text-success">+{Number(profile?.advertising_salary ?? 0).toFixed(2)}</p>
               <p className="text-[10px] text-muted-foreground font-medium">USDC</p>
             </div>
           </div>
