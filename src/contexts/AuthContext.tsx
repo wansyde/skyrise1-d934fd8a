@@ -136,12 +136,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // 1. Restore session from storage FIRST, then set loading=false
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        // Await both profile + admin check before marking ready
+        await Promise.all([
+          fetchProfile(session.user.id),
+          checkAdmin(session.user.id),
+        ]);
+      }
+      if (mounted) setLoading(false);
+    }).catch(() => {
+      if (mounted) setLoading(false);
+    });
+
+    // 2. Listen for subsequent auth changes (sign-in, sign-out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         if (!mounted) return;
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
+          // Fire-and-forget profile/admin refresh on subsequent events
           fetchProfile(session.user.id);
           checkAdmin(session.user.id);
           if (_event === "SIGNED_IN" && session.access_token) {
@@ -151,22 +170,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setProfile(null);
           setIsAdmin(false);
         }
-        setLoading(false);
       }
     );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-        checkAdmin(session.user.id);
-      }
-      setLoading(false);
-    }).catch(() => {
-      if (mounted) setLoading(false);
-    });
 
     return () => {
       mounted = false;
