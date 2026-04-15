@@ -44,7 +44,7 @@ const logAdminAction = async (actionType: string, targetUserId?: string | null, 
 };
 
 const AdminPanel = () => {
-  const { signOut } = useAuth();
+  const { signOut, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -101,22 +101,16 @@ const AdminPanel = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: profiles } = useQuery({
+  const isReady = !authLoading && isAdmin;
+
+  const { data: profiles, isLoading: profilesLoading } = useQuery({
     queryKey: ["admin-profiles"],
     queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session) {
-        console.error("Admin profiles query: No active session");
-        throw new Error("Not authenticated");
-      }
       const { data, error } = await supabase.from("profiles").select("*");
-      if (error) {
-        console.error("Admin profiles query error:", error);
-        throw error;
-      }
-      console.log("Admin profiles loaded:", data?.length || 0);
+      if (error) throw error;
       return data || [];
     },
+    enabled: isReady,
     retry: 2,
   });
 
@@ -126,6 +120,7 @@ const AdminPanel = () => {
       const { data } = await supabase.from("deposits").select("*").order("created_at", { ascending: false });
       return data || [];
     },
+    enabled: isReady,
   });
 
   const { data: allWithdrawals } = useQuery({
@@ -134,6 +129,7 @@ const AdminPanel = () => {
       const { data } = await supabase.from("withdrawals").select("*").order("created_at", { ascending: false });
       return data || [];
     },
+    enabled: isReady,
   });
 
   const { data: adminRoles } = useQuery({
@@ -142,6 +138,7 @@ const AdminPanel = () => {
       const { data } = await supabase.from("user_roles").select("*").in("role", ["admin", "moderator"]);
       return data || [];
     },
+    enabled: isReady,
   });
 
   const { data: adminLogs } = useQuery({
@@ -150,6 +147,7 @@ const AdminPanel = () => {
       const { data } = await supabase.from("admin_logs").select("*").order("created_at", { ascending: false }).limit(500);
       return (data || []) as any[];
     },
+    enabled: isReady,
   });
 
   const getUserName = (userId: string) => {
