@@ -13,10 +13,10 @@ import FloatingSupportButton from "@/components/FloatingSupportButton";
 
 
 const bottomTabs = [
-  { href: "/app", label: "Home", icon: Home, gradient: "from-violet-500 to-purple-600", bgGlow: "bg-violet-500/10" },
-  { href: "/app/starting", label: "Starting", icon: Car, gradient: "from-purple-500 to-indigo-600", bgGlow: "bg-purple-500/10" },
-  { href: "/app/records", label: "Records", icon: ClipboardList, gradient: "from-indigo-500 to-violet-600", bgGlow: "bg-indigo-500/10" },
-  { href: "/app/profile", label: "Profile", icon: User, gradient: "from-fuchsia-500 to-purple-600", bgGlow: "bg-fuchsia-500/10" },
+  { href: "/app", label: "Home", icon: Home },
+  { href: "/app/starting", label: "Starting", icon: Car },
+  { href: "/app/records", label: "Records", icon: ClipboardList },
+  { href: "/app/profile", label: "Profile", icon: User },
 ];
 
 const slideMenuItems = [
@@ -137,32 +137,48 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 bottom-nav safe-bottom">
-        <div className="flex items-center justify-around h-[4.5rem] px-2">
+        <div className="flex items-center justify-around h-[4.25rem] px-3">
           {bottomTabs.map((tab) => {
             const active = isActive(tab.href);
             return (
               <Link
                 key={tab.href}
                 to={tab.href}
-                className="flex flex-col items-center gap-1 py-2 px-4 transition-all duration-300 relative group"
+                className="relative flex flex-col items-center gap-[5px] py-2.5 px-5 group"
               >
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${
+                {/* Active glow pill behind icon */}
+                {active && (
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-full"
+                    style={{
+                      background: "linear-gradient(90deg, hsl(255 60% 58%), hsl(255 65% 68%))",
+                      boxShadow: "0 2px 12px hsl(255 60% 58% / 0.4)",
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+
+                <motion.div
+                  whileTap={{ scale: 0.88 }}
+                  transition={{ duration: 0.15 }}
+                  className={`flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-300 ${
                     active
-                      ? `bg-gradient-to-br ${tab.gradient} shadow-lg shadow-purple-500/20`
-                      : `${tab.bgGlow} group-hover:bg-purple-100/60`
+                      ? "bg-primary/10"
+                      : "bg-transparent group-hover:bg-muted/60"
                   }`}
                 >
                   <tab.icon
-                    className={`h-[1.15rem] w-[1.15rem] transition-colors duration-300 ${
-                      active ? "text-white" : "text-muted-foreground group-hover:text-purple-600"
+                    className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+                      active ? "text-primary" : "text-muted-foreground group-hover:text-foreground/70"
                     }`}
-                    strokeWidth={active ? 2 : 1.5}
+                    strokeWidth={active ? 2 : 1.4}
                   />
-                </div>
+                </motion.div>
+
                 <span
-                  className={`text-[10.5px] font-semibold tracking-wide transition-colors duration-300 ${
-                    active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                  className={`text-[10px] font-medium tracking-[0.03em] transition-all duration-300 ${
+                    active ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}
                 >
                   {tab.label}
