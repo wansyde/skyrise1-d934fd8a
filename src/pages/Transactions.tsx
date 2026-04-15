@@ -2,7 +2,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, ArrowLeft, TrendingUp } from "lucide-react";
+import { DollarSign, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const formatETDate = (dateStr: string) => {
@@ -48,23 +48,6 @@ const Transactions = () => {
           <h1 className="text-lg font-semibold">Advertising Profits</h1>
         </div>
 
-        {/* Summary card */}
-        {records && records.length > 0 && (
-          <div className="rounded-2xl border border-border bg-card p-4 mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10">
-                <TrendingUp className="h-5 w-5 text-primary" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Total Earned</p>
-                <p className="text-lg font-bold tabular-nums text-primary">
-                  +{totalProfit.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">USDC</span>
-                </p>
-              </div>
-            </div>
-            <span className="text-xs text-muted-foreground">{records.length} records</span>
-          </div>
-        )}
 
         {isLoading ? (
           <div className="text-center text-sm text-muted-foreground py-12">Loading...</div>
@@ -91,7 +74,7 @@ const Transactions = () => {
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0 ml-3">
-                  <span className="text-sm font-semibold tabular-nums text-primary">
+                  <span className="text-sm font-semibold tabular-nums text-success">
                     +{Number(r.advertising_salary).toFixed(2)}
                   </span>
                   <span className="block text-[10px] text-muted-foreground">USDC</span>
