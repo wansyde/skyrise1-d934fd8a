@@ -123,6 +123,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Floating support button */}
       <FloatingSupportButton />
 
+      {/* Bonus popup */}
+      <PendingPopup />
+
 
       {/* Main content - scrollable area above bottom nav */}
       <main className="flex-1 overflow-y-auto pb-24">
