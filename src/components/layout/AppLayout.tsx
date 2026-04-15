@@ -10,6 +10,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import SkyriseLogo from "@/components/SkyriseLogo";
 import FloatingSupportButton from "@/components/FloatingSupportButton";
+import PendingPopup from "@/components/PendingPopup";
 
 
 const bottomTabs = [
