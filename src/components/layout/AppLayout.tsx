@@ -137,31 +137,31 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 bottom-nav safe-bottom">
-        <div className="flex items-center justify-around h-[4.5rem] px-2">
+        <div className="flex items-end justify-around h-16 px-2 pb-1">
           {bottomTabs.map((tab) => {
             const active = isActive(tab.href);
             return (
               <Link
                 key={tab.href}
                 to={tab.href}
-                className="flex flex-col items-center gap-1 py-2 px-4 transition-all duration-300 relative group"
+                className="flex flex-col items-center gap-0.5 py-1 px-3 transition-all duration-300 relative group"
               >
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${
+                  className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
                     active
                       ? `bg-gradient-to-br ${tab.gradient} shadow-lg shadow-purple-500/20`
                       : `${tab.bgGlow} group-hover:bg-purple-100/60`
                   }`}
                 >
                   <tab.icon
-                    className={`h-[1.15rem] w-[1.15rem] transition-colors duration-300 ${
+                    className={`h-[1.1rem] w-[1.1rem] transition-colors duration-300 ${
                       active ? "text-white" : "text-muted-foreground group-hover:text-purple-600"
                     }`}
                     strokeWidth={active ? 2 : 1.5}
                   />
                 </div>
                 <span
-                  className={`text-[10.5px] font-semibold tracking-wide transition-colors duration-300 ${
+                  className={`text-[10px] font-semibold tracking-wide transition-colors duration-300 ${
                     active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                   }`}
                 >
