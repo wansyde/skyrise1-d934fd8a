@@ -43,27 +43,50 @@ const Login = () => {
   const [tab, setTab] = useState<"login" | "register">(initialTab);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Persisted register form (survives tab switches & navigation)
+  const REG_KEY = "skyrise_register_draft";
+  const savedDraft = (() => {
+    try {
+      const raw = sessionStorage.getItem(REG_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  })();
+
   // Login state
   const [loginAccount, setLoginAccount] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPw, setShowLoginPw] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Register state
-  const [username, setUsername] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-  const [regConfirm, setRegConfirm] = useState("");
-  const [withdrawPw, setWithdrawPw] = useState("");
-  const [gender, setGender] = useState("");
-  const [referralCode, setReferralCode] = useState(refCode);
+  // Register state (rehydrated from sessionStorage)
+  const [username, setUsername] = useState(savedDraft.username || "");
+  const [phone, setPhone] = useState(savedDraft.phone || "");
+  const [email, setEmail] = useState(savedDraft.email || "");
+  const [regPassword, setRegPassword] = useState(savedDraft.regPassword || "");
+  const [regConfirm, setRegConfirm] = useState(savedDraft.regConfirm || "");
+  const [withdrawPw, setWithdrawPw] = useState(savedDraft.withdrawPw || "");
+  const [gender, setGender] = useState(savedDraft.gender || "");
+  const [referralCode, setReferralCode] = useState(refCode || savedDraft.referralCode || "");
   const [showRegPw, setShowRegPw] = useState(false);
   const [showRegConfirm, setShowRegConfirm] = useState(false);
   const [showWithdrawPw, setShowWithdrawPw] = useState(false);
-  const [agreed, setAgreed] = useState(false);
+  const [agreed, setAgreed] = useState(savedDraft.agreed || false);
   const [regLoading, setRegLoading] = useState(false);
   const [regErrors, setRegErrors] = useState<Record<string, string>>({});
+
+  // Persist register draft on every change
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        REG_KEY,
+        JSON.stringify({ username, phone, email, regPassword, regConfirm, withdrawPw, gender, referralCode, agreed })
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [username, phone, email, regPassword, regConfirm, withdrawPw, gender, referralCode, agreed]);
 
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -185,10 +208,11 @@ const Login = () => {
       if (error) {
         toast.error(error.message);
       } else if (data.user && !data.session) {
-        toast.success("Check your email to verify");
-        setTab("login");
+        toast.success("Check your email to verify your account");
+        // Stay on register tab; keep credentials filled so user can re-try if needed
       } else {
         toast.success("Account created");
+        try { sessionStorage.removeItem(REG_KEY); } catch { /* ignore */ }
         navigate("/app");
       }
     } catch {
@@ -203,8 +227,8 @@ const Login = () => {
   return (
     <div className="flex min-h-screen relative">
       
-      {/* Left — Image slider (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white">
+      {/* Left — Image slider (hidden on mobile, sticky on desktop) */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white sticky top-0 h-screen">
         <div className="absolute inset-0 flex flex-col items-center justify-center px-12 z-10">
           <Link to="/" className="mb-6">
             <SkyriseLogo className="h-16 w-auto" />
@@ -215,13 +239,13 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right — Form */}
-      <div className="flex flex-1 items-center justify-center p-6 lg:w-1/2">
+      {/* Right — Form (full screen, scrolls with the page) */}
+      <div className="flex flex-1 justify-center items-start lg:items-center p-6 lg:w-1/2 min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
-          className="w-full max-w-md"
+          className="w-full max-w-md py-6"
         >
           {/* Logo on mobile */}
           <div className="mb-8 text-center lg:hidden">
@@ -326,7 +350,7 @@ const Login = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
               >
-                <div className="glass-card p-8 max-h-[75vh] overflow-y-auto">
+                <div className="glass-card p-6 sm:p-8">
                   <h1 className="text-xl font-semibold tracking-tight mb-1">Create your account</h1>
                   <p className="text-sm text-muted-foreground mb-6">Start earning with Skyrise</p>
 
