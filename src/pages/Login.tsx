@@ -227,8 +227,8 @@ const Login = () => {
   return (
     <div className="flex min-h-screen relative">
       
-      {/* Left — Image slider (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white">
+      {/* Left — Image slider (hidden on mobile, sticky on desktop) */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white sticky top-0 h-screen">
         <div className="absolute inset-0 flex flex-col items-center justify-center px-12 z-10">
           <Link to="/" className="mb-6">
             <SkyriseLogo className="h-16 w-auto" />
@@ -239,13 +239,13 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right — Form */}
-      <div className="flex flex-1 items-center justify-center p-6 lg:w-1/2">
+      {/* Right — Form (full screen, scrolls with the page) */}
+      <div className="flex flex-1 justify-center items-start lg:items-center p-6 lg:w-1/2 min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
-          className="w-full max-w-md"
+          className="w-full max-w-md py-6"
         >
           {/* Logo on mobile */}
           <div className="mb-8 text-center lg:hidden">
