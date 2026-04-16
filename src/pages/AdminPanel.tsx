@@ -880,6 +880,30 @@ const AdminPanel = () => {
                         ) : (
                           <div className="flex gap-1.5 flex-wrap">
                             <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => startEditing(u)}><Pencil className="h-3 w-3" /> Edit</Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="destructive" className="h-7 text-xs gap-1.5" disabled={deletingUser === u.user_id}>
+                                  <Trash2 className="h-3 w-3" /> {deletingUser === u.user_id ? "Deleting..." : "Delete"}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete user permanently?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will permanently delete <span className="font-semibold">{u.username || u.email}</span> and all their data (deposits, withdrawals, tasks, transactions). This cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    onClick={() => handleDeleteUser(u.user_id)}
+                                  >
+                                    Delete Forever
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         )}
                       </td>

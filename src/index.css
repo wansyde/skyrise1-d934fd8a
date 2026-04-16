@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap');
+/* Fonts are preloaded in index.html with display=swap to avoid FOUT */
 
 @tailwind base;
 @tailwind components;
@@ -73,6 +73,17 @@
 @layer base {
   * {
     @apply border-border;
+  }
+
+  /* Slightly tighter root scale on desktop so the site doesn't feel oversized */
+  html {
+    font-size: 15px;
+  }
+  @media (min-width: 1280px) {
+    html { font-size: 15.5px; }
+  }
+  @media (min-width: 1536px) {
+    html { font-size: 16px; }
   }
 
   body {

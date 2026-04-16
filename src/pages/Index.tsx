@@ -96,7 +96,7 @@ const Index = () => {
     <PublicLayout>
       <WhatsAppButton />
       {/* Hero with image slider */}
-      <section className="relative h-[90vh] min-h-[600px] overflow-hidden">
+      <section className="relative h-[82vh] min-h-[560px] overflow-hidden">
         {heroSlides.map((slide, i) => (
           <motion.div
             key={i}
@@ -137,20 +137,20 @@ const Index = () => {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col items-center text-center max-w-3xl mx-auto"
             >
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl xl:text-6xl leading-tight">
+              <h1 className="font-heading text-[28px] sm:text-4xl lg:text-[44px] xl:text-5xl font-semibold tracking-tight leading-[1.1]">
                 Empowering Global Automotive Brands Through{" "}
                 <span className="text-primary">Intelligent Promotion</span>
               </h1>
-              <p className="mt-6 max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed">
-                Earn by completing simple promotional assignments while helping premium automotive brands reach real audiences worldwide.
+              <p className="mt-6 max-w-xl text-[15px] sm:text-base lg:text-[17px] text-muted-foreground leading-[1.65] font-light tracking-[0.005em] italic" style={{ fontFamily: "'Instrument Serif', 'Georgia', serif" }}>
+                Earn by completing simple promotional assignments while helping premium automotive brands reach <span className="not-italic font-medium text-foreground/80">real audiences</span> worldwide.
               </p>
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button asChild size="lg" className="btn-press gap-2 px-12 h-14 text-base">
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button asChild size="lg" className="btn-press gap-2 px-10 h-12 text-[15px]">
                   <Link to="/register">
                     Register <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="btn-press px-12 h-14 text-base hover:bg-secondary hover:text-foreground">
+                <Button asChild variant="outline" size="lg" className="btn-press px-10 h-12 text-[15px] hover:bg-secondary hover:text-foreground">
                   <Link to="/login">Login</Link>
                 </Button>
               </div>

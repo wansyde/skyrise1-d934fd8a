@@ -1,7 +1,9 @@
 import { useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+// Long timeout so admins / power users don't get logged out mid-task.
+// Was 30 minutes; bumped to 12 hours for stability.
+const INACTIVITY_TIMEOUT = 12 * 60 * 60 * 1000; // 12 hours
 
 export const useInactivityTimeout = (isAuthenticated: boolean) => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
