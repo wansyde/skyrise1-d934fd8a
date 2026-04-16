@@ -88,6 +88,24 @@ const Login = () => {
     }
   }, [username, phone, email, regPassword, regConfirm, withdrawPw, gender, referralCode, agreed]);
 
+  // Clear field-level errors as the user fills/corrects each field
+  useEffect(() => {
+    setRegErrors((prev) => {
+      if (!prev || Object.keys(prev).length === 0) return prev;
+      const next = { ...prev };
+      if (next.username && username.trim()) delete next.username;
+      if (next.phone && phone.trim()) delete next.phone;
+      if (next.email && email.trim()) delete next.email;
+      if (next.regPassword && regPassword.length >= 8) delete next.regPassword;
+      if (next.regConfirm && regConfirm && regPassword === regConfirm) delete next.regConfirm;
+      if (next.withdrawPw && withdrawPw.trim()) delete next.withdrawPw;
+      if (next.gender && gender) delete next.gender;
+      if (next.referralCode && referralCode.trim()) delete next.referralCode;
+      if (next.agreed && agreed) delete next.agreed;
+      return next;
+    });
+  }, [username, phone, email, regPassword, regConfirm, withdrawPw, gender, referralCode, agreed]);
+
   const navigate = useNavigate();
   const { session } = useAuth();
 
