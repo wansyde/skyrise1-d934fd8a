@@ -208,10 +208,11 @@ const Login = () => {
       if (error) {
         toast.error(error.message);
       } else if (data.user && !data.session) {
-        toast.success("Check your email to verify");
-        setTab("login");
+        toast.success("Check your email to verify your account");
+        // Stay on register tab; keep credentials filled so user can re-try if needed
       } else {
         toast.success("Account created");
+        try { sessionStorage.removeItem(REG_KEY); } catch { /* ignore */ }
         navigate("/app");
       }
     } catch {
