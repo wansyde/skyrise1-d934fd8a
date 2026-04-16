@@ -144,8 +144,10 @@ const Records = () => {
           return aP - bP;
         });
 
+        // If parent record is still pending, ALL cars (promoted + unpromoted) belong in Pending tab.
+        // Only when the parent record is fully completed do they move to Completed tab.
+        const parentPending = record.status === "pending";
         for (const car of carEntries) {
-          const isPending = car.carStatus === "pending_insufficient";
           cards.push({
             id: `${record.id}-car-${car.index}`,
             parentRecordId: record.id,
@@ -153,7 +155,7 @@ const Records = () => {
             car_name: car.name,
             total_amount: car.price,
             advertising_salary: car.commission * mult,
-            status: isPending ? "pending" : "completed",
+            status: parentPending ? "pending" : "completed",
             assignment_code: record.assignment_code,
             isAAA: true,
             carIndex: car.index,
