@@ -250,11 +250,20 @@ const Records = () => {
         )}
 
         <div className="space-y-3">
-          {filtered.map((card, i) => {
+          {(() => {
+            // Track which parent records have already shown a Submit button in the pending tab
+            const submitShownForRecord = new Set<string>();
+            return filtered.map((card, i) => {
             const isPending = card.status === "pending";
             const isAAAred = card.isAAA && card.carStatus === "pending_insufficient";
             const isAAAgreen = card.isAAA && card.carStatus === "completed_partial";
             const isSubmitting = submittingId === card.parentRecordId;
+            // Only show Submit on the FIRST promoted card per parent record, and only in Pending tab
+            let showSubmit = false;
+            if (activeTab === "pending" && isAAAgreen && isPending && !submitShownForRecord.has(card.parentRecordId)) {
+              showSubmit = true;
+              submitShownForRecord.add(card.parentRecordId);
+            }
 
             return (
               <motion.div
@@ -311,7 +320,7 @@ const Records = () => {
                       </div>
                     </div>
 
-                    {isAAAgreen && (
+                    {showSubmit && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -339,7 +348,8 @@ const Records = () => {
                 </div>
               </motion.div>
             );
-          })}
+            });
+          })()}
         </div>
       </div>
     </AppLayout>
