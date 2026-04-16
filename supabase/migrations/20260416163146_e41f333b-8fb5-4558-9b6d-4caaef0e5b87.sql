@@ -1,0 +1,266 @@
+
+-- Table to track referral bonuses and prevent duplicates
+CREATE TABLE public.referral_bonuses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  referrer_id UUID NOT NULL,
+  referred_user_id UUID NOT NULL,
+  set_number INTEGER NOT NULL,
+  bonus_amount NUMERIC NOT NULL,
+  set_earnings NUMERIC NOT NULL,
+  reset_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  UNIQUE(referred_user_id, set_number, reset_date)
+);
+
+ALTER TABLE public.referral_bonuses ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can view all referral_bonuses"
+ON public.referral_bonuses FOR SELECT TO authenticated
+USING (has_role(auth.uid(), 'admin'::app_role));
+
+CREATE POLICY "Admins can delete referral_bonuses"
+ON public.referral_bonuses FOR DELETE TO authenticated
+USING (has_role(auth.uid(), 'admin'::app_role));
+
+CREATE POLICY "Users can view own referral bonuses"
+ON public.referral_bonuses FOR SELECT TO authenticated
+USING (auth.uid() = referrer_id);
+
+-- Update complete_task to add referral bonus on set completion
+CREATE OR REPLACE FUNCTION public.complete_task(_assignment_code text, _car_brand text, _car_image_url text, _car_name text, _total_amount numeric)
+ RETURNS json
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  _user_id UUID;
+  _profile RECORD;
+  _reward NUMERIC;
+  _new_balance NUMERIC;
+  _new_salary NUMERIC;
+  _new_task_count INTEGER;
+  _tasks_per_set INTEGER;
+  _total_sets INTEGER := 3;
+  _total_tasks INTEGER;
+  _tier_percent NUMERIC;
+  _current_set INTEGER;
+  _tasks_in_set_before INTEGER;
+  _tasks_in_set_after INTEGER;
+  _et_hour INTEGER;
+  _max_allowed_tasks INTEGER;
+  _effective_amount NUMERIC;
+  _noise_seed TEXT;
+  _noise_byte4 INTEGER;
+  _decimal_noise NUMERIC;
+  _min_task NUMERIC;
+  _base_deposit NUMERIC;
+  _set_target NUMERIC;
+  _target_jitter NUMERIC;
+  _salary_so_far NUMERIC;
+  _max_reward NUMERIC;
+  _ideal_reward NUMERIC;
+  _remaining_profit NUMERIC;
+  _remaining_tasks INTEGER;
+  _jitter_byte INTEGER;
+  _jitter NUMERIC;
+  _set_percent NUMERIC;
+  -- Referral variables
+  _referrer_id UUID;
+  _set_earnings NUMERIC;
+  _referral_bonus NUMERIC;
+  _already_paid BOOLEAN;
+BEGIN
+  _user_id := auth.uid();
+  IF _user_id IS NULL THEN
+    RETURN json_build_object('error', 'Not authenticated');
+  END IF;
+
+  IF _user_id <> '4c1d14e8-45a6-416b-866c-6b6fd8aab39e'::uuid THEN
+    _et_hour := EXTRACT(HOUR FROM (now() AT TIME ZONE 'America/New_York'));
+    IF _et_hour < 10 OR _et_hour >= 22 THEN
+      RETURN json_build_object('error', 'Promotions are only available between 10:00 AM and 10:00 PM (ET)');
+    END IF;
+  END IF;
+
+  SELECT * INTO _profile FROM public.profiles WHERE user_id = _user_id FOR UPDATE;
+  IF NOT FOUND THEN RETURN json_build_object('error', 'Profile not found'); END IF;
+  IF _profile.status <> 'active' THEN RETURN json_build_object('error', 'Account is restricted'); END IF;
+  IF _profile.task_cycle_completed THEN RETURN json_build_object('error', 'Task cycle completed. Please contact customer service to renew or upgrade your plan.'); END IF;
+  IF _profile.balance < 100 THEN RETURN json_build_object('error', 'Minimum balance of $100 required'); END IF;
+
+  CASE _profile.vip_level
+    WHEN 'Elite' THEN _tier_percent := 0.010; _tasks_per_set := 55; _set_percent := 0.48;
+    WHEN 'Expert' THEN _tier_percent := 0.008; _tasks_per_set := 50; _set_percent := 0.30;
+    WHEN 'Professional' THEN _tier_percent := 0.006; _tasks_per_set := 45; _set_percent := 0.185;
+    ELSE _tier_percent := 0.004; _tasks_per_set := 40; _set_percent := 0.09;
+  END CASE;
+
+  _total_tasks := _tasks_per_set * _total_sets;
+  _max_allowed_tasks := COALESCE(_profile.current_unlocked_set, 1) * _tasks_per_set;
+
+  IF _profile.tasks_completed_today >= _max_allowed_tasks THEN
+    _current_set := LEAST((_profile.tasks_completed_today / _tasks_per_set) + 1, _total_sets);
+    RETURN json_build_object(
+      'error', 'Set ' || LEAST(_profile.tasks_completed_today / _tasks_per_set, _total_sets) || ' completed. Contact customer support to unlock next set.',
+      'set_locked', true, 'current_set', _current_set
+    );
+  END IF;
+
+  IF _profile.tasks_completed_today >= _total_tasks THEN
+    RETURN json_build_object('error', 'Daily task limit reached');
+  END IF;
+
+  _current_set := LEAST((_profile.tasks_completed_today / _tasks_per_set) + 1, _total_sets);
+  _tasks_in_set_before := _profile.tasks_completed_today - ((_current_set - 1) * _tasks_per_set);
+
+  _base_deposit := GREATEST(COALESCE(_profile.initial_deposit, 0), 100);
+  _base_deposit := LEAST(_base_deposit, ROUND(_profile.balance * 1.5, 2));
+  _base_deposit := GREATEST(_base_deposit, 100);
+
+  _noise_seed := _user_id::text || ':target:' || _current_set::text || ':' || _profile.last_task_reset::text;
+  _target_jitter := (get_byte(decode(substr(md5(_noise_seed), 1, 2), 'hex'), 0)::numeric / 255) * 0.005;
+  _set_target := ROUND(_base_deposit * (_set_percent + _target_jitter), 2);
+
+  SELECT COALESCE(SUM(tr.advertising_salary), 0) INTO _salary_so_far
+  FROM (
+    SELECT advertising_salary
+    FROM public.task_records
+    WHERE user_id = _user_id
+      AND created_at >= _profile.last_task_reset
+      AND status = 'completed'
+      AND task_type = 'regular'
+    ORDER BY created_at ASC
+    OFFSET ((_current_set - 1) * _tasks_per_set)
+    LIMIT _tasks_in_set_before
+  ) tr;
+
+  _remaining_profit := GREATEST(_set_target - _salary_so_far, 0);
+  _remaining_tasks := GREATEST(_tasks_per_set - _tasks_in_set_before, 1);
+  _ideal_reward := _remaining_profit / _remaining_tasks;
+
+  _noise_seed := _user_id::text || ':jitter:' || _profile.tasks_completed_today::text || ':' || _current_set::text || ':' || _profile.last_task_reset::text;
+  _jitter_byte := get_byte(decode(substr(md5(_noise_seed), 1, 2), 'hex'), 0);
+  _jitter := ((_jitter_byte::numeric / 255) - 0.5) * 0.80;
+  _reward := ROUND(_ideal_reward * (1 + _jitter), 2);
+  _reward := GREATEST(_reward, 0.01);
+
+  _max_reward := ROUND(_base_deposit * (_set_percent + 0.005), 2) - _salary_so_far;
+  IF _reward > _max_reward AND _max_reward > 0 THEN
+    _reward := GREATEST(_max_reward, 0.01);
+  ELSIF _max_reward <= 0 THEN
+    _reward := 0.01;
+  END IF;
+
+  IF _ideal_reward > 0 AND _reward > _ideal_reward * 3 THEN
+    _reward := ROUND(_ideal_reward * 3, 2);
+  END IF;
+  _reward := GREATEST(_reward, 0.01);
+
+  _effective_amount := ROUND(_reward / _tier_percent, 2);
+  _min_task := GREATEST(30, ROUND(_profile.balance * 0.15, 2));
+  _effective_amount := GREATEST(_effective_amount, _min_task);
+  _effective_amount := LEAST(_effective_amount, _profile.balance);
+
+  _noise_byte4 := get_byte(decode(substr(md5(_noise_seed), 7, 2), 'hex'), 0);
+  _decimal_noise := (_noise_byte4::numeric / 255) * 0.98 + 0.01;
+  _effective_amount := FLOOR(_effective_amount) + _decimal_noise;
+  _effective_amount := GREATEST(_effective_amount, _min_task);
+  _effective_amount := LEAST(_effective_amount, _profile.balance);
+  _effective_amount := ROUND(_effective_amount, 2);
+
+  _reward := ROUND(_effective_amount * _tier_percent, 2);
+  _reward := GREATEST(_reward, 0.01);
+
+  IF _reward > _max_reward AND _max_reward > 0 THEN
+    _reward := GREATEST(ROUND(_max_reward, 2), 0.01);
+    _effective_amount := ROUND(_reward / _tier_percent, 2);
+    _effective_amount := GREATEST(_effective_amount, _min_task);
+    _effective_amount := LEAST(_effective_amount, _profile.balance);
+  END IF;
+
+  _new_balance := ROUND(_profile.balance + _reward, 2);
+  _new_salary := ROUND(_profile.advertising_salary + _reward, 2);
+  _new_task_count := _profile.tasks_completed_today + 1;
+  _tasks_in_set_after := _new_task_count - ((_current_set - 1) * _tasks_per_set);
+
+  UPDATE public.profiles
+  SET balance = _new_balance,
+      advertising_salary = _new_salary,
+      tasks_completed_today = _new_task_count,
+      task_cycle_completed = (_new_task_count >= _total_tasks),
+      updated_at = now()
+  WHERE user_id = _user_id;
+
+  INSERT INTO public.task_records (user_id, car_brand, car_name, car_image_url, total_amount, advertising_salary, assignment_code, status)
+  VALUES (_user_id, _car_brand, _car_name, _car_image_url, _effective_amount, _reward, _assignment_code, 'completed');
+
+  -- ===== REFERRAL BONUS ON SET COMPLETION =====
+  IF _tasks_in_set_after >= _tasks_per_set THEN
+    -- Check if user has a valid referrer (not empty, not self)
+    IF _profile.referred_by IS NOT NULL AND _profile.referred_by <> '' AND _profile.referred_by::uuid <> _user_id THEN
+      _referrer_id := _profile.referred_by::uuid;
+
+      -- Check if bonus already paid for this set+reset
+      SELECT EXISTS(
+        SELECT 1 FROM public.referral_bonuses
+        WHERE referred_user_id = _user_id
+          AND set_number = _current_set
+          AND reset_date = _profile.last_task_reset
+      ) INTO _already_paid;
+
+      IF NOT _already_paid THEN
+        -- Calculate set earnings: sum of advertising_salary for tasks in this set
+        SELECT COALESCE(SUM(tr.advertising_salary), 0) + _reward INTO _set_earnings
+        FROM (
+          SELECT advertising_salary
+          FROM public.task_records
+          WHERE user_id = _user_id
+            AND created_at >= _profile.last_task_reset
+            AND status = 'completed'
+            AND task_type = 'regular'
+          ORDER BY created_at ASC
+          OFFSET ((_current_set - 1) * _tasks_per_set)
+          LIMIT (_tasks_per_set - 1)
+        ) tr;
+
+        _referral_bonus := ROUND(_set_earnings * 0.20, 2);
+
+        IF _referral_bonus > 0 THEN
+          -- Pay referrer
+          UPDATE public.profiles
+          SET balance = ROUND(balance + _referral_bonus, 2),
+              updated_at = now()
+          WHERE user_id = _referrer_id;
+
+          -- Record to prevent duplicates
+          INSERT INTO public.referral_bonuses (referrer_id, referred_user_id, set_number, bonus_amount, set_earnings, reset_date)
+          VALUES (_referrer_id, _user_id, _current_set, _referral_bonus, _set_earnings, _profile.last_task_reset);
+
+          -- Transaction record for referrer
+          INSERT INTO public.transactions (user_id, type, amount, status, description, method)
+          VALUES (_referrer_id, 'referral_bonus', _referral_bonus, 'approved',
+            'Referral bonus: 20% of set ' || _current_set || ' earnings from ' || COALESCE(_profile.username, 'user'),
+            'referral');
+        END IF;
+      END IF;
+    END IF;
+  END IF;
+
+  RETURN json_build_object(
+    'success', true,
+    'new_balance', _new_balance,
+    'new_salary', _new_salary,
+    'reward', _reward,
+    'task_value', _effective_amount,
+    'tier_percent', _tier_percent,
+    'tasks_completed', _new_task_count,
+    'current_set', _current_set,
+    'tasks_in_set', _tasks_in_set_after,
+    'tasks_per_set', _tasks_per_set,
+    'total_tasks', _total_tasks,
+    'task_cycle_completed', (_new_task_count >= _total_tasks),
+    'set_completed', (_new_task_count >= _max_allowed_tasks)
+  );
+END;
+$function$;
