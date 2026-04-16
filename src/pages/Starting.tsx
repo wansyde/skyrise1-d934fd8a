@@ -32,26 +32,26 @@ import mclarenGtImg from "@/assets/cars/mclaren-gt.jpg";
 import lexusEsImg from "@/assets/cars/lexus-es.jpg";
 import teslaModelSImg from "@/assets/cars/tesla-model-s.jpg";
 
-import audiA1Featured from "@/assets/cars/featured/audi-a1.png";
-import audiA2Featured from "@/assets/cars/featured/audi-a2.png";
-import astonMartinGreenFeatured from "@/assets/cars/featured/aston-martin-green.png";
-import astonMartinYellowFeatured from "@/assets/cars/featured/aston-martin-yellow.png";
-import maybachFeatured from "@/assets/cars/featured/maybach.png";
-import mercedesRedFeatured from "@/assets/cars/featured/mercedes-red.png";
-import bmwBlueFeatured from "@/assets/cars/featured/bmw-blue.png";
-import bmwPurpleFeatured from "@/assets/cars/featured/bmw-purple.png";
-import ferrariYellowFeatured from "@/assets/cars/featured/ferrari-yellow.png";
-import bentleyWhiteFeatured from "@/assets/cars/featured/bentley-white.png";
-import bentleyBlueFeatured from "@/assets/cars/featured/bentley-blue.png";
-import fordMustangFeatured from "@/assets/cars/featured/ford-mustang.png";
-import ferrariRomaFeatured from "@/assets/cars/featured/ferrari-roma.png";
-import cadillacCt5Featured from "@/assets/cars/featured/cadillac-ct5.png";
-import rangeRoverFeatured from "@/assets/cars/featured/range-rover.png";
-import lexusLcFeatured from "@/assets/cars/featured/lexus-lc.png";
-import mclarenArturaFeatured from "@/assets/cars/featured/mclaren-artura.png";
-import mclarenGtFeatured from "@/assets/cars/featured/mclaren-gt.png";
-import lexusEsFeatured from "@/assets/cars/featured/lexus-es.png";
-import teslaModelSFeatured from "@/assets/cars/featured/tesla-model-s.png";
+import audiA1Featured from "@/assets/cars/featured/audi-a1.webp";
+import audiA2Featured from "@/assets/cars/featured/audi-a2.webp";
+import astonMartinGreenFeatured from "@/assets/cars/featured/aston-martin-green.webp";
+import astonMartinYellowFeatured from "@/assets/cars/featured/aston-martin-yellow.webp";
+import maybachFeatured from "@/assets/cars/featured/maybach.webp";
+import mercedesRedFeatured from "@/assets/cars/featured/mercedes-red.webp";
+import bmwBlueFeatured from "@/assets/cars/featured/bmw-blue.webp";
+import bmwPurpleFeatured from "@/assets/cars/featured/bmw-purple.webp";
+import ferrariYellowFeatured from "@/assets/cars/featured/ferrari-yellow.webp";
+import bentleyWhiteFeatured from "@/assets/cars/featured/bentley-white.webp";
+import bentleyBlueFeatured from "@/assets/cars/featured/bentley-blue.webp";
+import fordMustangFeatured from "@/assets/cars/featured/ford-mustang.webp";
+import ferrariRomaFeatured from "@/assets/cars/featured/ferrari-roma.webp";
+import cadillacCt5Featured from "@/assets/cars/featured/cadillac-ct5.webp";
+import rangeRoverFeatured from "@/assets/cars/featured/range-rover.webp";
+import lexusLcFeatured from "@/assets/cars/featured/lexus-lc.webp";
+import mclarenArturaFeatured from "@/assets/cars/featured/mclaren-artura.webp";
+import mclarenGtFeatured from "@/assets/cars/featured/mclaren-gt.webp";
+import lexusEsFeatured from "@/assets/cars/featured/lexus-es.webp";
+import teslaModelSFeatured from "@/assets/cars/featured/tesla-model-s.webp";
 
 const carCampaigns = [
   { brand: "Audi", name: "Audi A1 2025 Sportback Premium Edition", image: audiA1Img, featured: audiA1Featured, totalAmount: 41, adSalary: 0.16 },
