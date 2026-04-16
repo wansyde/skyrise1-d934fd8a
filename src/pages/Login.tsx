@@ -207,10 +207,14 @@ const Login = () => {
 
       if (error) {
         toast.error(error.message);
-      } else if (data.user && !data.session) {
-        toast.success("Check your email to verify your account");
-        // Stay on register tab; keep credentials filled so user can re-try if needed
       } else {
+        // Ensure the user is signed in immediately (no email verification gate)
+        if (!data.session) {
+          await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password: regPassword,
+          });
+        }
         toast.success("Account created");
         try { sessionStorage.removeItem(REG_KEY); } catch { /* ignore */ }
         navigate("/app");
