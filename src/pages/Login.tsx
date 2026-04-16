@@ -350,7 +350,7 @@ const Login = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
               >
-                <div className="glass-card p-8 max-h-[75vh] overflow-y-auto">
+                <div className="glass-card p-6 sm:p-8">
                   <h1 className="text-xl font-semibold tracking-tight mb-1">Create your account</h1>
                   <p className="text-sm text-muted-foreground mb-6">Start earning with Skyrise</p>
 
