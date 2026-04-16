@@ -31,11 +31,19 @@ const AppWithdraw = () => {
   const hasSavedWallet = !!profile?.saved_wallet_address;
 
   const checkPaymentMethod = () => {
-    if (!hasSavedWallet) {
-      toast.error("Set up payment method first", {
+    const missing: string[] = [];
+    if (!profile?.saved_wallet_name?.trim()) missing.push("Wallet Name");
+    if (!profile?.saved_wallet_address?.trim()) missing.push("Wallet Address");
+    if (!profile?.saved_wallet_username?.trim()) missing.push("Wallet Username");
+    if (!profile?.saved_wallet_network?.trim()) missing.push("Network");
+    if (!profile?.saved_wallet_email?.trim()) missing.push("Email");
+
+    if (missing.length > 0) {
+      toast.error(`Complete your payment method: ${missing.join(", ")}`, {
+        duration: 5000,
         action: {
           label: "Set Up",
-          onClick: () => window.location.href = "/app/wallet/payment-methods",
+          onClick: () => navigate("/app/wallet/payment-methods"),
         },
       });
       return false;
