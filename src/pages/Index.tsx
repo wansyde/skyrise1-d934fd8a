@@ -144,13 +144,13 @@ const Index = () => {
               <p className="mt-6 max-w-xl text-[15px] sm:text-base lg:text-[17px] text-muted-foreground leading-[1.65] font-light tracking-[0.005em] italic" style={{ fontFamily: "'Instrument Serif', 'Georgia', serif" }}>
                 Earn by completing simple promotional assignments while helping premium automotive brands reach <span className="not-italic font-medium text-foreground/80">real audiences</span> worldwide.
               </p>
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button asChild size="lg" className="btn-press gap-2 px-12 h-14 text-base">
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button asChild size="lg" className="btn-press gap-2 px-10 h-12 text-[15px]">
                   <Link to="/register">
                     Register <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="btn-press px-12 h-14 text-base hover:bg-secondary hover:text-foreground">
+                <Button asChild variant="outline" size="lg" className="btn-press px-10 h-12 text-[15px] hover:bg-secondary hover:text-foreground">
                   <Link to="/login">Login</Link>
                 </Button>
               </div>
