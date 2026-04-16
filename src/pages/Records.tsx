@@ -320,7 +320,7 @@ const Records = () => {
                       </div>
                     </div>
 
-                    {isAAAgreen && (
+                    {showSubmit && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -348,7 +348,8 @@ const Records = () => {
                 </div>
               </motion.div>
             );
-          })}
+            });
+          })()}
         </div>
       </div>
     </AppLayout>
