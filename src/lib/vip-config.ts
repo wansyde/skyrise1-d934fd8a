@@ -18,7 +18,7 @@ export const VIP_TIERS: Record<string, VipTier> = {
   Professional: {
     level: "Professional", tasksPerSet: 45, totalSets: 3, totalTasks: 135,
     rewardPercent: 0.006, minBalance: 500,
-    setTargets: [[25, 30], [23, 28], [25, 30]],
+    setTargets: [[85, 95], [85, 95], [85, 95]],
   },
   Expert: {
     level: "Expert", tasksPerSet: 50, totalSets: 3, totalTasks: 150,
