@@ -141,8 +141,8 @@ const Index = () => {
                 Empowering Global Automotive Brands Through{" "}
                 <span className="text-primary">Intelligent Promotion</span>
               </h1>
-              <p className="mt-6 max-w-xl text-[15px] sm:text-base lg:text-[17px] text-muted-foreground leading-[1.65] font-light tracking-[0.005em] italic" style={{ fontFamily: "'Instrument Serif', 'Georgia', serif" }}>
-                Earn by completing simple promotional assignments while helping premium automotive brands reach <span className="not-italic font-medium text-foreground/80">real audiences</span> worldwide.
+              <p className="mt-6 max-w-xl text-[15px] sm:text-base lg:text-[17px] text-muted-foreground leading-[1.65] font-normal">
+                Earn by completing simple promotional assignments while helping premium automotive brands reach <span className="text-primary font-medium">real audiences</span> worldwide.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="lg" className="btn-press gap-2 px-10 h-12 text-[15px]">
