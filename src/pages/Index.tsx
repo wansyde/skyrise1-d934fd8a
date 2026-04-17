@@ -109,6 +109,11 @@ const Index = () => {
               src={slide}
               alt={`Premium automotive ${i + 1}`}
               className="h-full w-full object-cover"
+              width={1370}
+              height={771}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding={i === 0 ? "sync" : "async"}
+              fetchPriority={i === 0 ? "high" : "low"}
             />
           </motion.div>
         ))}
