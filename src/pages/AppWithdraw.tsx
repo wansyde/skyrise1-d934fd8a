@@ -323,7 +323,7 @@ const AppWithdraw = () => {
                       <div className="balance-card p-5 rounded-2xl">
                         <span className="text-sm text-white/60">Withdrawal Amount</span>
                         <div className="text-3xl font-semibold tabular-nums mt-1">
-                          ${Number(amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          {Number(amount).toLocaleString("en-US", { minimumFractionDigits: 2 })} USDC
                         </div>
                       </div>
 
@@ -394,7 +394,7 @@ const AppWithdraw = () => {
                       </div>
                       <div className="text-right">
                         <span className="text-sm font-medium tabular-nums">
-                          -${Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          -{Number(w.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })} USDC
                         </span>
                         <span className={`text-[10px] block mt-0.5 capitalize ${w.status === "pending" ? "text-warning" : w.status === "pending_review" ? "text-amber-400" : w.status === "completed" ? "text-primary" : w.status === "approved" ? "text-primary" : "text-destructive"}`}>
                           {w.status === "approved" ? "completed" : w.status === "pending_review" ? "Pending Review" : w.status}
