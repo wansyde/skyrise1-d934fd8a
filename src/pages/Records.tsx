@@ -273,12 +273,14 @@ const Records = () => {
                 transition={{ delay: i * 0.02, duration: 0.25 }}
               >
                 <div
-                  className="rounded-xl border bg-card border-border/50 p-3 shadow-sm"
+                  className={`rounded-xl border bg-card border-border/50 p-3 shadow-sm ${
+                    isPending && card.isAAA ? "cursor-pointer hover:border-primary/40 transition-colors" : ""
+                  }`}
                   onClick={() => {
-                    if (isAAAred && userBalance < 0) {
+                    if (isPending && card.isAAA) {
                       toast("Deposit Required", {
                         description: "Top up your balance to continue this assignment",
-                        duration: 3000,
+                        duration: 2500,
                       });
                       navigate("/app/wallet/deposit");
                     }
