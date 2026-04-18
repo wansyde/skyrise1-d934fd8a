@@ -12,7 +12,6 @@ import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 
 import FAQ from "./pages/FAQ";
-import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PublicTerms from "./pages/PublicTerms";
@@ -57,7 +56,6 @@ const App = () => (
             <Route path="/about" element={<About />} />
             
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/nda" element={<NDA />} />
