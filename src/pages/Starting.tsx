@@ -601,7 +601,7 @@ const Starting = () => {
               <Headphones className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
               <div>
                 <p className="text-xs font-medium">Contact Support</p>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">Please contact customer support for further questions.</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">For any further questions, please contact Online Customer Service.</p>
               </div>
             </div>
           </div>
