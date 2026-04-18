@@ -593,8 +593,8 @@ const Starting = () => {
             <div className="flex items-start gap-3">
               <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" strokeWidth={1.5} />
               <div>
-                <p className="text-xs font-medium">Support Hours</p>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">Mon – Fri, 9:00 AM – 6:00 PM (UTC)</p>
+                <p className="text-xs font-medium">Customer Support</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">9:00 AM – 9:00 PM (Eastern Time)</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
