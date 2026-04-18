@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { compressKycImage, validateKycFile, KycValidationError } from "@/lib/image-compress";
 
 const idTypes = ["National ID", "Passport", "Driver's License", "Residence Permit"];
 
@@ -234,8 +235,10 @@ const KYC = () => {
     setPreview: (p: string | null) => void
   ) => {
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File must be under 5MB");
+    try {
+      validateKycFile(file);
+    } catch (err) {
+      toast.error(err instanceof KycValidationError ? err.message : "Invalid file");
       return;
     }
     setFile(file);
@@ -244,15 +247,30 @@ const KYC = () => {
     reader.readAsDataURL(file);
   };
 
+  // Returns the storage path (not a public URL). Bucket is private; admins use signed URLs.
   const uploadFile = async (file: File, folder: string) => {
-    const ext = file.name.split(".").pop();
-    const path = `${user!.id}/${folder}.${ext}`;
+    const compressed = await compressKycImage(file);
+    const path = `${user!.id}/${folder}.jpg`;
     const { error } = await supabase.storage
       .from("kyc-documents")
-      .upload(path, file, { upsert: true });
+      .upload(path, compressed, {
+        upsert: true,
+        contentType: "image/jpeg",
+        cacheControl: "3600",
+      });
     if (error) throw error;
-    const { data } = supabase.storage.from("kyc-documents").getPublicUrl(path);
-    return data.publicUrl;
+    return path;
+  };
+
+  // Remove any existing KYC files for this user before uploading the new set.
+  const deletePreviousKyc = async () => {
+    if (!user) return;
+    const { data: list } = await supabase.storage
+      .from("kyc-documents")
+      .list(user.id, { limit: 100 });
+    if (!list || list.length === 0) return;
+    const paths = list.map((f) => `${user.id}/${f.name}`);
+    await supabase.storage.from("kyc-documents").remove(paths);
   };
 
   const handleSubmit = async () => {
@@ -268,11 +286,13 @@ const KYC = () => {
 
     setLoading(true);
     try {
-      const [frontUrl, backUrl, selfieUrl] = await Promise.all([
-        uploadFile(frontFile, "id-front"),
-        uploadFile(backFile, "id-back"),
-        uploadFile(selfieFile, "selfie"),
-      ]);
+      // 1) Wipe any previous KYC files so we keep only ONE active set per user.
+      await deletePreviousKyc();
+
+      // 2) Compress + upload sequentially (keeps memory low on phones).
+      const frontUrl = await uploadFile(frontFile, "id-front");
+      const backUrl = await uploadFile(backFile, "id-back");
+      const selfieUrl = await uploadFile(selfieFile, "selfie");
 
       const { error } = await supabase.rpc("submit_kyc", {
         _kyc_name: name.trim(),
@@ -287,7 +307,9 @@ const KYC = () => {
       toast.success("Submitted");
       setJustSubmitted(true);
     } catch (err: any) {
-      toast.error("Submission failed");
+      toast.error(
+        err instanceof KycValidationError ? err.message : "Submission failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -329,10 +351,11 @@ const KYC = () => {
           </div>
         )}
       </button>
-      <input
+          <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png"
+        capture="environment"
         className="hidden"
         onChange={(e) => onSelect(e.target.files?.[0])}
       />

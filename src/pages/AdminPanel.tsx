@@ -15,6 +15,7 @@ import AdminSupportTab from "@/components/admin/AdminSupportTab";
 import AdminAAATab from "@/components/admin/AdminAAATab";
 import AdminPendingAAATab from "@/components/admin/AdminPendingAAATab";
 import DangerZoneTab from "@/components/admin/DangerZoneTab";
+import KycViewLink from "@/components/admin/KycViewLink";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1154,25 +1155,13 @@ const AdminPanel = () => {
                         <td className="px-5 py-3 text-xs text-muted-foreground">{p.kyc_id_type || "—"}</td>
                         <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{p.kyc_id_number || "—"}</td>
                         <td className="px-5 py-3">
-                          {p.kyc_front_url ? (
-                            <a href={p.kyc_front_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                              <Eye className="h-3 w-3" /> View
-                            </a>
-                          ) : <span className="text-xs text-muted-foreground">—</span>}
+                          <KycViewLink value={p.kyc_front_url} />
                         </td>
                         <td className="px-5 py-3">
-                          {p.kyc_back_url ? (
-                            <a href={p.kyc_back_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                              <Eye className="h-3 w-3" /> View
-                            </a>
-                          ) : <span className="text-xs text-muted-foreground">—</span>}
+                          <KycViewLink value={p.kyc_back_url} />
                         </td>
                         <td className="px-5 py-3">
-                          {p.kyc_selfie_url ? (
-                            <a href={p.kyc_selfie_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                              <Eye className="h-3 w-3" /> View
-                            </a>
-                          ) : <span className="text-xs text-muted-foreground">—</span>}
+                          <KycViewLink value={p.kyc_selfie_url} />
                         </td>
                         <td className="px-5 py-3">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${
