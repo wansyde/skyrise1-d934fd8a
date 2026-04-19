@@ -232,17 +232,7 @@ const Starting = () => {
   const isRestricted = profile?.status === "suspended";
   const isCycleCompleted = (profile as any)?.task_cycle_completed === true;
 
-  const isWithinWorkingHours = () => {
-    // Steve is exempt from time restrictions
-    if (user?.id === '4c1d14e8-45a6-416b-866c-6b6fd8aab39e') return true;
-    const now = new Date();
-    const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
-    const hour = et.getHours();
-    return hour >= 10 && hour < 22;
-  };
-
   const handleMatchAd = () => {
-    if (!isWithinWorkingHours()) { toast.error("Promotions are only available between 10:00 AM and 10:00 PM (ET)"); return; }
     if (isRestricted) { toast.error("Account restricted"); return; }
     if (isCycleCompleted) { toast.error("Task cycle completed"); return; }
     const currentBalance = Number(profile?.balance ?? 0);
