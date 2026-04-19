@@ -104,17 +104,13 @@ const Profile = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/30" />
           </div>
 
-          {/* Avatar + user info below banner */}
-          <div className="relative px-4 pb-4">
-            <div className="flex items-end gap-3 -mt-9">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="Avatar" className="rounded-full border-[3px] border-card object-cover shrink-0 shadow-lg" style={{ width: 68, height: 68 }} />
-              ) : (
+            {/* Avatar + user info below banner */}
+            <div className="relative px-4 pb-4">
+              <div className="flex items-end gap-3 -mt-9">
                 <div className="rounded-full border-[3px] border-card bg-muted flex items-center justify-center shrink-0 shadow-lg" style={{ width: 68, height: 68 }}>
                   <User className="h-7 w-7 text-muted-foreground" strokeWidth={1.5} />
                 </div>
-              )}
-            </div>
+              </div>
             <div className="mt-2.5 px-0.5">
               <div className="flex items-center gap-1.5">
                 <h1 className="text-base font-semibold leading-tight text-foreground">{profile?.username || profile?.full_name || "User"}</h1>
