@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { useRef, useCallback, useState } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 
 interface WithdrawalReceiptProps {
   username: string;
@@ -62,8 +65,49 @@ const WithdrawalReceipt = ({
         pixelRatio: 3,
         backgroundColor: "#ffffff",
       });
+      const fileName = `skyrise-receipt-${transactionId.slice(0, 8).toUpperCase()}.png`;
+
+      // Native (iOS/Android via Capacitor) — save straight to device, no prompts
+      if (Capacitor.isNativePlatform()) {
+        const base64 = dataUrl.split(",")[1];
+        const result = await Filesystem.writeFile({
+          path: fileName,
+          data: base64,
+          directory: Directory.Documents,
+          recursive: true,
+        });
+        // Trigger system "Save Image" via share sheet only if user wants Photos.
+        // On most native installs this writes silently to the app's documents
+        // and (on Android) is visible in Files. For Photos roll, share once:
+        try {
+          await Share.share({
+            title: "Receipt",
+            url: result.uri,
+            dialogTitle: "Save receipt",
+          });
+        } catch {
+          // user dismissed share — file is still saved to Documents
+        }
+        toast.success("Saved to device");
+        return;
+      }
+
+      // Web fallback: try Web Share API with file (mobile browsers → "Save Image")
+      try {
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], fileName, { type: "image/png" });
+        // @ts-ignore - canShare is not in older TS lib
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: "Receipt" });
+          toast.success("Saved");
+          return;
+        }
+      } catch {
+        // fall through to download
+      }
+
       const link = document.createElement("a");
-      link.download = `skyrise-receipt-${transactionId.slice(0, 8).toUpperCase()}.png`;
+      link.download = fileName;
       link.href = dataUrl;
       link.click();
       toast.success("Saved");
