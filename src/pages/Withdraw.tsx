@@ -19,8 +19,8 @@ const Withdraw = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const num = Number(amount);
-    if (num < 100) {
-      toast.error("Minimum withdrawal amount is 100 USDC");
+    if (num < 50) {
+      toast.error("Minimum withdrawal amount is 50 USDC");
       return;
     }
     if (num <= 0 || num > balance) {
