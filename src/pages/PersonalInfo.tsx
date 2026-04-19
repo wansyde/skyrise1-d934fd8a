@@ -96,8 +96,6 @@ const PersonalInfo = () => {
   const { profile, user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState<View>("main");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Edit profile state
   const [fullName, setFullName] = useState(profile?.full_name || "");
@@ -116,44 +114,6 @@ const PersonalInfo = () => {
   const [newTxPassword, setNewTxPassword] = useState("");
   const [confirmTxPassword, setConfirmTxPassword] = useState("");
   const [updatingTxPassword, setUpdatingTxPassword] = useState(false);
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Select an image");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Max 5MB allowed");
-      return;
-    }
-    setUploadingAvatar(true);
-    const ext = file.name.split(".").pop();
-    const filePath = `${user.id}/avatar.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, file, { upsert: true });
-    if (uploadError) {
-      setUploadingAvatar(false);
-      toast.error("Upload failed");
-      return;
-    }
-    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
-    const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({ avatar_url: avatarUrl })
-      .eq("user_id", user.id);
-    setUploadingAvatar(false);
-    if (updateError) {
-      toast.error("Save failed");
-    } else {
-      toast.success("Avatar updated");
-      await refreshProfile();
-    }
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
 
   const handleSaveProfile = async () => {
     if (!user) return;
