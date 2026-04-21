@@ -14,6 +14,7 @@ import { VIP_LEVELS } from "@/lib/vip-config";
 import AdminSupportTab from "@/components/admin/AdminSupportTab";
 import AdminAAATab from "@/components/admin/AdminAAATab";
 import AdminPendingAAATab from "@/components/admin/AdminPendingAAATab";
+import AdminAAASummaryTab from "@/components/admin/AdminAAASummaryTab";
 import DangerZoneTab from "@/components/admin/DangerZoneTab";
 import KycViewLink from "@/components/admin/KycViewLink";
 import {
@@ -737,12 +738,13 @@ const AdminPanel = () => {
       )}
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-11">
+        <TabsList className="grid w-full grid-cols-12">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="deposits">Deposits</TabsTrigger>
           <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
           <TabsTrigger value="aaa" className="flex items-center gap-1.5"><Star className="h-3.5 w-3.5" />AAA</TabsTrigger>
-          <TabsTrigger value="pending-aaa" className="flex items-center gap-1.5"><AlertTriangle className="h-3.5 w-3.5" />Pending</TabsTrigger>
+          <TabsTrigger value="aaa-summary" className="flex items-center gap-1.5"><ScrollText className="h-3.5 w-3.5" />AAA Summary</TabsTrigger>
+          <TabsTrigger value="pending-aaa" className="flex items-center gap-1.5"><AlertTriangle className="h-3.5 w-3.5" />Pending AAA</TabsTrigger>
           <TabsTrigger value="referrals" className="flex items-center gap-1.5"><Link2 className="h-3.5 w-3.5" />Referrals</TabsTrigger>
           <TabsTrigger value="kyc" className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" />KYC</TabsTrigger>
           <TabsTrigger value="admins" className="flex items-center gap-1.5"><UserCog className="h-3.5 w-3.5" />Admins</TabsTrigger>
@@ -1411,6 +1413,11 @@ const AdminPanel = () => {
         {/* AAA Tab */}
         <TabsContent value="aaa">
           <AdminAAATab profiles={profiles || []} />
+        </TabsContent>
+
+        {/* AAA Summary Tab */}
+        <TabsContent value="aaa-summary">
+          <AdminAAASummaryTab profiles={profiles || []} />
         </TabsContent>
 
         {/* Pending AAA Tab */}
