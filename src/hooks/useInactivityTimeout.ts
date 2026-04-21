@@ -1,5 +1,7 @@
-import { useEffect, useCallback, useRef } from "react";
+import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+const { useEffect, useCallback, useRef } = React;
 
 // Long timeout so admins / power users don't get logged out mid-task.
 // Was 30 minutes; bumped to 12 hours for stability.
