@@ -819,9 +819,9 @@ const AdminPanel = () => {
                       <td className="px-5 py-3 text-xs text-muted-foreground">{u.vpn_score || "0/3"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">
-                        {u.referred_by ? (() => { const r = (profiles || []).find((p: any) => p.user_id === u.referred_by || p.referral_code === u.referred_by); return r ? r.username || r.email : u.referred_by; })() : "—"}
+                        {getReferrerName(u.referred_by)}
                       </td>
-                      <td className="px-5 py-3 text-sm tabular-nums">{(profiles || []).filter((p: any) => p.referred_by === u.user_id).length}</td>
+                      <td className="px-5 py-3 text-sm tabular-nums">{getReferredUsers(u).length}</td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editBalance} onChange={(e) => setEditBalance(e.target.value)} className="h-7 w-28 text-xs" min={0} />
