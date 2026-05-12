@@ -157,6 +157,25 @@ const AdminPanel = () => {
     return p?.username || p?.email || userId.slice(0, 8);
   };
 
+  const getProfileName = (profile: any) => profile?.username || profile?.full_name || profile?.email || "Unknown user";
+
+  const findReferrerProfile = (referredBy?: string | null) => {
+    const value = (referredBy || "").trim();
+    if (!value) return null;
+    return (profiles || []).find((p: any) => p.user_id === value || p.referral_code === value) || null;
+  };
+
+  const getReferrerName = (referredBy?: string | null) => {
+    if (!(referredBy || "").trim()) return "—";
+    const referrer = findReferrerProfile(referredBy);
+    return referrer ? getProfileName(referrer) : "Unknown referrer";
+  };
+
+  const getReferredUsers = (profile: any) => {
+    const identifiers = [profile?.user_id, profile?.referral_code].filter(Boolean);
+    return (profiles || []).filter((p: any) => identifiers.includes(p.referred_by));
+  };
+
   const getAdminName = (adminId: string | null) => {
     if (!adminId) return "—";
     const p = (profiles || []).find((p: any) => p.user_id === adminId);
