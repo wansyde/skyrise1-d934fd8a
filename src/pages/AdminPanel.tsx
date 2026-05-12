@@ -157,6 +157,25 @@ const AdminPanel = () => {
     return p?.username || p?.email || userId.slice(0, 8);
   };
 
+  const getProfileName = (profile: any) => profile?.username || profile?.full_name || profile?.email || "Unknown user";
+
+  const findReferrerProfile = (referredBy?: string | null) => {
+    const value = (referredBy || "").trim();
+    if (!value) return null;
+    return (profiles || []).find((p: any) => p.user_id === value || p.referral_code === value) || null;
+  };
+
+  const getReferrerName = (referredBy?: string | null) => {
+    if (!(referredBy || "").trim()) return "—";
+    const referrer = findReferrerProfile(referredBy);
+    return referrer ? getProfileName(referrer) : "Unknown referrer";
+  };
+
+  const getReferredUsers = (profile: any) => {
+    const identifiers = [profile?.user_id, profile?.referral_code].filter(Boolean);
+    return (profiles || []).filter((p: any) => identifiers.includes(p.referred_by));
+  };
+
   const getAdminName = (adminId: string | null) => {
     if (!adminId) return "—";
     const p = (profiles || []).find((p: any) => p.user_id === adminId);
@@ -800,9 +819,9 @@ const AdminPanel = () => {
                       <td className="px-5 py-3 text-xs text-muted-foreground">{u.vpn_score || "0/3"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground font-mono">{u.referral_code || "—"}</td>
                       <td className="px-5 py-3 text-xs text-muted-foreground">
-                        {u.referred_by ? (() => { const r = (profiles || []).find((p: any) => p.user_id === u.referred_by || p.referral_code === u.referred_by); return r ? r.username || r.email : u.referred_by; })() : "—"}
+                        {getReferrerName(u.referred_by)}
                       </td>
-                      <td className="px-5 py-3 text-sm tabular-nums">{(profiles || []).filter((p: any) => p.referred_by === u.user_id).length}</td>
+                      <td className="px-5 py-3 text-sm tabular-nums">{getReferredUsers(u).length}</td>
                       <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
                         {editingUser === u.user_id ? (
                           <Input type="number" value={editBalance} onChange={(e) => setEditBalance(e.target.value)} className="h-7 w-28 text-xs" min={0} />
@@ -1376,15 +1395,14 @@ const AdminPanel = () => {
                       return (p.username || "").toLowerCase().includes(q) || (p.email || "").toLowerCase().includes(q) || (p.referral_code || "").toLowerCase().includes(q);
                     })
                     .map((p: any) => {
-                      const referredUsers = (profiles || []).filter((r: any) => r.referred_by === p.user_id || r.referred_by === p.referral_code);
-                      const referrerProfile = p.referred_by ? (profiles || []).find((r: any) => r.user_id === p.referred_by || r.referral_code === p.referred_by) : null;
+                      const referredUsers = getReferredUsers(p);
                       return (
                         <tr key={p.user_id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
                           <td className="px-4 py-3 font-medium">{p.username || p.email}</td>
                           <td className="px-4 py-3">
                             <span className="font-mono text-xs bg-primary/10 text-primary px-2 py-1 rounded">{p.referral_code || "—"}</span>
                           </td>
-                          <td className="px-4 py-3 text-muted-foreground">{referrerProfile ? (referrerProfile as any).username || (referrerProfile as any).email : p.referred_by || "—"}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{getReferrerName(p.referred_by)}</td>
                           <td className="px-4 py-3 text-center">
                             <span className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full text-xs font-bold ${referredUsers.length > 0 ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
                               {referredUsers.length}
