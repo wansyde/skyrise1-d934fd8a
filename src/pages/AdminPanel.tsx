@@ -175,7 +175,13 @@ const AdminPanel = () => {
   const getReferrerName = (referredBy?: string | null) => {
     if (!(referredBy || "").trim()) return "—";
     const referrer = findReferrerProfile(referredBy);
-    return referrer ? getProfileName(referrer) : "Unknown referrer";
+    if (referrer) return getProfileName(referrer);
+
+    const deletedReferrerLog = (adminLogs || []).find((log: any) =>
+      normalizeReferralValue(log.target_user_id) === normalizeReferralValue(referredBy) &&
+      (log.description || "").toLowerCase().startsWith("deleted user:")
+    );
+    return deletedReferrerLog?.description?.replace(/^Deleted user:\s*/i, "") || referredBy;
   };
 
   const getReferredUsers = (profile: any) => {
