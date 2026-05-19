@@ -8,7 +8,7 @@ const SkyriseLogo = ({ className = "h-14 w-auto" }: { className?: string }) => (
     width={148}
     height={54}
     decoding="async"
-    fetchPriority="high"
+    {...({ fetchpriority: "high" } as any)}
     style={{ objectFit: "contain" }}
   />
 );
