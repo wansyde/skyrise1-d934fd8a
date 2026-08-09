@@ -1201,6 +1201,7 @@ const AdminPanel = () => {
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${
                             p.kyc_status === "verified" ? "bg-green-500/15 text-green-400" :
                             p.kyc_status === "submitted" ? "bg-amber-500/15 text-amber-400" :
+                            p.kyc_status === "rejected" ? "bg-red-500/15 text-red-400" :
                             "bg-muted text-muted-foreground"
                           }`}>
                             {p.kyc_status}
@@ -1209,29 +1210,65 @@ const AdminPanel = () => {
                         <td className="px-5 py-3 text-xs text-muted-foreground">{p.kyc_submitted_at ? formatUSTime(p.kyc_submitted_at) : "—"}</td>
                         <td className="px-5 py-3">
                           {p.kyc_status === "submitted" ? (
-                            <Button
-                              size="sm" variant="outline"
-                              className="h-7 text-xs gap-1.5 text-green-400 border-green-400/30 hover:bg-green-500/10"
-                              disabled={processingId === p.user_id}
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                setProcessingId(p.user_id);
-                                try {
-                                  const { error } = await supabase.from("profiles").update({ kyc_status: "verified" } as any).eq("user_id", p.user_id);
-                                  if (error) throw error;
-                                  await logAdminAction("kyc_verify", p.user_id, `Verified KYC for ${p.username || p.email}`);
-                                  toast.success(`KYC verified for ${p.username || p.email}.`);
-                                  queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
-                                  queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
-                                } catch (err: any) {
-                                  toast.error(err.message || "Failed to verify KYC.");
-                                } finally {
-                                  setProcessingId(null);
-                                }
-                              }}
-                            >
-                              <Check className="h-3 w-3" /> Verify
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm" variant="outline"
+                                className="h-7 text-xs gap-1.5 text-green-400 border-green-400/30 hover:bg-green-500/10"
+                                disabled={processingId === p.user_id}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setProcessingId(p.user_id);
+                                  try {
+                                    const { error } = await supabase.from("profiles").update({ kyc_status: "verified" } as any).eq("user_id", p.user_id);
+                                    if (error) throw error;
+                                    await logAdminAction("kyc_verify", p.user_id, `Verified KYC for ${p.username || p.email}`);
+                                    toast.success(`KYC verified for ${p.username || p.email}.`);
+                                    queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+                                    queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Failed to verify KYC.");
+                                  } finally {
+                                    setProcessingId(null);
+                                  }
+                                }}
+                              >
+                                <Check className="h-3 w-3" /> Verify
+                              </Button>
+                              <Button
+                                size="sm" variant="outline"
+                                className="h-7 text-xs gap-1.5 text-red-400 border-red-400/30 hover:bg-red-500/10"
+                                disabled={processingId === p.user_id}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (!window.confirm(`Decline KYC for ${p.username || p.email}? Their documents will be cleared and they must resubmit.`)) return;
+                                  setProcessingId(p.user_id);
+                                  try {
+                                    const { error } = await supabase.from("profiles").update({
+                                      kyc_status: "rejected",
+                                      kyc_name: null,
+                                      kyc_id_number: null,
+                                      kyc_id_type: null,
+                                      kyc_front_url: null,
+                                      kyc_back_url: null,
+                                      kyc_selfie_url: null,
+                                      kyc_submitted_at: null,
+                                    } as any).eq("user_id", p.user_id);
+                                    if (error) throw error;
+                                    await logAdminAction("kyc_decline", p.user_id, `Declined KYC for ${p.username || p.email}`);
+                                    toast.success(`KYC declined for ${p.username || p.email}. They can resubmit.`);
+                                    queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+                                    queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+                                  } catch (err: any) {
+                                    toast.error(err.message || "Failed to decline KYC.");
+                                  } finally {
+                                    setProcessingId(null);
+                                  }
+                                }}
+                              >
+                                <X className="h-3 w-3" /> Decline
+                              </Button>
+                            </div>
+
                           ) : p.kyc_status === "verified" ? (
                             <Button
                               size="sm" variant="outline"
