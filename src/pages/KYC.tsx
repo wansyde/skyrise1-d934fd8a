@@ -39,6 +39,8 @@ const KYC = () => {
   const kycStatus = (profile as any)?.kyc_status || "pending";
   const isVerified = kycStatus === "verified";
   const isSubmitted = kycStatus === "submitted" || justSubmitted;
+  const isRejected = kycStatus === "rejected" && !justSubmitted;
+
 
   // Full-screen status for submitted/verified states
   if (isSubmitted) {
@@ -379,7 +381,25 @@ const KYC = () => {
           </div>
         </div>
 
+        {/* Declined notice */}
+        {isRejected && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2.5 p-4 rounded-xl mb-6 border bg-destructive/5 border-destructive/20"
+          >
+            <AlertCircle className="h-5 w-5 text-destructive shrink-0" strokeWidth={1.5} />
+            <div>
+              <p className="text-sm font-medium">Verification Declined</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Your previous documents could not be verified. Please upload clear, valid documents and submit again.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
         {/* Status Badge */}
+
         {(isVerified || isSubmitted) && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
