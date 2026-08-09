@@ -1146,7 +1146,9 @@ const AdminPanel = () => {
                   <option value="">All Statuses</option>
                   <option value="submitted">Submitted</option>
                   <option value="verified">Verified</option>
+                  <option value="rejected">Declined</option>
                   <option value="pending">Pending</option>
+
                 </select>
               </div>
             </div>
