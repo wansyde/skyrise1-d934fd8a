@@ -39,6 +39,8 @@ const KYC = () => {
   const kycStatus = (profile as any)?.kyc_status || "pending";
   const isVerified = kycStatus === "verified";
   const isSubmitted = kycStatus === "submitted" || justSubmitted;
+  const isRejected = kycStatus === "rejected" && !justSubmitted;
+
 
   // Full-screen status for submitted/verified states
   if (isSubmitted) {
